@@ -104,7 +104,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Ionicons name="glasses-outline" size={28} color="#4facfe" />
-          <Text style={styles.headerTitle}>Rx Vault</Text>
+          <Text style={styles.headerTitle}>Optical Rx Now</Text>
         </View>
         <Text style={styles.headerSubtitle}>Store & Share Prescriptions</Text>
       </View>

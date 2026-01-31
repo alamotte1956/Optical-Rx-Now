@@ -23,7 +23,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="index"
           options={{
-            title: 'Rx Vault',
+            title: 'Optical Rx Now',
             headerTitleAlign: 'center',
           }}
         />

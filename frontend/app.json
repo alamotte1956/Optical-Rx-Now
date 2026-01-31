@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Rx Vault",
-    "slug": "rx-vault",
+    "name": "Optical Rx Now",
+    "slug": "optical-rx-now",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rx-vault",
+    "scheme": "optical-rx-now",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
