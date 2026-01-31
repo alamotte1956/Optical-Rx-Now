@@ -106,7 +106,7 @@ export default function HomeScreen() {
           <Ionicons name="glasses-outline" size={28} color="#4facfe" />
           <Text style={styles.headerTitle}>Optical Rx Now</Text>
         </View>
-        <Text style={styles.headerSubtitle}>Store & Share Prescriptions</Text>
+        <Text style={styles.headerSubtitle}>Store and Share Optical Prescriptions</Text>
       </View>
 
       <FlatList
