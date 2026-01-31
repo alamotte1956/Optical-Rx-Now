@@ -36,9 +36,13 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Logo/Icon */}
-        <View style={styles.iconContainer}>
-          <Ionicons name="eye" size={80} color="#4a9eff" />
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../assets/images/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
         {/* Title */}
