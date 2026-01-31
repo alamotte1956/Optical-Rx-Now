@@ -41,11 +41,6 @@ export default function AffiliateCard({ partner }: AffiliateCardProps) {
       <View style={styles.content}>
         <View style={styles.headerRow}>
           <Text style={styles.name}>{partner.name}</Text>
-          {partner.commission && (
-            <View style={styles.commissionBadge}>
-              <Text style={styles.commissionText}>{partner.commission}</Text>
-            </View>
-          )}
         </View>
         <Text style={styles.description}>{partner.description}</Text>
         <View style={styles.discountBadge}>
