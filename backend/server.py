@@ -26,10 +26,6 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Free tier limits
-FREE_FAMILY_MEMBER_LIMIT = 2
-FREE_PRESCRIPTION_LIMIT = 5
-
 
 # Define Models
 class FamilyMemberCreate(BaseModel):
@@ -66,17 +62,6 @@ class PrescriptionUpdate(BaseModel):
     date_taken: Optional[str] = None
     expiry_date: Optional[str] = None
 
-class UserSubscription(BaseModel):
-    id: str
-    user_id: str = "default_user"  # For MVP, single user
-    is_premium: bool = False
-    subscription_type: Optional[str] = None  # 'monthly' or 'yearly'
-    subscribed_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
-
-class SubscriptionCreate(BaseModel):
-    subscription_type: str  # 'monthly' or 'yearly'
-
 
 # Helper function to convert MongoDB document
 def convert_mongo_doc(doc):
@@ -93,105 +78,10 @@ async def root():
     return {"message": "Optical Rx Now API"}
 
 
-# ==================== Subscription Endpoints ====================
-
-@api_router.get("/subscription")
-async def get_subscription():
-    sub = await db.subscriptions.find_one({"user_id": "default_user"})
-    if not sub:
-        # Create default free subscription
-        default_sub = {
-            "user_id": "default_user",
-            "is_premium": False,
-            "subscription_type": None,
-            "subscribed_at": None,
-            "expires_at": None
-        }
-        result = await db.subscriptions.insert_one(default_sub)
-        default_sub['id'] = str(result.inserted_id)
-        return UserSubscription(**default_sub)
-    return UserSubscription(**convert_mongo_doc(sub))
-
-
-@api_router.post("/subscription/upgrade")
-async def upgrade_subscription(sub_data: SubscriptionCreate):
-    now = datetime.utcnow()
-    if sub_data.subscription_type == "monthly":
-        expires_at = now + timedelta(days=30)
-    else:  # yearly
-        expires_at = now + timedelta(days=365)
-    
-    update_data = {
-        "is_premium": True,
-        "subscription_type": sub_data.subscription_type,
-        "subscribed_at": now,
-        "expires_at": expires_at
-    }
-    
-    result = await db.subscriptions.update_one(
-        {"user_id": "default_user"},
-        {"$set": update_data},
-        upsert=True
-    )
-    
-    sub = await db.subscriptions.find_one({"user_id": "default_user"})
-    return UserSubscription(**convert_mongo_doc(sub))
-
-
-@api_router.post("/subscription/cancel")
-async def cancel_subscription():
-    update_data = {
-        "is_premium": False,
-        "subscription_type": None,
-        "subscribed_at": None,
-        "expires_at": None
-    }
-    
-    await db.subscriptions.update_one(
-        {"user_id": "default_user"},
-        {"$set": update_data}
-    )
-    
-    sub = await db.subscriptions.find_one({"user_id": "default_user"})
-    return UserSubscription(**convert_mongo_doc(sub))
-
-
-@api_router.get("/limits")
-async def get_limits():
-    """Get current usage vs limits"""
-    sub = await db.subscriptions.find_one({"user_id": "default_user"})
-    is_premium = sub.get("is_premium", False) if sub else False
-    
-    family_count = await db.family_members.count_documents({})
-    prescription_count = await db.prescriptions.count_documents({})
-    
-    return {
-        "is_premium": is_premium,
-        "family_members": {
-            "current": family_count,
-            "limit": None if is_premium else FREE_FAMILY_MEMBER_LIMIT,
-            "can_add": is_premium or family_count < FREE_FAMILY_MEMBER_LIMIT
-        },
-        "prescriptions": {
-            "current": prescription_count,
-            "limit": None if is_premium else FREE_PRESCRIPTION_LIMIT,
-            "can_add": is_premium or prescription_count < FREE_PRESCRIPTION_LIMIT
-        }
-    }
-
-
 # ==================== Family Member Endpoints ====================
 
 @api_router.post("/family-members", response_model=FamilyMember)
 async def create_family_member(member: FamilyMemberCreate):
-    # Check limits
-    limits = await get_limits()
-    if not limits["family_members"]["can_add"]:
-        raise HTTPException(
-            status_code=403, 
-            detail=f"Free tier limit reached. Upgrade to Premium for unlimited family members."
-        )
-    
     member_dict = member.dict()
     member_dict['created_at'] = datetime.utcnow()
     result = await db.family_members.insert_one(member_dict)
@@ -252,14 +142,6 @@ async def delete_family_member(member_id: str):
 
 @api_router.post("/prescriptions", response_model=Prescription)
 async def create_prescription(rx: PrescriptionCreate):
-    # Check limits
-    limits = await get_limits()
-    if not limits["prescriptions"]["can_add"]:
-        raise HTTPException(
-            status_code=403, 
-            detail=f"Free tier limit reached. Upgrade to Premium for unlimited prescriptions."
-        )
-    
     # Verify family member exists
     try:
         member = await db.family_members.find_one({"_id": ObjectId(rx.family_member_id)})
@@ -272,7 +154,7 @@ async def create_prescription(rx: PrescriptionCreate):
     rx_dict['created_at'] = datetime.utcnow()
     rx_dict['date_taken'] = rx.date_taken or datetime.utcnow().strftime("%Y-%m-%d")
     
-    # Set default expiry date (1 year for eyeglasses, 1 year for contacts)
+    # Set default expiry date (1 year from date taken)
     if not rx_dict.get('expiry_date'):
         date_taken = datetime.strptime(rx_dict['date_taken'], "%Y-%m-%d")
         expiry = date_taken + timedelta(days=365)
@@ -289,7 +171,6 @@ async def get_prescriptions(family_member_id: Optional[str] = None):
     if family_member_id:
         query['family_member_id'] = family_member_id
     
-    # Fetch all fields including image_base64 for list view (needed for thumbnails)
     prescriptions = await db.prescriptions.find(query).sort("created_at", -1).to_list(100)
     return [Prescription(**convert_mongo_doc(p)) for p in prescriptions]
 
@@ -345,19 +226,11 @@ async def get_stats():
     eyeglass_count = await db.prescriptions.count_documents({"rx_type": "eyeglass"})
     contact_count = await db.prescriptions.count_documents({"rx_type": "contact"})
     
-    # Check for expiring prescriptions (within 30 days)
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    thirty_days = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
-    expiring_count = await db.prescriptions.count_documents({
-        "expiry_date": {"$lte": thirty_days, "$gte": today}
-    })
-    
     return {
         "family_members": members_count,
         "total_prescriptions": prescriptions_count,
         "eyeglass_prescriptions": eyeglass_count,
-        "contact_prescriptions": contact_count,
-        "expiring_soon": expiring_count
+        "contact_prescriptions": contact_count
     }
 
 
