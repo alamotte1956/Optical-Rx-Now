@@ -234,6 +234,162 @@ async def get_stats():
     }
 
 
+# ==================== Analytics Endpoints ====================
+
+class AnalyticsEvent(BaseModel):
+    device_id: str
+    event_type: str = "app_open"  # app_open, ad_click, affiliate_click
+    platform: Optional[str] = None  # ios, android, web
+    app_version: Optional[str] = None
+    metadata: Optional[dict] = None
+
+@api_router.post("/analytics/track")
+async def track_event(event: AnalyticsEvent):
+    """Track analytics events from the app"""
+    now = datetime.utcnow()
+    today = now.strftime("%Y-%m-%d")
+    
+    event_doc = {
+        "device_id": event.device_id,
+        "event_type": event.event_type,
+        "platform": event.platform,
+        "app_version": event.app_version,
+        "metadata": event.metadata,
+        "timestamp": now,
+        "date": today
+    }
+    
+    await db.analytics_events.insert_one(event_doc)
+    
+    # Update or create device record (for unique user tracking)
+    if event.event_type == "app_open":
+        await db.devices.update_one(
+            {"device_id": event.device_id},
+            {
+                "$set": {
+                    "last_active": now,
+                    "platform": event.platform,
+                    "app_version": event.app_version
+                },
+                "$setOnInsert": {
+                    "first_seen": now,
+                    "device_id": event.device_id
+                }
+            },
+            upsert=True
+        )
+    
+    return {"status": "tracked"}
+
+
+@api_router.get("/analytics/dashboard")
+async def get_analytics_dashboard(admin_key: Optional[str] = None):
+    """Get analytics dashboard data for advertiser pitches"""
+    # Simple admin protection - in production, use proper auth
+    # For now, anyone can access - add admin_key check if needed
+    
+    now = datetime.utcnow()
+    today = now.strftime("%Y-%m-%d")
+    seven_days_ago = (now - timedelta(days=7)).strftime("%Y-%m-%d")
+    thirty_days_ago = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    # Total Downloads (unique devices ever seen)
+    total_downloads = await db.devices.count_documents({})
+    
+    # Daily Active Users (unique devices active today)
+    today_start = datetime.strptime(today, "%Y-%m-%d")
+    dau = await db.devices.count_documents({
+        "last_active": {"$gte": today_start}
+    })
+    
+    # Weekly Active Users (last 7 days)
+    week_start = datetime.strptime(seven_days_ago, "%Y-%m-%d")
+    wau = await db.devices.count_documents({
+        "last_active": {"$gte": week_start}
+    })
+    
+    # Monthly Active Users (last 30 days)
+    month_start = datetime.strptime(thirty_days_ago, "%Y-%m-%d")
+    mau = await db.devices.count_documents({
+        "last_active": {"$gte": month_start}
+    })
+    
+    # New users in last 7 days
+    new_users_week = await db.devices.count_documents({
+        "first_seen": {"$gte": week_start}
+    })
+    
+    # New users in last 30 days
+    new_users_month = await db.devices.count_documents({
+        "first_seen": {"$gte": month_start}
+    })
+    
+    # Platform breakdown
+    ios_users = await db.devices.count_documents({"platform": "ios"})
+    android_users = await db.devices.count_documents({"platform": "android"})
+    web_users = await db.devices.count_documents({"platform": "web"})
+    
+    # Ad clicks (last 30 days)
+    ad_clicks = await db.analytics_events.count_documents({
+        "event_type": "ad_click",
+        "date": {"$gte": thirty_days_ago}
+    })
+    
+    # Affiliate clicks (last 30 days)
+    affiliate_clicks = await db.analytics_events.count_documents({
+        "event_type": "affiliate_click",
+        "date": {"$gte": thirty_days_ago}
+    })
+    
+    # Daily breakdown for last 7 days
+    daily_stats = []
+    for i in range(7):
+        date = (now - timedelta(days=i)).strftime("%Y-%m-%d")
+        date_start = datetime.strptime(date, "%Y-%m-%d")
+        date_end = date_start + timedelta(days=1)
+        
+        day_active = await db.devices.count_documents({
+            "last_active": {"$gte": date_start, "$lt": date_end}
+        })
+        day_new = await db.devices.count_documents({
+            "first_seen": {"$gte": date_start, "$lt": date_end}
+        })
+        
+        daily_stats.append({
+            "date": date,
+            "active_users": day_active,
+            "new_users": day_new
+        })
+    
+    # Content stats
+    total_prescriptions = await db.prescriptions.count_documents({})
+    total_family_members = await db.family_members.count_documents({})
+    
+    return {
+        "summary": {
+            "total_downloads": total_downloads,
+            "daily_active_users": dau,
+            "weekly_active_users": wau,
+            "monthly_active_users": mau,
+            "new_users_this_week": new_users_week,
+            "new_users_this_month": new_users_month
+        },
+        "platforms": {
+            "ios": ios_users,
+            "android": android_users,
+            "web": web_users
+        },
+        "engagement": {
+            "ad_clicks_30d": ad_clicks,
+            "affiliate_clicks_30d": affiliate_clicks,
+            "total_prescriptions": total_prescriptions,
+            "total_family_members": total_family_members
+        },
+        "daily_breakdown": daily_stats,
+        "generated_at": now.isoformat()
+    }
+
+
 # ==================== Affiliate Links ====================
 
 @api_router.get("/affiliates")
