@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } fr
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { trackAppOpen } from "./services/analytics";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -12,6 +13,8 @@ export default function WelcomeScreen() {
   const [stats, setStats] = useState({ family_members: 0, total_prescriptions: 0 });
 
   useEffect(() => {
+    // Track app open for analytics
+    trackAppOpen();
     fetchStats();
   }, []);
 
@@ -35,6 +38,14 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Admin Button (hidden in corner for owner access) */}
+      <TouchableOpacity
+        style={styles.adminButton}
+        onPress={() => router.push("/admin")}
+      >
+        <Ionicons name="analytics" size={20} color="#3a4d63" />
+      </TouchableOpacity>
+
       <View style={styles.content}>
         {/* Logo */}
         <View style={styles.logoContainer}>
