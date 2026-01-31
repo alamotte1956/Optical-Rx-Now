@@ -41,6 +41,11 @@ export default function PrescriptionsScreen() {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
+  const goToHome = () => {
+    router.dismissAll();
+    router.replace("/");
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchData();
