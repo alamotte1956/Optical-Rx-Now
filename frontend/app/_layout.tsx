@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="add-member" options={{ presentation: "modal" }} />
         <Stack.Screen name="shop" options={{ presentation: "card" }} />
         <Stack.Screen name="admin" options={{ presentation: "card" }} />
+        <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );
