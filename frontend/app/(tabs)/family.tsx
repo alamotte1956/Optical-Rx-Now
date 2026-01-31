@@ -214,9 +214,6 @@ export default function FamilyScreen() {
               </TouchableOpacity>
             </View>
           ))
-              </Pressable>
-            </View>
-          ))
         )}
       </ScrollView>
     </SafeAreaView>
