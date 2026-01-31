@@ -16,7 +16,6 @@ import { TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import * as WebBrowser from "expo-web-browser";
 import AffiliateCard from "./components/AffiliateCard";
-import { trackAffiliateClick } from "../services/analytics";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
