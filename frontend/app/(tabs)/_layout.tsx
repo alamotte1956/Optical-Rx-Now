@@ -1,10 +1,8 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, Pressable } from "react-native";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
-  const router = useRouter();
-
   return (
     <Tabs
       screenOptions={{
@@ -40,21 +38,6 @@ export default function TabLayout() {
           title: "Family",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="home"
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            router.push("/");
-          },
-        }}
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
