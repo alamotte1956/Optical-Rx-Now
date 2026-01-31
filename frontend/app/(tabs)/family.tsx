@@ -33,6 +33,11 @@ export default function FamilyScreen() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [prescriptionCounts, setPrescriptionCounts] = useState<Stats>({});
 
+  const goToHome = () => {
+    router.dismissAll();
+    router.replace("/");
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchData();
