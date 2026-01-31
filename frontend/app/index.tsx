@@ -43,25 +43,34 @@ export default function WelcomeScreen() {
     router.replace("/(tabs)");
   };
 
+  const handleAdminAccess = () => {
+    Alert.alert(
+      "Admin Area",
+      "Choose an option:",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Analytics Dashboard", onPress: () => router.push("/admin") },
+        { text: "Manage Affiliates", onPress: () => router.push("/manage-affiliates") },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Admin Button (hidden in corner for owner access) */}
-      <TouchableOpacity
-        style={styles.adminButton}
-        onPress={() => router.push("/admin")}
-      >
-        <Ionicons name="analytics" size={20} color="#3a4d63" />
-      </TouchableOpacity>
-
       <View style={styles.content}>
-        {/* Logo */}
-        <View style={styles.logoContainer}>
+        {/* Logo - Long press for admin access */}
+        <TouchableOpacity 
+          style={styles.logoContainer}
+          onLongPress={handleAdminAccess}
+          delayLongPress={1000}
+          activeOpacity={1}
+        >
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Title */}
         <Text style={styles.title}>Optical Rx Now</Text>
