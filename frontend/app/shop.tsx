@@ -80,7 +80,12 @@ export default function ShopScreen() {
 
   const handleSamsClubPress = async () => {
     setLocationLoading(true);
-    await trackAffiliateClick("samsclub");
+    
+    // Track affiliate click (non-blocking)
+    try {
+      const { trackAffiliateClick } = await import("../services/analytics");
+      trackAffiliateClick("samsclub");
+    } catch (e) {}
     
     try {
       let url = "https://www.samsclub.com/locator";
