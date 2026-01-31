@@ -416,4 +416,37 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  swipeContainer: {
+    marginTop: 12,
+    position: "relative",
+  },
+  deleteBackground: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 80,
+    backgroundColor: "#ff5c5c",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  deleteBackgroundButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+  },
+  deleteBackgroundText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  swipeHint: {
+    fontSize: 12,
+    color: "#6b7c8f",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+  },
 });
