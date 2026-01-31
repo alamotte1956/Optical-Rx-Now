@@ -32,6 +32,9 @@ export default function FamilyScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [prescriptionCounts, setPrescriptionCounts] = useState<Stats>({});
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   console.log("FamilyScreen rendered, loading:", loading);
 
