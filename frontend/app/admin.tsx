@@ -123,8 +123,24 @@ export default function AdminDashboard() {
           </View>
         </View>
 
+        {/* Quick Actions */}
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <TouchableOpacity
+          style={styles.actionCard}
+          onPress={() => router.push("/manage-affiliates")}
+        >
+          <View style={styles.actionIcon}>
+            <Ionicons name="link" size={24} color="#4a9eff" />
+          </View>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionTitle}>Manage Affiliate Links</Text>
+            <Text style={styles.actionText}>Add, edit, or update your affiliate URLs</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
+        </TouchableOpacity>
+
         {/* Key Metrics */}
-        <Text style={styles.sectionTitle}>Key Metrics</Text>
+        <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Key Metrics</Text>
         <View style={styles.statsGrid}>
           <StatCard
             title="Total Downloads"
