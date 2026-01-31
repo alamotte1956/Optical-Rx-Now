@@ -1,23 +1,26 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 
-interface AdBannerProps {
-  onUpgrade?: () => void;
-}
+export default function AdBanner() {
+  const handleAdPress = async () => {
+    // In production, this would be a real ad click
+    // For now, link to a relevant optical partner
+    await WebBrowser.openBrowserAsync("https://www.zennioptical.com");
+  };
 
-export default function AdBanner({ onUpgrade }: AdBannerProps) {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleAdPress}>
       <View style={styles.adContent}>
         <Text style={styles.adLabel}>AD</Text>
-        <Text style={styles.adText}>Go Premium - Remove Ads & Unlock All Features</Text>
+        <View style={styles.adTextContainer}>
+          <Text style={styles.adTitle}>Need New Glasses?</Text>
+          <Text style={styles.adText}>Prescription glasses from $6.95</Text>
+        </View>
       </View>
-      <TouchableOpacity style={styles.upgradeButton} onPress={onUpgrade}>
-        <Ionicons name="star" size={14} color="#fff" />
-        <Text style={styles.upgradeText}>Upgrade</Text>
-      </TouchableOpacity>
-    </View>
+      <Ionicons name="chevron-forward" size={18} color="#6b7c8f" />
+    </TouchableOpacity>
   );
 }
 
@@ -37,7 +40,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
   adLabel: {
     backgroundColor: "#3a4d63",
@@ -48,23 +51,17 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
+  adTextContainer: {
+    flex: 1,
+  },
+  adTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   adText: {
     color: "#8899a6",
     fontSize: 12,
-    flex: 1,
-  },
-  upgradeButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f5a623",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-  },
-  upgradeText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
+    marginTop: 2,
   },
 });
