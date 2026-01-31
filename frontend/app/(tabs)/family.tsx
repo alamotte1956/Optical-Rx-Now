@@ -197,12 +197,15 @@ export default function FamilyScreen() {
                   {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
                 </Text>
               </View>
-              <TouchableOpacity
-                style={styles.deleteButton}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.deleteButton,
+                  pressed && { opacity: 0.7 }
+                ]}
                 onPress={() => handleDeleteMember(member)}
               >
                 <Ionicons name="trash" size={22} color="#fff" />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           ))
         )}
