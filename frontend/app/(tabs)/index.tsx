@@ -124,13 +124,36 @@ export default function PrescriptionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Prescriptions</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push("/add-rx")}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.shopButton}
+            onPress={() => router.push("/shop")}
+          >
+            <Ionicons name="cart" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push("/add-rx")}
+          >
+            <Ionicons name="add" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Ad Banner for free users */}
+      {limits && !limits.is_premium && (
+        <AdBanner onUpgrade={() => router.push("/premium")} />
+      )}
+
+      {/* Limit Banner */}
+      {limits && limits.prescriptions.limit && (
+        <LimitBanner
+          current={limits.prescriptions.current}
+          limit={limits.prescriptions.limit}
+          type="prescription"
+          onUpgrade={() => router.push("/premium")}
+        />
+      )}
 
       {/* Filter Chips */}
       {familyMembers.length > 0 && (
