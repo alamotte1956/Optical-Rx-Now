@@ -308,6 +308,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  shopButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   addButton: {
     width: 44,
     height: 44,
