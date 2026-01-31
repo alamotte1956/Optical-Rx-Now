@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Capture your eyeglass or contact lens prescription",
-        "NSPhotoLibraryUsageDescription": "Select prescription images from gallery"
+        "NSPhotoLibraryUsageDescription": "Select prescription images from gallery",
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club"
       }
     },
     "android": {
@@ -21,7 +22,7 @@
         "backgroundColor": "#0a1628"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["android.permission.CAMERA", "android.permission.READ_EXTERNAL_STORAGE"]
+      "permissions": ["android.permission.CAMERA", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION"]
     },
     "web": {
       "bundler": "metro",
