@@ -309,14 +309,22 @@ class VisionRxAPITester:
             self.log(f"❌ Error deleting family member: {str(e)}", "ERROR")
             return False
         
-        # Verify prescription was also deleted
+        # Verify prescription was also deleted by checking all prescriptions
         try:
-            response = self.session.get(f"{self.base_url}/prescriptions/{prescription_id}")
-            if response.status_code == 404:
-                self.log("✅ Prescription was correctly deleted with family member (cascade delete working)")
-                return True
+            # Check if prescription still exists by getting all prescriptions
+            response = self.session.get(f"{self.base_url}/prescriptions")
+            if response.status_code == 200:
+                all_prescriptions = response.json()
+                # Check if our prescription ID is in the list
+                prescription_exists = any(p['id'] == prescription_id for p in all_prescriptions)
+                if not prescription_exists:
+                    self.log("✅ Prescription was correctly deleted with family member (cascade delete working)")
+                    return True
+                else:
+                    self.log(f"❌ Prescription still exists after family member deletion", "ERROR")
+                    return False
             else:
-                self.log(f"❌ Prescription still exists after family member deletion: {response.status_code}", "ERROR")
+                self.log(f"❌ Error checking prescriptions after cascade delete: {response.status_code}", "ERROR")
                 return False
         except Exception as e:
             self.log(f"❌ Error checking prescription after cascade delete: {str(e)}", "ERROR")
