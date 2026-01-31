@@ -392,85 +392,200 @@ async def get_analytics_dashboard(admin_key: Optional[str] = None):
 
 # ==================== Affiliate Links ====================
 
+class AffiliatePartnerCreate(BaseModel):
+    name: str
+    description: str
+    url: str
+    category: str  # 'eyeglasses', 'contacts', 'both'
+    discount: str
+    commission: Optional[str] = None
+    is_featured: bool = False
+    is_active: bool = True
+    order: int = 100  # Lower number = higher in list
+
+class AffiliatePartner(BaseModel):
+    id: str
+    name: str
+    description: str
+    url: str
+    category: str
+    discount: str
+    commission: Optional[str] = None
+    is_featured: bool = False
+    is_active: bool = True
+    order: int = 100
+
+# Default affiliates to seed database
+DEFAULT_AFFILIATES = [
+    {
+        "name": "Sam's Club Optical",
+        "description": "In-store eye exams & quality eyewear",
+        "url": "https://www.samsclub.com/locator",
+        "category": "both",
+        "discount": "In-store savings",
+        "commission": None,
+        "is_featured": True,
+        "is_active": True,
+        "order": 1
+    },
+    {
+        "name": "Clearly",
+        "description": "Premium contacts & glasses with fast shipping",
+        "url": "https://www.clearly.ca",
+        "category": "both",
+        "discount": "Up to 20% commission",
+        "commission": "20%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 10
+    },
+    {
+        "name": "Eyeglasses.com",
+        "description": "200,000+ frames from 300+ designer brands",
+        "url": "https://www.eyeglasses.com",
+        "category": "eyeglasses",
+        "discount": "Up to 15% commission",
+        "commission": "15%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 20
+    },
+    {
+        "name": "PerfectLensWorld",
+        "description": "Premium brand contact lenses up to 40% off",
+        "url": "https://www.perfectlensworld.com",
+        "category": "contacts",
+        "discount": "Up to 15% commission",
+        "commission": "15%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 30
+    },
+    {
+        "name": "SmartBuyGlasses",
+        "description": "Designer sunglasses & prescription eyewear",
+        "url": "https://www.smartbuyglasses.com",
+        "category": "both",
+        "discount": "12% commission",
+        "commission": "12%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 40
+    },
+    {
+        "name": "Coastal",
+        "description": "3,000+ designer frames, first pair 50% off",
+        "url": "https://www.coastal.com",
+        "category": "eyeglasses",
+        "discount": "Up to 12% commission",
+        "commission": "12%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 50
+    },
+    {
+        "name": "GlassesUSA",
+        "description": "5,000+ styles with virtual try-on",
+        "url": "https://www.glassesusa.com",
+        "category": "eyeglasses",
+        "discount": "Up to 12% commission",
+        "commission": "12%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 60
+    },
+    {
+        "name": "Zenni Optical",
+        "description": "Affordable prescription glasses from $6.95",
+        "url": "https://www.zennioptical.com",
+        "category": "eyeglasses",
+        "discount": "Budget-friendly prices",
+        "commission": "9%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 70
+    },
+    {
+        "name": "1-800 Contacts",
+        "description": "Fast delivery on all contact lens brands",
+        "url": "https://www.1800contacts.com",
+        "category": "contacts",
+        "discount": "Price match guarantee",
+        "commission": "8%",
+        "is_featured": False,
+        "is_active": True,
+        "order": 80
+    }
+]
+
+
+async def seed_affiliates():
+    """Seed default affiliates if collection is empty"""
+    count = await db.affiliates.count_documents({})
+    if count == 0:
+        await db.affiliates.insert_many(DEFAULT_AFFILIATES)
+        logger.info(f"Seeded {len(DEFAULT_AFFILIATES)} default affiliates")
+
+
 @api_router.get("/affiliates")
 async def get_affiliate_links():
-    """Return affiliate partner links - sorted by commission rate"""
-    return {
-        "partners": [
-            {
-                "id": "clearly",
-                "name": "Clearly",
-                "description": "Premium contacts & glasses with fast shipping",
-                "url": "https://www.clearly.ca",
-                "category": "both",
-                "discount": "Up to 20% commission",
-                "commission": "20%"
-            },
-            {
-                "id": "eyeglasses",
-                "name": "Eyeglasses.com",
-                "description": "200,000+ frames from 300+ designer brands",
-                "url": "https://www.eyeglasses.com",
-                "category": "eyeglasses",
-                "discount": "Up to 15% commission",
-                "commission": "15%"
-            },
-            {
-                "id": "perfectlens",
-                "name": "PerfectLensWorld",
-                "description": "Premium brand contact lenses up to 40% off",
-                "url": "https://www.perfectlensworld.com",
-                "category": "contacts",
-                "discount": "Up to 15% commission",
-                "commission": "15%"
-            },
-            {
-                "id": "smartbuy",
-                "name": "SmartBuyGlasses",
-                "description": "Designer sunglasses & prescription eyewear",
-                "url": "https://www.smartbuyglasses.com",
-                "category": "both",
-                "discount": "12% commission",
-                "commission": "12%"
-            },
-            {
-                "id": "coastal",
-                "name": "Coastal",
-                "description": "3,000+ designer frames, first pair 50% off",
-                "url": "https://www.coastal.com",
-                "category": "eyeglasses",
-                "discount": "Up to 12% commission",
-                "commission": "12%"
-            },
-            {
-                "id": "glassesusa",
-                "name": "GlassesUSA",
-                "description": "5,000+ styles with virtual try-on",
-                "url": "https://www.glassesusa.com",
-                "category": "eyeglasses",
-                "discount": "Up to 12% commission",
-                "commission": "12%"
-            },
-            {
-                "id": "zenni",
-                "name": "Zenni Optical",
-                "description": "Affordable prescription glasses from $6.95",
-                "url": "https://www.zennioptical.com",
-                "category": "eyeglasses",
-                "discount": "Budget-friendly prices",
-                "commission": "9%"
-            },
-            {
-                "id": "contacts",
-                "name": "1-800 Contacts",
-                "description": "Fast delivery on all contact lens brands",
-                "url": "https://www.1800contacts.com",
-                "category": "contacts",
-                "discount": "Price match guarantee",
-                "commission": "8%"
-            }
-        ]
-    }
+    """Return active affiliate partner links from database"""
+    # Seed defaults if empty
+    await seed_affiliates()
+    
+    affiliates = await db.affiliates.find(
+        {"is_active": True}
+    ).sort("order", 1).to_list(100)
+    
+    partners = [AffiliatePartner(**convert_mongo_doc(a)) for a in affiliates]
+    
+    return {"partners": [p.dict() for p in partners]}
+
+
+@api_router.get("/affiliates/all")
+async def get_all_affiliates():
+    """Return all affiliates including inactive (for admin)"""
+    await seed_affiliates()
+    
+    affiliates = await db.affiliates.find().sort("order", 1).to_list(100)
+    return {"partners": [AffiliatePartner(**convert_mongo_doc(a)).dict() for a in affiliates]}
+
+
+@api_router.post("/affiliates", response_model=AffiliatePartner)
+async def create_affiliate(affiliate: AffiliatePartnerCreate):
+    """Create a new affiliate partner"""
+    affiliate_dict = affiliate.dict()
+    result = await db.affiliates.insert_one(affiliate_dict)
+    affiliate_dict['id'] = str(result.inserted_id)
+    return AffiliatePartner(**affiliate_dict)
+
+
+@api_router.put("/affiliates/{affiliate_id}", response_model=AffiliatePartner)
+async def update_affiliate(affiliate_id: str, affiliate: AffiliatePartnerCreate):
+    """Update an existing affiliate partner"""
+    try:
+        result = await db.affiliates.update_one(
+            {"_id": ObjectId(affiliate_id)},
+            {"$set": affiliate.dict()}
+        )
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Affiliate not found")
+        updated = await db.affiliates.find_one({"_id": ObjectId(affiliate_id)})
+        return AffiliatePartner(**convert_mongo_doc(updated))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.delete("/affiliates/{affiliate_id}")
+async def delete_affiliate(affiliate_id: str):
+    """Delete an affiliate partner"""
+    try:
+        result = await db.affiliates.delete_one({"_id": ObjectId(affiliate_id)})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Affiliate not found")
+        return {"message": "Affiliate deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # Include the router in the main app
