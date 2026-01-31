@@ -2,9 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
+import { trackAdClick } from "../services/analytics";
 
 export default function AdBanner() {
   const handleAdPress = async () => {
+    // Track ad click for analytics
+    await trackAdClick("zenni_banner");
     // In production, this would be a real ad click
     // For now, link to a relevant optical partner
     await WebBrowser.openBrowserAsync("https://www.zennioptical.com");
