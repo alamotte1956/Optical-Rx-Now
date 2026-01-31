@@ -42,6 +42,8 @@ export default function RxDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchPrescription();
