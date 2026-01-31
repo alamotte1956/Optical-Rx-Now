@@ -217,6 +217,46 @@ export default function FamilyScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelDelete}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Ionicons name="warning" size={48} color="#ff5c5c" />
+            <Text style={styles.modalTitle}>Delete Family Member?</Text>
+            <Text style={styles.modalMessage}>
+              {memberToDelete && (prescriptionCounts[memberToDelete.id] || 0) > 0
+                ? `This will also delete ${prescriptionCounts[memberToDelete.id]} prescription(s) for ${memberToDelete?.name}. This cannot be undone.`
+                : `Are you sure you want to delete ${memberToDelete?.name}?`}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={cancelDelete}
+                disabled={deleting}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmDeleteButton}
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.confirmDeleteText}>Delete</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
