@@ -34,8 +34,8 @@ export default function FamilyScreen() {
   const [prescriptionCounts, setPrescriptionCounts] = useState<Stats>({});
 
   const goToHome = () => {
-    router.dismissAll();
-    router.replace("/");
+    // Navigate to root - use navigate to go back in the stack
+    router.navigate("/");
   };
 
   useFocusEffect(
