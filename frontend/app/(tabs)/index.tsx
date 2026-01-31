@@ -14,7 +14,6 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
-import LimitBanner from "../components/LimitBanner";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -34,11 +33,6 @@ interface Prescription {
   created_at: string;
 }
 
-interface Limits {
-  is_premium: boolean;
-  prescriptions: { current: number; limit: number | null; can_add: boolean };
-}
-
 export default function PrescriptionsScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -46,7 +40,6 @@ export default function PrescriptionsScreen() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
-  const [limits, setLimits] = useState<Limits | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -56,20 +49,14 @@ export default function PrescriptionsScreen() {
 
   const fetchData = async () => {
     try {
-      const [membersRes, rxRes, limitsRes] = await Promise.all([
+      const [membersRes, rxRes] = await Promise.all([
         fetch(`${BACKEND_URL}/api/family-members`),
         fetch(`${BACKEND_URL}/api/prescriptions`),
-        fetch(`${BACKEND_URL}/api/limits`),
       ]);
 
       if (membersRes.ok) {
         const membersData = await membersRes.json();
         setFamilyMembers(membersData);
-      }
-
-      if (limitsRes.ok) {
-        const limitsData = await limitsRes.json();
-        setLimits(limitsData);
       }
 
       if (rxRes.ok) {
