@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   featuresContainer: {
     width: "100%",
-    marginBottom: 32,
+    marginBottom: 20,
   },
   featureItem: {
     flexDirection: "row",
