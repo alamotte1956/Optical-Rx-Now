@@ -336,11 +336,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   deleteButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "#ff5c5c",
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: 8,
   },
 });
