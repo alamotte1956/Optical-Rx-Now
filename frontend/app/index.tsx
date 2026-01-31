@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } fr
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { trackAppOpen } from "../services/analytics";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -13,8 +12,16 @@ export default function WelcomeScreen() {
   const [stats, setStats] = useState({ family_members: 0, total_prescriptions: 0 });
 
   useEffect(() => {
-    // Track app open for analytics
-    trackAppOpen();
+    // Track app open for analytics (async, non-blocking)
+    const trackOpen = async () => {
+      try {
+        const { trackAppOpen } = await import("../services/analytics");
+        trackAppOpen();
+      } catch (e) {
+        console.log("Analytics not available");
+      }
+    };
+    trackOpen();
     fetchStats();
   }, []);
 
