@@ -32,6 +32,111 @@ interface Stats {
   [key: string]: number;
 }
 
+// Swipeable Member Card Component
+const SwipeableMemberCard = ({ 
+  member, 
+  prescriptionCount, 
+  onDelete, 
+  getRelationshipIcon 
+}: { 
+  member: FamilyMember; 
+  prescriptionCount: number;
+  onDelete: () => void;
+  getRelationshipIcon: (rel: string) => string;
+}) => {
+  const translateX = useRef(new Animated.Value(0)).current;
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 10;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx < 0) {
+          translateX.setValue(Math.max(gestureState.dx, -120));
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx < SWIPE_THRESHOLD) {
+          // Show delete button
+          Animated.spring(translateX, {
+            toValue: -80,
+            useNativeDriver: true,
+          }).start();
+        } else {
+          // Reset position
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const resetPosition = () => {
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleDelete = () => {
+    setIsDeleting(true);
+    onDelete();
+    resetPosition();
+    setIsDeleting(false);
+  };
+
+  return (
+    <View style={styles.swipeContainer}>
+      {/* Delete Button Background */}
+      <View style={styles.deleteBackground}>
+        <TouchableOpacity
+          style={styles.deleteBackgroundButton}
+          onPress={handleDelete}
+          disabled={isDeleting}
+        >
+          <Ionicons name="trash" size={24} color="#fff" />
+          <Text style={styles.deleteBackgroundText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Swipeable Card */}
+      <Animated.View
+        style={[
+          styles.memberCard,
+          { transform: [{ translateX }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <View style={styles.memberIconContainer}>
+          <Ionicons
+            name={getRelationshipIcon(member.relationship) as any}
+            size={28}
+            color="#4a9eff"
+          />
+        </View>
+        <View style={styles.memberInfo}>
+          <Text style={styles.memberName}>{member.name}</Text>
+          <Text style={styles.memberRelationship}>{member.relationship}</Text>
+          <Text style={styles.memberRxCount}>
+            {prescriptionCount} prescription{prescriptionCount !== 1 ? "s" : ""}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={handleDelete}
+        >
+          <Ionicons name="trash-outline" size={20} color="#ff5c5c" />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
+  );
+};
+
 export default function FamilyScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
