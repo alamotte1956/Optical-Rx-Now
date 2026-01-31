@@ -117,6 +117,8 @@ export default function ShopScreen() {
   };
 
   const filteredPartners = partners.filter((p) => {
+    // Exclude Sam's Club since it's shown as featured
+    if (p.name.toLowerCase().includes("sam's club")) return false;
     if (filter === "all") return true;
     if (filter === "eyeglasses") return p.category === "eyeglasses" || p.category === "both";
     if (filter === "contacts") return p.category === "contacts" || p.category === "both";
