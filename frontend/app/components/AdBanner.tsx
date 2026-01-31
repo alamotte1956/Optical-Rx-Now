@@ -1,16 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as WebBrowser from "expo-web-browser";
+import { useRouter } from "expo-router";
 import { trackAdClick } from "../../services/analytics";
 
 export default function AdBanner() {
+  const router = useRouter();
+
   const handleAdPress = async () => {
     // Track ad click for analytics
-    await trackAdClick("zenni_banner");
-    // In production, this would be a real ad click
-    // For now, link to a relevant optical partner
-    await WebBrowser.openBrowserAsync("https://www.zennioptical.com");
+    await trackAdClick("shop_banner");
+    // Navigate to shop page with eyewear retailers
+    router.push("/shop");
   };
 
   return (
@@ -19,7 +20,7 @@ export default function AdBanner() {
         <Text style={styles.adLabel}>AD</Text>
         <View style={styles.adTextContainer}>
           <Text style={styles.adTitle}>Need new eyewear?</Text>
-          <Text style={styles.adText}>Prescription glasses from $6.95</Text>
+          <Text style={styles.adText}>Shop our trusted retail partners</Text>
         </View>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#6b7c8f" />
