@@ -62,8 +62,8 @@ export default function WelcomeScreen() {
         <TouchableOpacity 
           style={styles.logoContainer}
           onLongPress={handleAdminAccess}
-          delayLongPress={1000}
-          activeOpacity={1}
+          delayLongPress={500}
+          activeOpacity={0.8}
         >
           <Image
             source={require("../assets/images/logo.png")}
