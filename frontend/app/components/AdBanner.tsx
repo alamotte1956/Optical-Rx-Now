@@ -18,7 +18,7 @@ export default function AdBanner() {
       <View style={styles.adContent}>
         <Text style={styles.adLabel}>AD</Text>
         <View style={styles.adTextContainer}>
-          <Text style={styles.adTitle}>Need New Glasses?</Text>
+          <Text style={styles.adTitle}>Need new eyewear?</Text>
           <Text style={styles.adText}>Prescription glasses from $6.95</Text>
         </View>
       </View>
