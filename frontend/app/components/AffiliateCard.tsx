@@ -11,6 +11,7 @@ interface AffiliatePartner {
   url: string;
   category: string;
   discount: string;
+  commission?: string;
 }
 
 interface AffiliateCardProps {
@@ -36,7 +37,14 @@ export default function AffiliateCard({ partner }: AffiliateCardProps) {
         <Ionicons name={getCategoryIcon(partner.category) as any} size={24} color="#4a9eff" />
       </View>
       <View style={styles.content}>
-        <Text style={styles.name}>{partner.name}</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.name}>{partner.name}</Text>
+          {partner.commission && (
+            <View style={styles.commissionBadge}>
+              <Text style={styles.commissionText}>{partner.commission}</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.description}>{partner.description}</Text>
         <View style={styles.discountBadge}>
           <Ionicons name="pricetag" size={12} color="#4CAF50" />
@@ -69,9 +77,25 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   name: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#fff",
+  },
+  commissionBadge: {
+    backgroundColor: "#f5a623",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  commissionText: {
+    fontSize: 10,
+    fontWeight: "bold",
     color: "#fff",
   },
   description: {
