@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { trackAffiliateClick } from "../../services/analytics";
 
 interface AffiliatePartner {
   id: string;
@@ -20,8 +19,11 @@ interface AffiliateCardProps {
 
 export default function AffiliateCard({ partner }: AffiliateCardProps) {
   const handlePress = async () => {
-    // Track affiliate click for analytics
-    await trackAffiliateClick(partner.id);
+    // Track affiliate click for analytics (non-blocking)
+    try {
+      const { trackAffiliateClick } = await import("../../services/analytics");
+      trackAffiliateClick(partner.id);
+    } catch (e) {}
     await WebBrowser.openBrowserAsync(partner.url);
   };
 
