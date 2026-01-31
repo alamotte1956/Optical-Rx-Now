@@ -6,12 +6,17 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Alert,
+  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
+import * as Location from "expo-location";
+import * as WebBrowser from "expo-web-browser";
 import AffiliateCard from "./components/AffiliateCard";
+import { trackAffiliateClick } from "./services/analytics";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -22,6 +27,12 @@ interface AffiliatePartner {
   url: string;
   category: string;
   discount: string;
+  commission?: string;
+}
+
+interface LocationCoords {
+  latitude: number;
+  longitude: number;
 }
 
 export default function ShopScreen() {
@@ -30,10 +41,28 @@ export default function ShopScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [partners, setPartners] = useState<AffiliatePartner[]>([]);
   const [filter, setFilter] = useState<"all" | "eyeglasses" | "contacts">("all");
+  const [location, setLocation] = useState<LocationCoords | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   useEffect(() => {
     fetchPartners();
+    requestLocationPermission();
   }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        });
+      }
+    } catch (error) {
+      console.log("Location error:", error);
+    }
+  };
 
   const fetchPartners = async () => {
     try {
@@ -47,6 +76,39 @@ export default function ShopScreen() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const handleSamsClubPress = async () => {
+    setLocationLoading(true);
+    await trackAffiliateClick("samsclub");
+    
+    try {
+      let url = "https://www.samsclub.com/locator";
+      
+      // If we have location, add it to the URL for store finder
+      if (location) {
+        // Sam's Club store locator URL with coordinates
+        url = `https://www.samsclub.com/locator?latitude=${location.latitude}&longitude=${location.longitude}&radius=50`;
+      } else {
+        // Try to get location one more time
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({});
+          url = `https://www.samsclub.com/locator?latitude=${loc.coords.latitude}&longitude=${loc.coords.longitude}&radius=50`;
+          setLocation({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          });
+        }
+      }
+      
+      await WebBrowser.openBrowserAsync(url);
+    } catch (error) {
+      // Fallback to basic URL
+      await WebBrowser.openBrowserAsync("https://www.samsclub.com/locator");
+    } finally {
+      setLocationLoading(false);
     }
   };
 
@@ -116,7 +178,39 @@ export default function ShopScreen() {
           />
         }
       >
-        <Text style={styles.sectionTitle}>Recommended Partners</Text>
+        {/* Sam's Club - Featured at Top */}
+        <Text style={styles.sectionTitle}>Featured Partner</Text>
+        <TouchableOpacity style={styles.samsClubCard} onPress={handleSamsClubPress}>
+          <View style={styles.samsClubIcon}>
+            <Ionicons name="location" size={28} color="#0066cc" />
+          </View>
+          <View style={styles.samsClubContent}>
+            <View style={styles.samsClubHeader}>
+              <Text style={styles.samsClubName}>Sam's Club Optical</Text>
+              <View style={styles.featuredBadge}>
+                <Ionicons name="star" size={10} color="#fff" />
+                <Text style={styles.featuredText}>FEATURED</Text>
+              </View>
+            </View>
+            <Text style={styles.samsClubDescription}>
+              {location ? "Find your nearest Sam's Club Optical" : "In-store eye exams & quality eyewear"}
+            </Text>
+            <View style={styles.samsClubLocation}>
+              <Ionicons name="navigate" size={14} color="#4CAF50" />
+              <Text style={styles.samsClubLocationText}>
+                {location ? "Using your location" : "Tap to find nearby stores"}
+              </Text>
+            </View>
+          </View>
+          {locationLoading ? (
+            <ActivityIndicator size="small" color="#4a9eff" />
+          ) : (
+            <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
+          )}
+        </TouchableOpacity>
+
+        {/* Online Partners */}
+        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Online Partners</Text>
         {filteredPartners.map((partner) => (
           <AffiliateCard key={partner.id} partner={partner} />
         ))}
@@ -215,6 +309,67 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
+  },
+  samsClubCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: "#0066cc",
+  },
+  samsClubIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(0, 102, 204, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  samsClubContent: {
+    flex: 1,
+  },
+  samsClubHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  samsClubName: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  featuredBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0066cc",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    gap: 3,
+  },
+  featuredText: {
+    fontSize: 9,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  samsClubDescription: {
+    fontSize: 13,
+    color: "#8899a6",
+    marginTop: 4,
+  },
+  samsClubLocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 4,
+  },
+  samsClubLocationText: {
+    fontSize: 12,
+    color: "#4CAF50",
+    fontWeight: "500",
   },
   disclaimer: {
     fontSize: 11,
