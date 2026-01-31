@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   featuredBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0066cc",
+    backgroundColor: "#ff5c5c",
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 4,
