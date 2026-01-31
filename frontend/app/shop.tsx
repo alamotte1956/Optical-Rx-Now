@@ -141,7 +141,7 @@ export default function ShopScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Order Lenses</Text>
+        <Text style={styles.headerTitle}>Find an Eyewear Retailer</Text>
         <View style={styles.placeholder} />
       </View>
 
