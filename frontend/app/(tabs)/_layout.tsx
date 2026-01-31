@@ -1,8 +1,10 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { Platform, TouchableOpacity } from "react-native";
 
 export default function TabLayout() {
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
@@ -39,6 +41,27 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              onPress={() => router.replace("/")}
+            />
+          ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.replace("/");
+          },
         }}
       />
     </Tabs>
