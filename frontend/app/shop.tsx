@@ -26,7 +26,6 @@ interface AffiliatePartner {
   url: string;
   category: string;
   discount: string;
-  commission?: string;
 }
 
 interface LocationCoords {
