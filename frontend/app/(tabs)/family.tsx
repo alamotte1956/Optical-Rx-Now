@@ -85,37 +85,36 @@ export default function FamilyScreen() {
 
   const handleDeleteMember = (member: FamilyMember) => {
     console.log("Delete button pressed for:", member.name);
-    const rxCount = prescriptionCounts[member.id] || 0;
-    const message = rxCount > 0
-      ? `This will also delete ${rxCount} prescription(s) for ${member.name}. This cannot be undone.`
-      : `Are you sure you want to delete ${member.name}?`;
+    setMemberToDelete(member);
+    setDeleteModalVisible(true);
+  };
 
-    Alert.alert(
-      "Delete Family Member",
-      message,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            console.log("Deleting member:", member.id);
-            try {
-              const response = await fetch(
-                `${BACKEND_URL}/api/family-members/${member.id}`,
-                { method: "DELETE" }
-              );
-              console.log("Delete response:", response.status);
-              if (response.ok) {
-                fetchData();
-              }
-            } catch (error) {
-              console.log("Error deleting member:", error);
-            }
-          },
-        },
-      ]
-    );
+  const confirmDelete = async () => {
+    if (!memberToDelete) return;
+    
+    setDeleting(true);
+    console.log("Deleting member:", memberToDelete.id);
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/family-members/${memberToDelete.id}`,
+        { method: "DELETE" }
+      );
+      console.log("Delete response:", response.status);
+      if (response.ok) {
+        setDeleteModalVisible(false);
+        setMemberToDelete(null);
+        fetchData();
+      }
+    } catch (error) {
+      console.log("Error deleting member:", error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
+    setMemberToDelete(null);
   };
 
   const getRelationshipIcon = (relationship: string): string => {
