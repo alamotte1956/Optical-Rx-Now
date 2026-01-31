@@ -42,8 +42,8 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    // Navigate to root - use navigate to go back in the stack
-    router.navigate("/");
+    // Go back to the welcome screen
+    router.back();
   };
 
   useFocusEffect(
