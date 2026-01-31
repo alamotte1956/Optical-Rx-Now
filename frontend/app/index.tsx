@@ -11,6 +11,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AdBanner from '../components/AdBanner';
 
 interface FamilyMember {
   id: string;
@@ -128,6 +129,9 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       <Text style={styles.hint}>Long press on a member to delete</Text>
+      
+      {/* AdMob Banner */}
+      <AdBanner />
     </SafeAreaView>
   );
 }
@@ -221,7 +225,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 30,
+    bottom: 100,
     width: 60,
     height: 60,
     borderRadius: 30,
