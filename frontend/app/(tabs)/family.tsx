@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,10 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
-  Animated,
-  PanResponder,
-  Dimensions,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SWIPE_THRESHOLD = -80;
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -31,111 +25,6 @@ interface FamilyMember {
 interface Stats {
   [key: string]: number;
 }
-
-// Swipeable Member Card Component
-const SwipeableMemberCard = ({ 
-  member, 
-  prescriptionCount, 
-  onDelete, 
-  getRelationshipIcon 
-}: { 
-  member: FamilyMember; 
-  prescriptionCount: number;
-  onDelete: () => void;
-  getRelationshipIcon: (rel: string) => string;
-}) => {
-  const translateX = useRef(new Animated.Value(0)).current;
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 10;
-      },
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx < 0) {
-          translateX.setValue(Math.max(gestureState.dx, -120));
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx < SWIPE_THRESHOLD) {
-          // Show delete button
-          Animated.spring(translateX, {
-            toValue: -80,
-            useNativeDriver: true,
-          }).start();
-        } else {
-          // Reset position
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-        }
-      },
-    })
-  ).current;
-
-  const resetPosition = () => {
-    Animated.spring(translateX, {
-      toValue: 0,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleDelete = () => {
-    setIsDeleting(true);
-    onDelete();
-    resetPosition();
-    setIsDeleting(false);
-  };
-
-  return (
-    <View style={styles.swipeContainer}>
-      {/* Delete Button Background */}
-      <View style={styles.deleteBackground}>
-        <TouchableOpacity
-          style={styles.deleteBackgroundButton}
-          onPress={handleDelete}
-          disabled={isDeleting}
-        >
-          <Ionicons name="trash" size={24} color="#fff" />
-          <Text style={styles.deleteBackgroundText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Swipeable Card */}
-      <Animated.View
-        style={[
-          styles.memberCard,
-          { transform: [{ translateX }] },
-        ]}
-        {...panResponder.panHandlers}
-      >
-        <View style={styles.memberIconContainer}>
-          <Ionicons
-            name={getRelationshipIcon(member.relationship) as any}
-            size={28}
-            color="#4a9eff"
-          />
-        </View>
-        <View style={styles.memberInfo}>
-          <Text style={styles.memberName}>{member.name}</Text>
-          <Text style={styles.memberRelationship}>{member.relationship}</Text>
-          <Text style={styles.memberRxCount}>
-            {prescriptionCount} prescription{prescriptionCount !== 1 ? "s" : ""}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDelete}
-        >
-          <Ionicons name="trash-outline" size={20} color="#ff5c5c" />
-        </TouchableOpacity>
-      </Animated.View>
-    </View>
-  );
-};
 
 export default function FamilyScreen() {
   const router = useRouter();
@@ -171,8 +60,7 @@ export default function FamilyScreen() {
         setPrescriptionCounts(counts);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to load family members");
+      console.log("Error fetching data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -185,9 +73,14 @@ export default function FamilyScreen() {
   };
 
   const handleDeleteMember = (member: FamilyMember) => {
+    const rxCount = prescriptionCounts[member.id] || 0;
+    const message = rxCount > 0
+      ? `This will also delete ${rxCount} prescription(s) for ${member.name}. This cannot be undone.`
+      : `Are you sure you want to delete ${member.name}?`;
+
     Alert.alert(
       "Delete Family Member",
-      `Are you sure you want to delete ${member.name}? All their prescriptions will also be deleted.`,
+      message,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -201,11 +94,9 @@ export default function FamilyScreen() {
               );
               if (response.ok) {
                 fetchData();
-              } else {
-                Alert.alert("Error", "Failed to delete family member");
               }
             } catch (error) {
-              Alert.alert("Error", "Failed to delete family member");
+              console.log("Error deleting member:", error);
             }
           },
         },
@@ -213,15 +104,12 @@ export default function FamilyScreen() {
     );
   };
 
-  const getRelationshipIcon = (relationship: string) => {
+  const getRelationshipIcon = (relationship: string): string => {
     const rel = relationship.toLowerCase();
     if (rel.includes("self") || rel.includes("me")) return "person";
-    if (rel.includes("spouse") || rel.includes("wife") || rel.includes("husband"))
-      return "heart";
-    if (rel.includes("child") || rel.includes("son") || rel.includes("daughter"))
-      return "happy";
-    if (rel.includes("parent") || rel.includes("mom") || rel.includes("dad"))
-      return "people";
+    if (rel.includes("spouse") || rel.includes("wife") || rel.includes("husband")) return "heart";
+    if (rel.includes("child") || rel.includes("son") || rel.includes("daughter")) return "happy";
+    if (rel.includes("parent") || rel.includes("mom") || rel.includes("dad")) return "people";
     return "person-outline";
   };
 
@@ -278,25 +166,36 @@ export default function FamilyScreen() {
               style={styles.emptyButton}
               onPress={() => router.push("/add-member")}
             >
-              <Ionicons name="person-add" size={18} color="#fff" />
-              <Text style={styles.emptyButtonText}>Add Family Member</Text>
+              <Ionicons name="person-add" size={20} color="#fff" />
+              <Text style={styles.emptyButtonText}>Add First Member</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <>
-            <Text style={styles.swipeHint}>
-              <Ionicons name="arrow-back" size={12} color="#6b7c8f" /> Swipe left to delete
-            </Text>
-            {members.map((member) => (
-              <SwipeableMemberCard
-                key={member.id}
-                member={member}
-                prescriptionCount={prescriptionCounts[member.id] || 0}
-                onDelete={() => handleDeleteMember(member)}
-                getRelationshipIcon={getRelationshipIcon}
-              />
-            ))}
-          </>
+          members.map((member) => (
+            <View key={member.id} style={styles.memberCard}>
+              <View style={styles.memberIconContainer}>
+                <Ionicons
+                  name={getRelationshipIcon(member.relationship) as any}
+                  size={28}
+                  color="#4a9eff"
+                />
+              </View>
+              <View style={styles.memberInfo}>
+                <Text style={styles.memberName}>{member.name}</Text>
+                <Text style={styles.memberRelationship}>{member.relationship}</Text>
+                <Text style={styles.memberRxCount}>
+                  {prescriptionCounts[member.id] || 0} prescription
+                  {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeleteMember(member)}
+              >
+                <Ionicons name="trash" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
@@ -353,41 +252,41 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom: 24,
   },
   emptyState: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 100,
+    paddingVertical: 60,
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#8899a6",
+    color: "#6b7c8f",
     textAlign: "center",
-    marginTop: 8,
-    paddingHorizontal: 40,
+    marginBottom: 24,
   },
   emptyButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 24,
     backgroundColor: "#4a9eff",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 25,
     gap: 8,
   },
   emptyButtonText: {
     color: "#fff",
+    fontSize: 16,
     fontWeight: "600",
-    fontSize: 14,
   },
   memberCard: {
     flexDirection: "row",
@@ -398,16 +297,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   memberIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "rgba(74, 158, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
   },
   memberInfo: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: 12,
   },
   memberName: {
     fontSize: 18,
@@ -416,7 +315,7 @@ const styles = StyleSheet.create({
   },
   memberRelationship: {
     fontSize: 14,
-    color: "#8899a6",
+    color: "#6b7c8f",
     marginTop: 2,
   },
   memberRxCount: {
@@ -428,41 +327,8 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255, 92, 92, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  swipeContainer: {
-    marginTop: 12,
-    position: "relative",
-  },
-  deleteBackground: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 80,
     backgroundColor: "#ff5c5c",
-    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-  },
-  deleteBackgroundButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 8,
-  },
-  deleteBackgroundText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-    marginTop: 4,
-  },
-  swipeHint: {
-    fontSize: 12,
-    color: "#6b7c8f",
-    textAlign: "center",
-    marginTop: 8,
-    marginBottom: 4,
   },
 });
