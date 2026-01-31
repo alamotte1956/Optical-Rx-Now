@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } fr
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { trackAppOpen } from "./services/analytics";
+import { trackAppOpen } from "../services/analytics";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
