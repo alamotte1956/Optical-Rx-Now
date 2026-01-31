@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,16 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  Animated,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SWIPE_THRESHOLD = -80;
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
