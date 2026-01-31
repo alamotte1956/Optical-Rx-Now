@@ -142,6 +142,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0a1628",
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -149,29 +152,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoContainer: {
-    width: 180,
-    height: 180,
+    width: 150,
+    height: 150,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   logo: {
     width: "100%",
     height: "100%",
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#8899a6",
     textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 24,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  adContainer: {
+    width: "100%",
+    marginBottom: 20,
   },
   featuresContainer: {
     width: "100%",
