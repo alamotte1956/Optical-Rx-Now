@@ -1,5 +1,4 @@
 import { Platform } from "react-native";
-import * as Application from "expo-application";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
