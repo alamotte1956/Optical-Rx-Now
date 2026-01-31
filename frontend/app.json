@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your prescriptions",
-        "NSPhotoLibraryUsageDescription": "Select prescription photos from your library"
+        "NSPhotoLibraryUsageDescription": "Select prescription photos from your library",
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you"
       }
     },
     "android": {
@@ -43,10 +44,20 @@
           "backgroundColor": "#000"
         }
       ],
-      "react-native-google-mobile-ads"
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3940256099942544~3347511713",
+    "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
   }
 }
