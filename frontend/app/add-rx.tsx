@@ -77,6 +77,7 @@ export default function AddRxScreen() {
       aspect: [4, 3],
       quality: 0.8,
       base64: true,
+      exif: false,
     });
 
     if (!result.canceled && result.assets[0].base64) {
@@ -91,6 +92,7 @@ export default function AddRxScreen() {
       aspect: [4, 3],
       quality: 0.8,
       base64: true,
+      exif: false,
     });
 
     if (!result.canceled && result.assets[0].base64) {
