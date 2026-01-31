@@ -42,7 +42,7 @@ export default function WelcomeScreen() {
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>Vision Rx Vault</Text>
+        <Text style={styles.title}>Optical Rx Now</Text>
         <Text style={styles.subtitle}>
           Store and manage your family's eyeglass and contact lens prescriptions
         </Text>

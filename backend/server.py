@@ -72,7 +72,7 @@ def convert_mongo_doc(doc):
 # Root endpoint
 @api_router.get("/")
 async def root():
-    return {"message": "Vision Rx Manager API"}
+    return {"message": "Optical Rx Now API"}
 
 
 # ==================== Family Member Endpoints ====================
