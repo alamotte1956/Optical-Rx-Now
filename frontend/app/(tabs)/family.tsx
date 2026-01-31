@@ -79,6 +79,7 @@ export default function FamilyScreen() {
   };
 
   const handleDeleteMember = (member: FamilyMember) => {
+    console.log("Delete button pressed for:", member.name);
     const rxCount = prescriptionCounts[member.id] || 0;
     const message = rxCount > 0
       ? `This will also delete ${rxCount} prescription(s) for ${member.name}. This cannot be undone.`
@@ -93,11 +94,13 @@ export default function FamilyScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            console.log("Deleting member:", member.id);
             try {
               const response = await fetch(
                 `${BACKEND_URL}/api/family-members/${member.id}`,
                 { method: "DELETE" }
               );
+              console.log("Delete response:", response.status);
               if (response.ok) {
                 fetchData();
               }
