@@ -117,7 +117,7 @@ export default function PrescriptionsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => router.push("/")}
+          onPress={goToHome}
         >
           <Ionicons name="home" size={22} color="#4a9eff" />
         </TouchableOpacity>
