@@ -394,40 +394,80 @@ async def get_analytics_dashboard(admin_key: Optional[str] = None):
 
 @api_router.get("/affiliates")
 async def get_affiliate_links():
-    """Return affiliate partner links"""
+    """Return affiliate partner links - sorted by commission rate"""
     return {
         "partners": [
+            {
+                "id": "clearly",
+                "name": "Clearly",
+                "description": "Premium contacts & glasses with fast shipping",
+                "url": "https://www.clearly.ca",
+                "category": "both",
+                "discount": "Up to 20% commission",
+                "commission": "20%"
+            },
+            {
+                "id": "eyeglasses",
+                "name": "Eyeglasses.com",
+                "description": "200,000+ frames from 300+ designer brands",
+                "url": "https://www.eyeglasses.com",
+                "category": "eyeglasses",
+                "discount": "Up to 15% commission",
+                "commission": "15%"
+            },
+            {
+                "id": "perfectlens",
+                "name": "PerfectLensWorld",
+                "description": "Premium brand contact lenses up to 40% off",
+                "url": "https://www.perfectlensworld.com",
+                "category": "contacts",
+                "discount": "Up to 15% commission",
+                "commission": "15%"
+            },
+            {
+                "id": "smartbuy",
+                "name": "SmartBuyGlasses",
+                "description": "Designer sunglasses & prescription eyewear",
+                "url": "https://www.smartbuyglasses.com",
+                "category": "both",
+                "discount": "12% commission",
+                "commission": "12%"
+            },
+            {
+                "id": "coastal",
+                "name": "Coastal",
+                "description": "3,000+ designer frames, first pair 50% off",
+                "url": "https://www.coastal.com",
+                "category": "eyeglasses",
+                "discount": "Up to 12% commission",
+                "commission": "12%"
+            },
+            {
+                "id": "glassesusa",
+                "name": "GlassesUSA",
+                "description": "5,000+ styles with virtual try-on",
+                "url": "https://www.glassesusa.com",
+                "category": "eyeglasses",
+                "discount": "Up to 12% commission",
+                "commission": "12%"
+            },
             {
                 "id": "zenni",
                 "name": "Zenni Optical",
                 "description": "Affordable prescription glasses from $6.95",
                 "url": "https://www.zennioptical.com",
                 "category": "eyeglasses",
-                "discount": "Up to 50% off"
-            },
-            {
-                "id": "warby",
-                "name": "Warby Parker",
-                "description": "Designer frames with free home try-on",
-                "url": "https://www.warbyparker.com",
-                "category": "eyeglasses",
-                "discount": "Free shipping"
+                "discount": "Budget-friendly prices",
+                "commission": "9%"
             },
             {
                 "id": "contacts",
                 "name": "1-800 Contacts",
-                "description": "Fast delivery on contact lenses",
+                "description": "Fast delivery on all contact lens brands",
                 "url": "https://www.1800contacts.com",
                 "category": "contacts",
-                "discount": "Price match guarantee"
-            },
-            {
-                "id": "coastal",
-                "name": "Coastal",
-                "description": "Quality glasses & contacts online",
-                "url": "https://www.coastal.com",
-                "category": "both",
-                "discount": "First pair 50% off"
+                "discount": "Price match guarantee",
+                "commission": "8%"
             }
         ]
     }
