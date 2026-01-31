@@ -127,20 +127,8 @@ export default function PrescriptionsScreen() {
         </View>
       </View>
 
-      {/* Ad Banner for free users */}
-      {limits && !limits.is_premium && (
-        <AdBanner onUpgrade={() => router.push("/premium")} />
-      )}
-
-      {/* Limit Banner */}
-      {limits && limits.prescriptions.limit && (
-        <LimitBanner
-          current={limits.prescriptions.current}
-          limit={limits.prescriptions.limit}
-          type="prescription"
-          onUpgrade={() => router.push("/premium")}
-        />
-      )}
+      {/* Ad Banner */}
+      <AdBanner />
 
       {/* Filter Chips */}
       {familyMembers.length > 0 && (
