@@ -176,32 +176,31 @@ Please see attached prescription image.
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Delete Prescription",
-      "Are you sure you want to delete this prescription?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const response = await fetch(
-                `${BACKEND_URL}/api/prescriptions/${id}`,
-                { method: "DELETE" }
-              );
-              if (response.ok) {
-                router.back();
-              } else {
-                Alert.alert("Error", "Failed to delete prescription");
-              }
-            } catch (error) {
-              Alert.alert("Error", "Failed to delete prescription");
-            }
-          },
-        },
-      ]
-    );
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/prescriptions/${id}`,
+        { method: "DELETE" }
+      );
+      if (response.ok) {
+        setDeleteModalVisible(false);
+        router.back();
+      } else {
+        Alert.alert("Error", "Failed to delete prescription");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete prescription");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
   };
 
   if (loading) {
