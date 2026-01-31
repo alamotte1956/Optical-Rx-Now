@@ -84,17 +84,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  commissionBadge: {
-    backgroundColor: "#f5a623",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  commissionText: {
-    fontSize: 10,
-    fontWeight: "bold",
-    color: "#fff",
-  },
   description: {
     fontSize: 13,
     color: "#8899a6",
