@@ -110,17 +110,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingTop: 20,
     alignItems: "center",
   },
-  iconContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: "rgba(74, 158, 255, 0.1)",
+  logoContainer: {
+    width: 180,
+    height: 180,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  logo: {
+    width: "100%",
+    height: "100%",
   },
   title: {
     fontSize: 32,
