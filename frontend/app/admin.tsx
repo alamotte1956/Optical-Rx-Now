@@ -330,6 +330,36 @@ const styles = StyleSheet.create({
     color: "#8899a6",
     marginTop: 2,
   },
+  actionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  actionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  actionContent: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  actionText: {
+    fontSize: 13,
+    color: "#8899a6",
+    marginTop: 2,
+  },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
