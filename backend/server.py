@@ -591,6 +591,11 @@ async def delete_affiliate(affiliate_id: str):
 # Include the router in the main app
 app.include_router(api_router)
 
+# Root health check endpoint for Kubernetes
+@app.get("/")
+async def root_health_check():
+    return {"status": "healthy", "service": "Optical Rx Now API"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
