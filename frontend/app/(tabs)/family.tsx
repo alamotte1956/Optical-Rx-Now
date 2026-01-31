@@ -34,7 +34,10 @@ export default function FamilyScreen() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [prescriptionCounts, setPrescriptionCounts] = useState<Stats>({});
 
+  console.log("FamilyScreen rendered, loading:", loading);
+
   const goToHome = () => {
+    console.log("goToHome called!");
     // Go back to the welcome screen
     router.back();
   };
