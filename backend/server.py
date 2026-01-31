@@ -88,7 +88,10 @@ async def create_family_member(member: FamilyMemberCreate):
 
 @api_router.get("/family-members", response_model=List[FamilyMember])
 async def get_family_members():
-    members = await db.family_members.find().to_list(100)
+    members = await db.family_members.find(
+        {}, 
+        {"_id": 1, "name": 1, "relationship": 1, "created_at": 1}
+    ).to_list(100)
     return [FamilyMember(**convert_mongo_doc(m)) for m in members]
 
 
@@ -159,7 +162,8 @@ async def get_prescriptions(family_member_id: Optional[str] = None):
     if family_member_id:
         query['family_member_id'] = family_member_id
     
-    prescriptions = await db.prescriptions.find(query).sort("created_at", -1).to_list(1000)
+    # Fetch all fields including image_base64 for list view (needed for thumbnails)
+    prescriptions = await db.prescriptions.find(query).sort("created_at", -1).to_list(100)
     return [Prescription(**convert_mongo_doc(p)) for p in prescriptions]
 
 
