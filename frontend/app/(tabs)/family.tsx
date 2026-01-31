@@ -277,31 +277,20 @@ export default function FamilyScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          members.map((member) => (
-            <View key={member.id} style={styles.memberCard}>
-              <View style={styles.memberIconContainer}>
-                <Ionicons
-                  name={getRelationshipIcon(member.relationship) as any}
-                  size={28}
-                  color="#4a9eff"
-                />
-              </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                <Text style={styles.memberRxCount}>
-                  {prescriptionCounts[member.id] || 0} prescription
-                  {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDeleteMember(member)}
-              >
-                <Ionicons name="trash-outline" size={20} color="#ff5c5c" />
-              </TouchableOpacity>
-            </View>
-          ))
+          <>
+            <Text style={styles.swipeHint}>
+              <Ionicons name="arrow-back" size={12} color="#6b7c8f" /> Swipe left to delete
+            </Text>
+            {members.map((member) => (
+              <SwipeableMemberCard
+                key={member.id}
+                member={member}
+                prescriptionCount={prescriptionCounts[member.id] || 0}
+                onDelete={() => handleDeleteMember(member)}
+                getRelationshipIcon={getRelationshipIcon}
+              />
+            ))}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
