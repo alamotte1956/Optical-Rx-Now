@@ -171,47 +171,43 @@ export default function FamilyScreen() {
           </View>
         ) : (
           members.map((member) => (
-            <View key={member.id} style={styles.memberCard}>
-              <TouchableOpacity 
-                style={styles.memberTouchable}
-                onPress={() => {
-                  console.log("Member card tapped:", member.name);
-                  // Navigate to prescriptions tab - this screen shows all prescriptions
-                  // User can filter by this member there
-                  router.push("/(tabs)");
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={styles.memberIconContainer}>
-                  <Ionicons
-                    name={getRelationshipIcon(member.relationship) as any}
-                    size={28}
-                    color="#4a9eff"
-                  />
-                </View>
-                <View style={styles.memberInfo}>
-                  <Text style={styles.memberName}>{member.name}</Text>
-                  <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                  <Text style={styles.memberRxCount}>
-                    {prescriptionCounts[member.id] || 0} prescription
-                    {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
-              </TouchableOpacity>
+            <TouchableOpacity 
+              key={member.id} 
+              style={styles.memberCard}
+              onPress={() => {
+                console.log("Member card tapped:", member.name);
+                router.push("/(tabs)");
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={styles.memberIconContainer}>
+                <Ionicons
+                  name={getRelationshipIcon(member.relationship) as any}
+                  size={28}
+                  color="#4a9eff"
+                />
+              </View>
+              <View style={styles.memberInfo}>
+                <Text style={styles.memberName}>{member.name}</Text>
+                <Text style={styles.memberRelationship}>{member.relationship}</Text>
+                <Text style={styles.memberRxCount}>
+                  {prescriptionCounts[member.id] || 0} prescription
+                  {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
+                </Text>
+              </View>
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={() => {
+                onPress={(e) => {
+                  e.stopPropagation();
                   console.log("Delete tapped for:", member.name);
                   handleDeleteMember(member);
                 }}
                 activeOpacity={0.6}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons name="trash" size={22} color="#fff" />
                 <Text style={styles.deleteText}>Delete</Text>
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
