@@ -343,6 +343,11 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 12,
   },
+  memberTouchable: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   memberIconContainer: {
     width: 50,
     height: 50,
