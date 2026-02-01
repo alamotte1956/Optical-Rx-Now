@@ -171,15 +171,7 @@ export default function FamilyScreen() {
           </View>
         ) : (
           members.map((member) => (
-            <TouchableOpacity 
-              key={member.id} 
-              style={styles.memberCard}
-              onPress={() => {
-                console.log("Member card tapped:", member.name);
-                router.push("/(tabs)");
-              }}
-              activeOpacity={0.7}
-            >
+            <View key={member.id} style={styles.memberCard}>
               <View style={styles.memberIconContainer}>
                 <Ionicons
                   name={getRelationshipIcon(member.relationship) as any}
@@ -197,8 +189,7 @@ export default function FamilyScreen() {
               </View>
               <TouchableOpacity
                 style={styles.deleteButton}
-                onPress={(e) => {
-                  e.stopPropagation();
+                onPress={() => {
                   console.log("Delete tapped for:", member.name);
                   handleDeleteMember(member);
                 }}
@@ -207,7 +198,7 @@ export default function FamilyScreen() {
                 <Ionicons name="trash" size={22} color="#fff" />
                 <Text style={styles.deleteText}>Delete</Text>
               </TouchableOpacity>
-            </TouchableOpacity>
+            </View>
           ))
         )}
       </ScrollView>
