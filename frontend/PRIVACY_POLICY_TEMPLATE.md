@@ -1,6 +1,6 @@
 # Privacy Policy for Optical Rx Now
 
-**Last Updated: [DATE]**
+**Last Updated: [DATE - e.g., January 1, 2026]**
 
 ## Introduction
 
@@ -73,8 +73,8 @@ We may update this policy periodically. Continued use of the app constitutes acc
 ## Contact Us
 
 For questions about this privacy policy, contact:
-[YOUR EMAIL ADDRESS]
+[YOUR SUPPORT EMAIL ADDRESS]
 
 ---
 
-**Note to Developer**: Replace placeholders ([DATE], [YOUR EMAIL]) before publishing. Host this policy on a public URL (GitHub Pages, your website, etc.) and link to it in both app stores.
+**Note to Developer**: Replace placeholders ([DATE - e.g., January 1, 2026], [YOUR SUPPORT EMAIL ADDRESS]) before publishing. Host this policy on a public URL (GitHub Pages, your website, etc.) and link to it in both app stores.
