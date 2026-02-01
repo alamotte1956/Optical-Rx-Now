@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.opticalrxnow.app",
-      "buildNumber": "109",
+      "buildNumber": "110",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": []
       },
@@ -28,7 +28,7 @@
     },
     "android": {
       "package": "com.opticalrxnow.app",
-      "versionCode": 109,
+      "versionCode": 110,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
