@@ -1,54 +1,26 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Stack } from "expo-router";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
-  // Note: AdMob SDK initialization happens automatically when the app is built
-  // with EAS. It requires native modules that aren't available in Expo Go or web.
-  
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#1a1a2e',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          contentStyle: {
-            backgroundColor: '#16213e',
-          },
+          headerShown: false,
+          contentStyle: { backgroundColor: "#0a1628" },
+          animation: "slide_from_right",
         }}
       >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: 'Optical Rx Now',
-            headerTitleAlign: 'center',
-          }}
-        />
-        <Stack.Screen
-          name="add-member"
-          options={{
-            title: 'Add Family Member',
-            presentation: 'modal',
-          }}
-        />
-        <Stack.Screen
-          name="member/[id]"
-          options={{
-            title: 'Prescriptions',
-          }}
-        />
-        <Stack.Screen
-          name="prescription/[id]"
-          options={{
-            title: 'Prescription Details',
-          }}
-        />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
+        <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
+        <Stack.Screen name="add-member" options={{ presentation: "modal" }} />
+        <Stack.Screen name="shop" options={{ presentation: "card" }} />
+        <Stack.Screen name="admin" options={{ presentation: "card" }} />
+        <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );
