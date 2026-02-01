@@ -28,7 +28,7 @@
     },
     "android": {
       "package": "com.opticalrxnow.app",
-      "versionCode": 1,
+      "versionCode": 109,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
