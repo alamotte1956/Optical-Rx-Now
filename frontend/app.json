@@ -83,6 +83,7 @@
       "eas": {
         "projectId": "optical-rx-now"
       }
-    }
+    },
+    "privacy": "https://opticalrxnow.com/privacy"
   }
 }
