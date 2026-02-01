@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -44,6 +44,17 @@ export default function WelcomeScreen() {
     router.push("/(tabs)");
   };
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: "Check out Optical Rx Now - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now.",
+        title: "Optical Rx Now",
+      });
+    } catch (error) {
+      console.log("Error sharing:", error);
+    }
+  };
+
   const handleAdminAccess = () => {
     Alert.alert(
       "Admin Area",
@@ -58,6 +69,14 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Share Button in Header */}
+      <View style={styles.header}>
+        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Ionicons name="share-outline" size={24} color="#4a9eff" />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {/* Logo - Long press for admin access */}
