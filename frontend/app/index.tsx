@@ -161,6 +161,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0a1628",
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  headerPlaceholder: {
+    width: 44,
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollContent: {
     flexGrow: 1,
   },
