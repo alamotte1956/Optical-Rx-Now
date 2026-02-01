@@ -172,21 +172,33 @@ export default function FamilyScreen() {
         ) : (
           members.map((member) => (
             <View key={member.id} style={styles.memberCard}>
-              <View style={styles.memberIconContainer}>
-                <Ionicons
-                  name={getRelationshipIcon(member.relationship) as any}
-                  size={28}
-                  color="#4a9eff"
-                />
-              </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                <Text style={styles.memberRxCount}>
-                  {prescriptionCounts[member.id] || 0} prescription
-                  {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
-                </Text>
-              </View>
+              <TouchableOpacity 
+                style={styles.memberTouchable}
+                onPress={() => {
+                  console.log("Member card tapped:", member.name);
+                  // Navigate to prescriptions tab - this screen shows all prescriptions
+                  // User can filter by this member there
+                  router.push("/(tabs)");
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.memberIconContainer}>
+                  <Ionicons
+                    name={getRelationshipIcon(member.relationship) as any}
+                    size={28}
+                    color="#4a9eff"
+                  />
+                </View>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>{member.name}</Text>
+                  <Text style={styles.memberRelationship}>{member.relationship}</Text>
+                  <Text style={styles.memberRxCount}>
+                    {prescriptionCounts[member.id] || 0} prescription
+                    {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => {
