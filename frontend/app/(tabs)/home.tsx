@@ -1,13 +1,27 @@
 import { useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import { useRootNavigationState, useRouter } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { CommonActions } from "@react-navigation/native";
 
 export default function HomeTab() {
   const router = useRouter();
+  const navigation = useNavigation();
 
   useEffect(() => {
-    // Go back to welcome screen
-    router.back();
+    // Get the parent navigator (root stack) and reset to welcome screen
+    const parent = navigation.getParent();
+    if (parent) {
+      parent.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'index' }],
+        })
+      );
+    } else {
+      // Fallback - navigate directly
+      router.push("/");
+    }
   }, []);
 
   return (
