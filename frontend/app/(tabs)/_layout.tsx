@@ -1,9 +1,24 @@
 import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, TouchableOpacity } from "react-native";
+import { Platform } from "react-native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 
 export default function TabLayout() {
   const router = useRouter();
+  const navigation = useNavigation();
+  
+  const goToWelcome = () => {
+    // Get the root navigator and reset to welcome screen
+    const rootNav = navigation.getParent();
+    if (rootNav) {
+      rootNav.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'index' }],
+        })
+      );
+    }
+  };
   
   return (
     <Tabs
@@ -55,7 +70,7 @@ export default function TabLayout() {
         listeners={{
           tabPress: (e) => {
             e.preventDefault();
-            router.replace("/");
+            goToWelcome();
           },
         }}
       />
