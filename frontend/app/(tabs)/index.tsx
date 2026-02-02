@@ -131,28 +131,30 @@ export default function PrescriptionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Home Button - Separate Row */}
+      <TouchableOpacity
+        style={styles.homeButtonRow}
+        onPress={() => {
+          Alert.alert(
+            "Go Home?",
+            "Return to welcome screen?",
+            [
+              { text: "Cancel", style: "cancel" },
+              { 
+                text: "Yes", 
+                onPress: () => router.push("/")
+              }
+            ]
+          );
+        }}
+        activeOpacity={0.6}
+      >
+        <Ionicons name="arrow-back" size={20} color="#4a9eff" />
+        <Text style={styles.homeButtonText}>Back to Home</Text>
+      </TouchableOpacity>
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={() => {
-            Alert.alert(
-              "Go Home?",
-              "Return to welcome screen?",
-              [
-                { text: "Cancel", style: "cancel" },
-                { 
-                  text: "Yes", 
-                  onPress: () => router.push("/")
-                }
-              ]
-            );
-          }}
-          activeOpacity={0.6}
-          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-        >
-          <Ionicons name="home" size={22} color="#4a9eff" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
