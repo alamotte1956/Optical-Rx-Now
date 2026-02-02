@@ -134,19 +134,7 @@ export default function PrescriptionsScreen() {
       {/* Home Button - Separate Row */}
       <TouchableOpacity
         style={styles.homeButtonRow}
-        onPress={() => {
-          Alert.alert(
-            "Go Home?",
-            "Return to welcome screen?",
-            [
-              { text: "Cancel", style: "cancel" },
-              { 
-                text: "Yes", 
-                onPress: () => router.push("/")
-              }
-            ]
-          );
-        }}
+        onPress={() => router.push("/")}
         activeOpacity={0.6}
       >
         <Ionicons name="arrow-back" size={20} color="#4a9eff" />
