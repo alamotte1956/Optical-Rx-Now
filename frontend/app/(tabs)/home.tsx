@@ -6,8 +6,8 @@ export default function HomeTab() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to welcome screen immediately
-    router.replace("/");
+    // Go back to welcome screen
+    router.back();
   }, []);
 
   return (
