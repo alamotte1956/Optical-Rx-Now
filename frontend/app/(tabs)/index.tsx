@@ -45,13 +45,23 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    console.log("Home button pressed - navigating to welcome");
-    // Reset navigation stack and go to welcome screen
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: "index" }],
-      })
+    Alert.alert(
+      "Go Home?",
+      "Do you want to return to the welcome screen?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Yes", 
+          onPress: () => {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: "index" }],
+              })
+            );
+          }
+        }
+      ]
     );
   };
 
