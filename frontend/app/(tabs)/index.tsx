@@ -118,13 +118,15 @@ export default function PrescriptionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Home Button - Using Link Component */}
-      <Link href="/" asChild>
-        <TouchableOpacity style={styles.homeButtonRow} activeOpacity={0.6}>
-          <Ionicons name="arrow-back" size={20} color="#4a9eff" />
-          <Text style={styles.homeButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </Link>
+      {/* Home Button - Separate Row */}
+      <TouchableOpacity
+        style={styles.homeButtonRow}
+        onPress={goToHome}
+        activeOpacity={0.6}
+      >
+        <Ionicons name="arrow-back" size={20} color="#4a9eff" />
+        <Text style={styles.homeButtonText}>Back to Home</Text>
+      </TouchableOpacity>
 
       {/* Header */}
       <View style={styles.header}>
