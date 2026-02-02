@@ -44,7 +44,7 @@ export default function PrescriptionsScreen() {
 
   const goToHome = () => {
     console.log("Home button pressed");
-    router.replace("/");
+    router.push("/");
   };
 
   useFocusEffect(
