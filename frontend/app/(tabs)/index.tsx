@@ -120,6 +120,13 @@ export default function PrescriptionsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => router.replace("/")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
