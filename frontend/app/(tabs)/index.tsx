@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
+import * as Linking from "expo-linking";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
