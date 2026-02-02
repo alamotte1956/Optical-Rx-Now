@@ -134,15 +134,13 @@ export default function PrescriptionsScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.homeButton,
-            pressed && { opacity: 0.7, backgroundColor: "rgba(74, 158, 255, 0.3)" }
-          ]}
+        <TouchableOpacity
+          style={styles.homeButton}
           onPress={goToHome}
+          activeOpacity={0.7}
         >
           <Ionicons name="home" size={22} color="#4a9eff" />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
