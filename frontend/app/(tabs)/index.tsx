@@ -9,7 +9,6 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  Pressable,
 } from "react-native";
 import { useRouter, useFocusEffect, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
