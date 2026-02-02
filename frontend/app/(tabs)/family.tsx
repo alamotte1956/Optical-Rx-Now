@@ -44,21 +44,29 @@ export default function FamilyScreen() {
 
   const fetchData = async () => {
     try {
+      if (!BACKEND_URL) {
+        console.log("BACKEND_URL not configured");
+        setLoading(false);
+        return;
+      }
+      
       const [membersRes, rxRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/family-members`),
-        fetch(`${BACKEND_URL}/api/prescriptions`),
+        fetch(`${BACKEND_URL}/api/family-members`).catch(() => null),
+        fetch(`${BACKEND_URL}/api/prescriptions`).catch(() => null),
       ]);
 
-      if (membersRes.ok) {
+      if (membersRes && membersRes.ok) {
         const membersData = await membersRes.json();
-        setMembers(membersData);
+        setMembers(membersData || []);
       }
 
-      if (rxRes.ok) {
+      if (rxRes && rxRes.ok) {
         const rxData = await rxRes.json();
         const counts: Stats = {};
-        rxData.forEach((rx: any) => {
-          counts[rx.family_member_id] = (counts[rx.family_member_id] || 0) + 1;
+        (rxData || []).forEach((rx: any) => {
+          if (rx && rx.family_member_id) {
+            counts[rx.family_member_id] = (counts[rx.family_member_id] || 0) + 1;
+          }
         });
         setPrescriptionCounts(counts);
       }
