@@ -10,11 +10,10 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { useRouter, useFocusEffect, useNavigation } from "expo-router";
+import { useRouter, useFocusEffect, Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
-import { CommonActions } from "@react-navigation/native";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
