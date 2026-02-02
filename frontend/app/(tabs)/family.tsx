@@ -141,6 +141,13 @@ export default function FamilyScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => router.replace("/")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Family Members</Text>
         <TouchableOpacity
           style={styles.addButton}
