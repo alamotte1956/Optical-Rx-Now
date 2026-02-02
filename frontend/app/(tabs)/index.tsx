@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Pressable,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -42,8 +43,8 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    // Go to the welcome screen
-    router.push("/");
+    console.log("Home button pressed");
+    router.replace("/");
   };
 
   useFocusEffect(
