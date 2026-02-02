@@ -94,7 +94,6 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
 
           {/* Title */}
-          <Text style={styles.title}>Optical Rx Now</Text>
           <Text style={styles.subtitle}>
             Store and manage your family's eyeglass and contact lens prescriptions
           </Text>
