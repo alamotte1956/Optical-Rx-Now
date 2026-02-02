@@ -36,11 +36,20 @@ interface Prescription {
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+
+  // Navigate back to welcome screen
+  const goToHome = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'index' }],
+    });
+  };
 
   useFocusEffect(
     useCallback(() => {
