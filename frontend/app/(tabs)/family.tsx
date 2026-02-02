@@ -143,7 +143,12 @@ export default function FamilyScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => router.replace("/")}
+          onPress={() => {
+            // Navigate to root welcome screen
+            while (router.canGoBack()) {
+              router.back();
+            }
+          }}
           activeOpacity={0.7}
         >
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
