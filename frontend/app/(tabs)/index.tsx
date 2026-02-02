@@ -294,12 +294,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   homeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "rgba(74, 158, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   headerTitle: {
     fontSize: 24,
