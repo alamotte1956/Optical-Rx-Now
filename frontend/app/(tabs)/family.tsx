@@ -12,6 +12,7 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Linking from "expo-linking";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
