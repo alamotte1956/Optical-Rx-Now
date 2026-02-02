@@ -41,7 +41,7 @@ export default function WelcomeScreen() {
   };
 
   const handleGetStarted = () => {
-    router.push("/(tabs)");
+    router.replace("/(tabs)");
   };
 
   const handleShare = async () => {
