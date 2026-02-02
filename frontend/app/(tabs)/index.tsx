@@ -321,7 +321,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
+  },
+  homeButtonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  homeButtonText: {
+    color: "#4a9eff",
+    fontSize: 14,
+    fontWeight: "500",
   },
   homeButton: {
     width: 44,
