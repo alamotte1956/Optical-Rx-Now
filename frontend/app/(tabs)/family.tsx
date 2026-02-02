@@ -283,10 +283,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  homeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
+    flex: 1,
+    marginLeft: 12,
   },
   addButton: {
     width: 44,
