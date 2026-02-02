@@ -11,10 +11,11 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
+import { CommonActions } from "@react-navigation/native";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -36,6 +37,7 @@ interface Prescription {
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
@@ -43,8 +45,14 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    console.log("Home button pressed");
-    router.push("/");
+    console.log("Home button pressed - navigating to welcome");
+    // Reset navigation stack and go to welcome screen
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "index" }],
+      })
+    );
   };
 
   useFocusEffect(
