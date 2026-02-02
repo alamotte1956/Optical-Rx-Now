@@ -42,8 +42,8 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    // Go back to the welcome screen
-    router.back();
+    // Go to the welcome screen
+    router.push("/");
   };
 
   useFocusEffect(
