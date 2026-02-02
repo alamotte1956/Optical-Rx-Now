@@ -1,22 +1,17 @@
 import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform } from "react-native";
-import { useNavigation, CommonActions } from "@react-navigation/native";
+import { Platform, BackHandler } from "react-native";
 
 export default function TabLayout() {
   const router = useRouter();
-  const navigation = useNavigation();
   
   const goToWelcome = () => {
-    // Get the root navigator and reset to welcome screen
-    const rootNav = navigation.getParent();
-    if (rootNav) {
-      rootNav.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'index' }],
-        })
-      );
+    // Dismiss all screens and go back to root
+    try {
+      router.dismissAll();
+    } catch (e) {
+      // Fallback: navigate to root
+      router.navigate("/");
     }
   };
   
