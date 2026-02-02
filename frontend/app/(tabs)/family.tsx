@@ -145,10 +145,9 @@ export default function FamilyScreen() {
         <TouchableOpacity
           style={styles.homeButton}
           onPress={() => {
-            // Navigate to root welcome screen
-            while (router.canGoBack()) {
-              router.back();
-            }
+            // Navigate to welcome screen using Linking
+            const url = Linking.createURL("/");
+            Linking.openURL(url);
           }}
           activeOpacity={0.7}
         >
