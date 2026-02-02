@@ -1,20 +1,8 @@
 import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, BackHandler } from "react-native";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
-  const router = useRouter();
-  
-  const goToWelcome = () => {
-    // Dismiss all screens and go back to root
-    try {
-      router.dismissAll();
-    } catch (e) {
-      // Fallback: navigate to root
-      router.navigate("/");
-    }
-  };
-  
   return (
     <Tabs
       initialRouteName="index"
@@ -52,21 +40,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            goToWelcome();
-          },
         }}
       />
     </Tabs>
