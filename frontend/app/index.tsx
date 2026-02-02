@@ -99,28 +99,26 @@ export default function WelcomeScreen() {
             Store and manage your family's eyeglass and contact lens prescriptions
           </Text>
 
-          {/* Ad Banner */}
+          {/* Need New Eyewear Button (Ad Banner) */}
           <View style={styles.adContainer}>
             <AdBanner />
           </View>
 
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            <View style={styles.featureItem}>
-              <Ionicons name="camera" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Capture Rx photos</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="people" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Organize by family member</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="share" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Share or print anytime</Text>
-            </View>
-          </View>
+          {/* Open My Vault / Get Started Button */}
+          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.buttonText}>
+                  {stats.family_members > 0 ? "Open My Vault" : "Get Started"}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+              </>
+            )}
+          </TouchableOpacity>
 
-          {/* Stats (if returning user) */}
+          {/* Your Vault Stats (if returning user) */}
           {!loading && (stats.family_members > 0 || stats.total_prescriptions > 0) && (
             <View style={styles.statsContainer}>
               <Text style={styles.statsTitle}>Your Vault</Text>
@@ -137,19 +135,11 @@ export default function WelcomeScreen() {
             </View>
           )}
 
-          {/* CTA Button */}
-          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.buttonText}>
-                  {stats.family_members > 0 ? "Open My Vault" : "Get Started"}
-                </Text>
-                <Ionicons name="arrow-forward" size={20} color="#fff" />
-              </>
-            )}
-          </TouchableOpacity>
+          {/* Future Ad Banner Placeholder */}
+          <View style={styles.adPlaceholder}>
+            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
+            <Text style={styles.adPlaceholderText}>Ad Space</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
