@@ -338,11 +338,11 @@ describe('PrescriptionCard', () => {
       JSON.stringify({ id: '1', name: 'My Prescription' })
     );
     
-    const { getByText } = render(
+    const { findByText } = render(
       <PrescriptionCard prescriptionId="1" />
     );
     
-    expect(await getByText('My Prescription')).toBeTruthy();
+    expect(await findByText('My Prescription')).toBeTruthy();
   });
 });
 ```
