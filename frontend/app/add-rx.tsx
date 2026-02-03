@@ -18,6 +18,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { getFamilyMembers, createPrescription, type FamilyMember } from "../services/localStorage";
 
+const MAX_IMAGE_SIZE_MB = 10;
+
+const validateImageSize = (base64: string): boolean => {
+  // Base64 is ~33% larger than binary, so multiply by 0.75 to get actual size
+  const sizeInMB = (base64.length * 0.75) / (1024 * 1024);
+  return sizeInMB <= MAX_IMAGE_SIZE_MB;
+};
+
 export default function AddRxScreen() {
   const router = useRouter();
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -64,13 +72,25 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.7,  // Add compression
+      maxWidth: 1920,  // Limit dimensions
+      maxHeight: 1080,
       base64: true,
       exif: false,
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      setImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      const base64Data = result.assets[0].base64;
+      
+      if (!validateImageSize(base64Data)) {
+        Alert.alert(
+          "Image Too Large",
+          "The image is too large. Please try again with a smaller image or lower quality."
+        );
+        return;
+      }
+      
+      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
     }
   };
 
@@ -78,13 +98,25 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.7,  // Add compression
+      maxWidth: 1920,  // Limit dimensions
+      maxHeight: 1080,
       base64: true,
       exif: false,
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      setImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      const base64Data = result.assets[0].base64;
+      
+      if (!validateImageSize(base64Data)) {
+        Alert.alert(
+          "Image Too Large",
+          "The image is too large. Please try again with a smaller image or lower quality."
+        );
+        return;
+      }
+      
+      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
     }
   };
 
