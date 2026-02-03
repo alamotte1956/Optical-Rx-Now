@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Ale
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AdBanner from "./components/AdBanner";
 import { getStats } from "../services/localStorage";
 
 export default function WelcomeScreen() {
@@ -94,11 +93,6 @@ export default function WelcomeScreen() {
             Store and manage your family's eyeglass and contact lens prescriptions
           </Text>
 
-          {/* Need New Eyewear Button (Ad Banner) */}
-          <View style={styles.adContainer}>
-            <AdBanner />
-          </View>
-
           {/* Open My Vault / Get Started Button */}
           <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
             {loading ? (
@@ -129,12 +123,6 @@ export default function WelcomeScreen() {
               </View>
             </View>
           )}
-
-          {/* Future Ad Banner Placeholder */}
-          <View style={styles.adPlaceholder}>
-            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
-            <Text style={styles.adPlaceholderText}>Ad Space</Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -198,10 +186,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     lineHeight: 22,
   },
-  adContainer: {
-    width: "100%",
-    marginBottom: 16,
-  },
   button: {
     flexDirection: "row",
     alignItems: "center",
@@ -250,24 +234,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#8899a6",
     marginTop: 4,
-  },
-  adPlaceholder: {
-    width: "100%",
-    height: 100,
-    backgroundColor: "rgba(74, 158, 255, 0.05)",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(74, 158, 255, 0.2)",
-    borderStyle: "dashed",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 32,
-    gap: 8,
-  },
-  adPlaceholderText: {
-    fontSize: 14,
-    color: "#6b7c8f",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
 });
