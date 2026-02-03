@@ -13,10 +13,10 @@
       "bundleIdentifier": "com.alamotte.opticalrxnow",
       "buildNumber": "1.0.0",
       "infoPlist": {
-        "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
-        "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
+        "NSCameraUsageDescription": "We need camera access to let you take photos of your prescriptions.",
+        "NSPhotoLibraryUsageDescription": "We need access to your photos to help you save and manage prescription images.",
         "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
-        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+        "NSUserTrackingUsageDescription": "This app uses your data to show you personalized ads that help keep the app free."
       },
       "config": {
         "usesNonExemptEncryption": false
