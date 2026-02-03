@@ -25,11 +25,9 @@
         "EXPO_PUBLIC_BACKEND_URL": "https://your-backend-url.com"
       },
       "ios": {
-        "bundleIdentifier": "com.alamotte.opticalrxnow",
         "buildConfiguration": "Release"
       },
       "android": {
-        "package": "com.alamotte.opticalrxnow",
         "buildType": "apk"
       },
       "cache": {
