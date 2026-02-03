@@ -2,7 +2,6 @@
 
 ## iOS Testing
 - [ ] Test on iOS 17+ (latest)
-- [ ] App Tracking Transparency prompt appears
 - [ ] Camera permission prompt appears
 - [ ] Photo library permission prompt appears
 - [ ] Prescriptions save and load correctly
@@ -23,7 +22,6 @@
 - [ ] No network calls for prescription data
 - [ ] Data persists after app restart
 - [ ] Data is deleted when app is uninstalled
-- [ ] Analytics still tracks (if user consents)
 - [ ] Affiliate links still work
 
 ## Functionality Testing
