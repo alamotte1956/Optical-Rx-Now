@@ -58,3 +58,59 @@ curl -H "X-Admin-Key: your-admin-key" https://api.example.com/api/analytics/dash
 ### CORS Configuration
 CORS is restricted to specific origins. Configure allowed origins via the `ALLOWED_ORIGINS` environment variable.
 
+## Admin Dashboard
+
+A simple web-based admin dashboard is available at `frontend/admin-dashboard.html`.
+
+### Features:
+- 📊 **Real-time Analytics Dashboard**
+  - Total downloads and active users (daily, weekly, monthly)
+  - Platform breakdown (iOS, Android, Web)
+  - Engagement metrics (ad clicks, affiliate clicks)
+  - Auto-refresh every 60 seconds
+  
+- 🔗 **Manage Affiliate Partners**
+  - Add, edit, and delete affiliate partners
+  - Toggle active status with one click
+  - Set featured affiliates and display order
+  - Categorize by eyeglasses, contacts, or both
+
+- 🔐 **Secure & Simple**
+  - No login required - just enter admin key once
+  - Admin key stored in browser localStorage
+  - Configurable API URL for different environments
+  - Real-time connection status indicator
+
+### Usage:
+
+1. **Open the Dashboard**
+   - Open `frontend/admin-dashboard.html` in your browser
+   - Or host it on any static file hosting service
+
+2. **First Time Setup**
+   - Enter your admin key (same as the `ADMIN_KEY` environment variable)
+   - Optionally configure the API URL (default: `http://localhost:8000/api`)
+   - The admin key is stored in your browser for future sessions
+
+3. **Managing Affiliates**
+   - Click "Add New Affiliate" to create a new partner
+   - Use "Edit" to modify existing affiliates
+   - "Activate/Deactivate" to control visibility in the app
+   - "Delete" to permanently remove an affiliate
+
+4. **Viewing Analytics**
+   - Dashboard automatically loads analytics on page load
+   - Click "Refresh" to manually update
+   - Analytics auto-refresh every 60 seconds
+
+### Hosting Options:
+
+The dashboard is a single HTML file with no dependencies, so you can:
+- Open it directly from your filesystem (`file://`)
+- Host on **GitHub Pages**
+- Deploy to **Netlify** or **Vercel**
+- Upload to any static hosting service
+- Serve from an S3 bucket or CDN
+
+**Note:** For production use, configure your backend's `ALLOWED_ORIGINS` to include your dashboard's URL for CORS support.
+

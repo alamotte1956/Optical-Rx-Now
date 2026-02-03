@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optical Rx Now - Admin Dashboard</title>
+    <style>
+        /* Dark theme CSS matching app colors */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #0a1628;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin: 0;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .card {
+            background: #1a2942;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #4a9eff;
+        }
+        
+        .card h3 {
+            margin: 20px 0 10px 0;
+            font-size: 1.2em;
+            color: #6b7c8f;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #0a1628;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #1a2942;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #6b7c8f;
+            margin-top: 5px;
+        }
+        
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #3a8eef;
+        }
+        
+        button:disabled {
+            background: #2a3f5f;
+            cursor: not-allowed;
+        }
+        
+        button.danger {
+            background: #ff5c5c;
+        }
+        
+        button.danger:hover {
+            background: #ff4040;
+        }
+        
+        button.secondary {
+            background: #6b7c8f;
+        }
+        
+        button.secondary:hover {
+            background: #5a6b7f;
+        }
+        
+        button.success {
+            background: #4caf50;
+        }
+        
+        button.success:hover {
+            background: #45a049;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #1a2942;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #4a9eff;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #fff;
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6b7c8f;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #2a3f5f;
+            border-radius: 6px;
+            background: #0a1628;
+            color: #fff;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-group.checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group.checkbox input {
+            width: auto;
+        }
+        
+        /* Table styles */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        
+        table thead {
+            background: #0a1628;
+        }
+        
+        table th {
+            padding: 12px 10px;
+            text-align: left;
+            color: #4a9eff;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #0a1628;
+        }
+        
+        table tbody tr:hover {
+            background: #0a1628;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Status indicator */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-indicator.connected {
+            background: #4caf50;
+        }
+        
+        .status-indicator.error {
+            background: #ff5c5c;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            color: #6b7c8f;
+        }
+        
+        /* Loading spinner */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7c8f;
+        }
+        
+        .spinner {
+            border: 3px solid #1a2942;
+            border-top: 3px solid #4a9eff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error message */
+        .error-message {
+            background: #ff5c5c33;
+            color: #ff5c5c;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #ff5c5c;
+        }
+        
+        .success-message {
+            background: #4caf5033;
+            color: #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #4caf50;
+        }
+        
+        /* Info text */
+        .info-text {
+            color: #6b7c8f;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>📊 Optical Rx Now - Admin Dashboard</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-indicator error"></span>
+                <span>Connecting...</span>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <button onclick="refreshDashboard()">🔄 Refresh</button>
+            <button onclick="changeAdminKey()">🔑 Change Key</button>
+            <button onclick="changeApiUrl()">⚙️ API Settings</button>
+        </div>
+    </div>
+    
+    <!-- Admin Key Modal -->
+    <div id="keyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Enter Admin Key</h2>
+            </div>
+            <div class="form-group">
+                <label for="adminKeyInput">Admin Key:</label>
+                <input type="password" id="adminKeyInput" placeholder="Enter your admin key">
+            </div>
+            <button onclick="saveAdminKey()" style="width: 100%; margin-top: 10px;">Save Key</button>
+        </div>
+    </div>
+    
+    <!-- Analytics Section -->
+    <div class="card">
+        <h2>📈 Analytics Overview</h2>
+        <div id="analyticsContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading analytics...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Affiliate Management Section -->
+    <div class="card">
+        <h2>🔗 Affiliate Partners</h2>
+        <button onclick="showAddAffiliateModal()">➕ Add New Affiliate</button>
+        <div id="affiliatesTable">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading affiliates...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Affiliate Modal -->
+    <div id="affiliateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="affiliateModalTitle">Add New Affiliate</h2>
+                <span class="close" onclick="closeAffiliateModal()">&times;</span>
+            </div>
+            <form id="affiliateForm" onsubmit="saveAffiliate(event)">
+                <input type="hidden" id="affiliateId">
+                
+                <div class="form-group">
+                    <label for="affiliateName">Name*</label>
+                    <input type="text" id="affiliateName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateDescription">Description*</label>
+                    <textarea id="affiliateDescription" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateUrl">URL*</label>
+                    <input type="url" id="affiliateUrl" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateCategory">Category*</label>
+                    <select id="affiliateCategory" required>
+                        <option value="eyeglasses">Eyeglasses</option>
+                        <option value="contacts">Contacts</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateDiscount">Discount/Offer*</label>
+                    <input type="text" id="affiliateDiscount" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateCommission">Commission (optional)</label>
+                    <input type="text" id="affiliateCommission">
+                </div>
+                
+                <div class="form-group">
+                    <label for="affiliateOrder">Order (lower = higher priority)</label>
+                    <input type="number" id="affiliateOrder" value="100">
+                </div>
+                
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="affiliateFeatured">
+                    <label for="affiliateFeatured">Featured</label>
+                </div>
+                
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="affiliateActive" checked>
+                    <label for="affiliateActive">Active</label>
+                </div>
+                
+                <button type="submit" style="width: 100%; margin-top: 20px;">Save Affiliate</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // API Configuration
+        let API_URL = localStorage.getItem('api_url') || 'http://localhost:8000/api';
+        let ADMIN_KEY = localStorage.getItem('admin_key');
+        
+        // Initialize dashboard
+        async function init() {
+            if (!ADMIN_KEY) {
+                showKeyModal();
+            } else {
+                await loadDashboard();
+            }
+        }
+        
+        // API Helper
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'X-Admin-Key': ADMIN_KEY,
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                if (response.status === 403) {
+                    updateConnectionStatus(false);
+                    alert('Invalid admin key. Please re-enter.');
+                    showKeyModal();
+                    throw new Error('Invalid admin key');
+                }
+                
+                if (!response.ok) {
+                    updateConnectionStatus(false);
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                
+                updateConnectionStatus(true);
+                return response.json();
+            } catch (error) {
+                if (error.message.includes('fetch')) {
+                    updateConnectionStatus(false);
+                    throw new Error('Cannot connect to API. Check API URL and network connection.');
+                }
+                throw error;
+            }
+        }
+        
+        // Connection status
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            const indicator = statusEl.querySelector('.status-indicator');
+            const text = statusEl.querySelector('span:last-child');
+            
+            if (connected) {
+                indicator.className = 'status-indicator connected';
+                text.textContent = 'Connected';
+            } else {
+                indicator.className = 'status-indicator error';
+                text.textContent = 'Connection Error';
+            }
+        }
+        
+        // Load Analytics Dashboard
+        async function loadAnalytics() {
+            try {
+                const data = await apiRequest('/analytics/dashboard');
+                displayAnalytics(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analyticsContent').innerHTML = 
+                    `<div class="error-message">Error loading analytics: ${error.message}</div>`;
+            }
+        }
+        
+        function displayAnalytics(data) {
+            const html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.total_downloads || 0}</div>
+                        <div class="stat-label">Total Downloads</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.daily_active_users || 0}</div>
+                        <div class="stat-label">Daily Active Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.weekly_active_users || 0}</div>
+                        <div class="stat-label">Weekly Active Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.monthly_active_users || 0}</div>
+                        <div class="stat-label">Monthly Active Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.new_users_this_week || 0}</div>
+                        <div class="stat-label">New Users (7d)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.summary.new_users_this_month || 0}</div>
+                        <div class="stat-label">New Users (30d)</div>
+                    </div>
+                </div>
+                
+                <h3>Platform Breakdown</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${data.platforms.ios || 0}</div>
+                        <div class="stat-label">iOS Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.platforms.android || 0}</div>
+                        <div class="stat-label">Android Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.platforms.web || 0}</div>
+                        <div class="stat-label">Web Users</div>
+                    </div>
+                </div>
+                
+                <h3>Engagement (Last 30 Days)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${data.engagement.ad_clicks_30d || 0}</div>
+                        <div class="stat-label">Ad Clicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${data.engagement.affiliate_clicks_30d || 0}</div>
+                        <div class="stat-label">Affiliate Clicks</div>
+                    </div>
+                </div>
+                
+                <p class="info-text">
+                    Last updated: ${new Date(data.generated_at).toLocaleString()}
+                </p>
+            `;
+            document.getElementById('analyticsContent').innerHTML = html;
+        }
+        
+        // Load Affiliates
+        async function loadAffiliates() {
+            try {
+                const data = await apiRequest('/affiliates/all');
+                displayAffiliates(data.partners);
+            } catch (error) {
+                console.error('Error loading affiliates:', error);
+                document.getElementById('affiliatesTable').innerHTML = 
+                    `<div class="error-message">Error loading affiliates: ${error.message}</div>`;
+            }
+        }
+        
+        function displayAffiliates(partners) {
+            if (!partners || partners.length === 0) {
+                document.getElementById('affiliatesTable').innerHTML = 
+                    '<p class="info-text">No affiliates found. Add your first affiliate partner.</p>';
+                return;
+            }
+            
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Discount</th>
+                            <th>Order</th>
+                            <th>Featured</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${partners.map(p => `
+                            <tr>
+                                <td>${escapeHtml(p.name)}</td>
+                                <td>${escapeHtml(p.category)}</td>
+                                <td>${escapeHtml(p.discount)}</td>
+                                <td>${p.order}</td>
+                                <td>${p.is_featured ? '⭐' : '-'}</td>
+                                <td>${p.is_active ? '✅' : '❌'}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button onclick="editAffiliate('${p.id}')">✏️ Edit</button>
+                                        <button onclick="toggleActive('${p.id}', ${!p.is_active})" 
+                                                class="${p.is_active ? 'secondary' : 'success'}">
+                                            ${p.is_active ? 'Deactivate' : 'Activate'}
+                                        </button>
+                                        <button onclick="deleteAffiliate('${p.id}')" 
+                                                class="danger">
+                                            🗑️ Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('affiliatesTable').innerHTML = html;
+        }
+        
+        // HTML escape helper
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Affiliate CRUD operations
+        let affiliatesCache = [];
+        
+        async function toggleActive(id, newStatus) {
+            try {
+                const affiliate = affiliatesCache.find(a => a.id === id);
+                if (!affiliate) {
+                    alert('Affiliate not found');
+                    return;
+                }
+                
+                const updatedAffiliate = {
+                    name: affiliate.name,
+                    description: affiliate.description,
+                    url: affiliate.url,
+                    category: affiliate.category,
+                    discount: affiliate.discount,
+                    commission: affiliate.commission,
+                    is_featured: affiliate.is_featured,
+                    is_active: newStatus,
+                    order: affiliate.order
+                };
+                
+                await apiRequest(`/affiliates/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updatedAffiliate)
+                });
+                
+                await loadAffiliates();
+                showSuccessMessage('Affiliate status updated successfully');
+            } catch (error) {
+                alert(`Error updating affiliate: ${error.message}`);
+            }
+        }
+        
+        async function editAffiliate(id) {
+            const affiliate = affiliatesCache.find(a => a.id === id);
+            if (!affiliate) {
+                alert('Affiliate not found');
+                return;
+            }
+            
+            document.getElementById('affiliateModalTitle').textContent = 'Edit Affiliate';
+            document.getElementById('affiliateId').value = affiliate.id;
+            document.getElementById('affiliateName').value = affiliate.name;
+            document.getElementById('affiliateDescription').value = affiliate.description;
+            document.getElementById('affiliateUrl').value = affiliate.url;
+            document.getElementById('affiliateCategory').value = affiliate.category;
+            document.getElementById('affiliateDiscount').value = affiliate.discount;
+            document.getElementById('affiliateCommission').value = affiliate.commission || '';
+            document.getElementById('affiliateOrder').value = affiliate.order;
+            document.getElementById('affiliateFeatured').checked = affiliate.is_featured;
+            document.getElementById('affiliateActive').checked = affiliate.is_active;
+            
+            document.getElementById('affiliateModal').classList.add('active');
+        }
+        
+        async function deleteAffiliate(id) {
+            if (!confirm('Are you sure you want to delete this affiliate? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                await apiRequest(`/affiliates/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                await loadAffiliates();
+                showSuccessMessage('Affiliate deleted successfully');
+            } catch (error) {
+                alert(`Error deleting affiliate: ${error.message}`);
+            }
+        }
+        
+        function showAddAffiliateModal() {
+            document.getElementById('affiliateModalTitle').textContent = 'Add New Affiliate';
+            document.getElementById('affiliateForm').reset();
+            document.getElementById('affiliateId').value = '';
+            document.getElementById('affiliateOrder').value = '100';
+            document.getElementById('affiliateActive').checked = true;
+            document.getElementById('affiliateModal').classList.add('active');
+        }
+        
+        function closeAffiliateModal() {
+            document.getElementById('affiliateModal').classList.remove('active');
+        }
+        
+        async function saveAffiliate(event) {
+            event.preventDefault();
+            
+            const affiliateId = document.getElementById('affiliateId').value;
+            const affiliateData = {
+                name: document.getElementById('affiliateName').value,
+                description: document.getElementById('affiliateDescription').value,
+                url: document.getElementById('affiliateUrl').value,
+                category: document.getElementById('affiliateCategory').value,
+                discount: document.getElementById('affiliateDiscount').value,
+                commission: document.getElementById('affiliateCommission').value || null,
+                order: parseInt(document.getElementById('affiliateOrder').value),
+                is_featured: document.getElementById('affiliateFeatured').checked,
+                is_active: document.getElementById('affiliateActive').checked
+            };
+            
+            try {
+                if (affiliateId) {
+                    // Update existing
+                    await apiRequest(`/affiliates/${affiliateId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(affiliateData)
+                    });
+                    showSuccessMessage('Affiliate updated successfully');
+                } else {
+                    // Create new
+                    await apiRequest('/affiliates', {
+                        method: 'POST',
+                        body: JSON.stringify(affiliateData)
+                    });
+                    showSuccessMessage('Affiliate created successfully');
+                }
+                
+                closeAffiliateModal();
+                await loadAffiliates();
+            } catch (error) {
+                alert(`Error saving affiliate: ${error.message}`);
+            }
+        }
+        
+        // Success message
+        function showSuccessMessage(message) {
+            const container = document.getElementById('affiliatesTable');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'success-message';
+            msgDiv.textContent = message;
+            container.insertBefore(msgDiv, container.firstChild);
+            
+            setTimeout(() => {
+                msgDiv.remove();
+            }, 3000);
+        }
+        
+        // Admin Key Management
+        function showKeyModal() {
+            document.getElementById('keyModal').classList.add('active');
+            document.getElementById('adminKeyInput').focus();
+        }
+        
+        function saveAdminKey() {
+            const key = document.getElementById('adminKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('admin_key', key);
+                ADMIN_KEY = key;
+                document.getElementById('keyModal').classList.remove('active');
+                document.getElementById('adminKeyInput').value = '';
+                loadDashboard();
+            } else {
+                alert('Please enter a valid admin key');
+            }
+        }
+        
+        function changeAdminKey() {
+            localStorage.removeItem('admin_key');
+            ADMIN_KEY = null;
+            showKeyModal();
+        }
+        
+        function changeApiUrl() {
+            const newUrl = prompt('Enter API URL:', API_URL);
+            if (newUrl && newUrl.trim()) {
+                localStorage.setItem('api_url', newUrl.trim());
+                API_URL = newUrl.trim();
+                loadDashboard();
+            }
+        }
+        
+        // Dashboard Loading
+        async function loadDashboard() {
+            // Cache affiliates for toggle operations
+            try {
+                const data = await apiRequest('/affiliates/all');
+                affiliatesCache = data.partners;
+            } catch (error) {
+                console.error('Error caching affiliates:', error);
+            }
+            
+            await Promise.all([
+                loadAnalytics(),
+                loadAffiliates()
+            ]);
+        }
+        
+        function refreshDashboard() {
+            loadDashboard();
+        }
+        
+        // Auto-refresh every 60 seconds (analytics only)
+        setInterval(loadAnalytics, 60000);
+        
+        // Initialize on load
+        init();
+        
+        // Allow Enter key to save admin key
+        document.getElementById('adminKeyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                saveAdminKey();
+            }
+        });
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const keyModal = document.getElementById('keyModal');
+            const affiliateModal = document.getElementById('affiliateModal');
+            
+            if (event.target === keyModal) {
+                // Don't close key modal by clicking outside if no admin key is set
+                if (ADMIN_KEY) {
+                    keyModal.classList.remove('active');
+                }
+            }
+            if (event.target === affiliateModal) {
+                closeAffiliateModal();
+            }
+        }
+    </script>
+</body>
+</html>
