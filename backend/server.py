@@ -1,5 +1,4 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -25,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 # Admin key for protected endpoints (from environment variable)
 ADMIN_KEY = os.getenv('ADMIN_KEY', 'change-this-in-production')
+
+# Default allowed CORS origins
+DEFAULT_ALLOWED_ORIGINS = 'http://localhost:3000,http://localhost:8000'
 
 # MongoDB connection - use getenv with defaults for deployment flexibility
 mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
@@ -438,7 +440,7 @@ async def root_health_check():
 
 # CORS middleware - restrict to specific origins in production
 # Set ALLOWED_ORIGINS environment variable to comma-separated list of allowed origins
-allowed_origins_str = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000,https://lens-rx-tracker.preview.emergentagent.com')
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', DEFAULT_ALLOWED_ORIGINS)
 allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',')]
 
 app.add_middleware(

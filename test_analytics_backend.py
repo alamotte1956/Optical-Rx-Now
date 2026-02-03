@@ -194,7 +194,7 @@ class TestAffiliateEndpoints:
         assert "partners" in data
         # Should only return active affiliates
         for partner in data["partners"]:
-            assert partner.get("is_active") == True
+            assert partner.get("is_active") is True
     
     def test_get_all_affiliates_requires_admin_key(self):
         """GET /api/affiliates/all should require admin key"""
