@@ -12,16 +12,7 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as Linking from "expo-linking";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-  created_at: string;
-}
+import { getFamilyMembers, getPrescriptions, deleteFamilyMember, type FamilyMember } from "../../services/localStorage";
 
 interface Stats {
   [key: string]: number;
@@ -45,32 +36,18 @@ export default function FamilyScreen() {
 
   const fetchData = async () => {
     try {
-      if (!BACKEND_URL) {
-        console.log("BACKEND_URL not configured");
-        setLoading(false);
-        return;
-      }
-      
-      const [membersRes, rxRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/family-members`).catch(() => null),
-        fetch(`${BACKEND_URL}/api/prescriptions`).catch(() => null),
+      const [membersData, rxData] = await Promise.all([
+        getFamilyMembers(),
+        getPrescriptions(),
       ]);
 
-      if (membersRes && membersRes.ok) {
-        const membersData = await membersRes.json();
-        setMembers(membersData || []);
-      }
+      setMembers(membersData);
 
-      if (rxRes && rxRes.ok) {
-        const rxData = await rxRes.json();
-        const counts: Stats = {};
-        (rxData || []).forEach((rx: any) => {
-          if (rx && rx.family_member_id) {
-            counts[rx.family_member_id] = (counts[rx.family_member_id] || 0) + 1;
-          }
-        });
-        setPrescriptionCounts(counts);
-      }
+      const counts: Stats = {};
+      rxData.forEach((rx: any) => {
+        counts[rx.family_member_id] = (counts[rx.family_member_id] || 0) + 1;
+      });
+      setPrescriptionCounts(counts);
     } catch (error) {
       console.log("Error fetching data:", error);
     } finally {
@@ -96,16 +73,10 @@ export default function FamilyScreen() {
     setDeleting(true);
     console.log("Deleting member:", memberToDelete.id);
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/family-members/${memberToDelete.id}`,
-        { method: "DELETE" }
-      );
-      console.log("Delete response:", response.status);
-      if (response.ok) {
-        setDeleteModalVisible(false);
-        setMemberToDelete(null);
-        fetchData();
-      }
+      await deleteFamilyMember(memberToDelete.id);
+      setDeleteModalVisible(false);
+      setMemberToDelete(null);
+      fetchData();
     } catch (error) {
       console.log("Error deleting member:", error);
     } finally {

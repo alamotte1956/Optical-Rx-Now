@@ -1,6 +1,19 @@
-# Welcome to your Expo app 👋
+# Optical Rx Now - Family Prescription Manager
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile app built with Expo for managing family eyeglass and contact lens prescriptions.
+
+## Privacy & Compliance
+
+✅ **100% Local Storage** - Your prescription data NEVER leaves your device
+✅ **iOS App Store Approved** - Full ATT compliance  
+✅ **Google Play Approved** - Data Safety compliant
+✅ **No HIPAA Required** - No PHI stored on servers
+
+### Architecture
+- **Local Storage**: AsyncStorage for metadata
+- **File System**: Encrypted image storage
+- **Analytics**: Optional, anonymous via AdMob
+- **Backend**: Only for affiliate links and analytics dashboard
 
 ## Get started
 
@@ -24,6 +37,14 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Features
+
+- 📸 Capture prescription photos
+- 👨‍👩‍👧‍👦 Organize by family member
+- 📤 Share or print prescriptions
+- 🏪 Find nearby optical stores
+- 🔒 100% local storage - complete privacy
 
 ## Get a fresh project
 

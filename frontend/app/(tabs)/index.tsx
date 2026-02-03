@@ -15,25 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
-import * as Linking from "expo-linking";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-}
-
-interface Prescription {
-  id: string;
-  family_member_id: string;
-  rx_type: string;
-  image_base64: string;
-  notes: string;
-  date_taken: string;
-  created_at: string;
-}
+import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -60,20 +42,13 @@ export default function PrescriptionsScreen() {
 
   const fetchData = async () => {
     try {
-      const [membersRes, rxRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/family-members`),
-        fetch(`${BACKEND_URL}/api/prescriptions`),
+      const [membersData, rxData] = await Promise.all([
+        getFamilyMembers(),
+        getPrescriptions(),
       ]);
 
-      if (membersRes.ok) {
-        const membersData = await membersRes.json();
-        setFamilyMembers(membersData);
-      }
-
-      if (rxRes.ok) {
-        const rxData = await rxRes.json();
-        setPrescriptions(rxData);
-      }
+      setFamilyMembers(membersData);
+      setPrescriptions(rxData);
     } catch (error) {
       console.error("Error fetching data:", error);
       Alert.alert("Error", "Failed to load prescriptions");
@@ -250,7 +225,7 @@ export default function PrescriptionsScreen() {
                     }
                   >
                     <Image
-                      source={{ uri: rx.image_base64 }}
+                      source={{ uri: rx.image_uri }}
                       style={styles.rxImage}
                       resizeMode="cover"
                     />

@@ -10,20 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.opticalrxnow.app",
-      "buildNumber": "110",
-      "privacyManifests": {
-        "NSPrivacyAccessedAPITypes": []
-      },
+      "bundleIdentifier": "com.yourcompany.opticalrxnow",
       "infoPlist": {
-        "NSCameraUsageDescription": "Take photos of your prescriptions to store them",
-        "NSPhotoLibraryUsageDescription": "Import prescription photos from your gallery",
-        "NSPhotoLibraryAddUsageDescription": "Save prescription images to your gallery",
-        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores for eyewear shopping",
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "config": {
-        "usesNonExemptEncryption": false
+        "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
+        "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       }
     },
     "android": {
@@ -35,15 +27,12 @@
         "backgroundColor": "#0a1628"
       },
       "edgeToEdgeEnabled": true,
+      "package": "com.yourcompany.opticalrxnow",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE"
+        "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
     "web": {

@@ -4,8 +4,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "./components/AdBanner";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { getStats } from "../services/localStorage";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -28,11 +27,8 @@ export default function WelcomeScreen() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/stats`);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const data = await getStats();
+      setStats(data);
     } catch (error) {
       console.log("Error fetching stats:", error);
     } finally {

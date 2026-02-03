@@ -14,8 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { createFamilyMember } from "../services/localStorage";
 
 const RELATIONSHIP_OPTIONS = [
   "Self",
@@ -44,17 +43,8 @@ export default function AddMemberScreen() {
 
     setSaving(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/family-members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), relationship }),
-      });
-
-      if (response.ok) {
-        router.back();
-      } else {
-        Alert.alert("Error", "Failed to add family member");
-      }
+      await createFamilyMember({ name: name.trim(), relationship });
+      router.back();
     } catch (error) {
       Alert.alert("Error", "Failed to add family member");
     } finally {
