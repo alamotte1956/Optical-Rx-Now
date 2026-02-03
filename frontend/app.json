@@ -13,10 +13,9 @@
       "bundleIdentifier": "com.alamotte.opticalrxnow",
       "buildNumber": "1.0.0",
       "infoPlist": {
-        "NSCameraUsageDescription": "We need camera access to let you take photos of your prescriptions.",
-        "NSPhotoLibraryUsageDescription": "We need access to your photos to help you save and manage prescription images.",
-        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
-        "NSUserTrackingUsageDescription": "This app uses your device's advertising identifier to show you personalized ads that help keep the app free."
+        "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
+        "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club"
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -35,8 +34,7 @@
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
     "web": {
@@ -74,11 +72,9 @@
     },
     "privacy": "https://opticalrxnow.com/privacy",
     "extra": {
-      "router": {},
       "eas": {
         "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
       }
-    },
-    "owner": "alamotte1956"
+    }
   }
 }
