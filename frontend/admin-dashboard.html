@@ -625,6 +625,7 @@
         async function loadAffiliates() {
             try {
                 const data = await apiRequest('/affiliates/all');
+                affiliatesCache = data.partners; // Update cache when loading affiliates
                 displayAffiliates(data.partners);
             } catch (error) {
                 console.error('Error loading affiliates:', error);
@@ -701,16 +702,10 @@
                     return;
                 }
                 
+                // Use object spread to preserve all properties and only update is_active
                 const updatedAffiliate = {
-                    name: affiliate.name,
-                    description: affiliate.description,
-                    url: affiliate.url,
-                    category: affiliate.category,
-                    discount: affiliate.discount,
-                    commission: affiliate.commission,
-                    is_featured: affiliate.is_featured,
-                    is_active: newStatus,
-                    order: affiliate.order
+                    ...affiliate,
+                    is_active: newStatus
                 };
                 
                 await apiRequest(`/affiliates/${id}`, {
@@ -866,17 +861,9 @@
         
         // Dashboard Loading
         async function loadDashboard() {
-            // Cache affiliates for toggle operations
-            try {
-                const data = await apiRequest('/affiliates/all');
-                affiliatesCache = data.partners;
-            } catch (error) {
-                console.error('Error caching affiliates:', error);
-            }
-            
             await Promise.all([
                 loadAnalytics(),
-                loadAffiliates()
+                loadAffiliates() // loadAffiliates now updates the cache
             ]);
         }
         
