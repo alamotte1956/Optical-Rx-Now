@@ -6,7 +6,7 @@ const FAMILY_MEMBERS_KEY = '@optical_rx_family_members';
 const PRESCRIPTIONS_KEY = '@optical_rx_prescriptions';
 
 // Queue for preventing concurrent write operations
-let operationQueue: Promise<any> = Promise.resolve();
+let operationQueue: Promise<void> = Promise.resolve();
 
 const queueOperation = <T>(operation: () => Promise<T>): Promise<T> => {
   const queued = operationQueue.then(operation).catch(error => {

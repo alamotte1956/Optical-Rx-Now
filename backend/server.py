@@ -14,6 +14,7 @@ from bson.errors import InvalidId
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+import json
 
 
 ROOT_DIR = Path(__file__).parent
@@ -115,7 +116,7 @@ class AnalyticsEvent(BaseModel):
     
     @validator('metadata')
     def validate_metadata_size(cls, v):
-        if v and len(str(v)) > 1000:
+        if v and len(json.dumps(v)) > 1000:
             raise ValueError('Metadata too large')
         return v
 

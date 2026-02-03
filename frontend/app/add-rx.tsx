@@ -72,8 +72,8 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.7,  // Add compression
-      maxWidth: 1920,  // Limit dimensions
+      quality: 0.7,  // Reduce file size to stay under 10MB limit
+      maxWidth: 1920,  // Limit dimensions to reduce memory usage
       maxHeight: 1080,
       base64: true,
       exif: false,
@@ -98,8 +98,8 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.7,  // Add compression
-      maxWidth: 1920,  // Limit dimensions
+      quality: 0.7,  // Reduce file size to stay under 10MB limit
+      maxWidth: 1920,  // Limit dimensions to reduce memory usage
       maxHeight: 1080,
       base64: true,
       exif: false,
