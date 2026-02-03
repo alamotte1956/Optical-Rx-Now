@@ -1,3 +1,31 @@
-git add eas.json
-git commit -m "Remove backend URL for frontend-only app"
-git push
+{
+  "cli": {
+    "version": ">= 13.2.5",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "resourceClass": "m-medium"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "env": {}
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
