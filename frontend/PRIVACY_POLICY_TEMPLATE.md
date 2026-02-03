@@ -6,11 +6,31 @@
 
 Optical Rx Now ("we", "our", or "the app") is committed to protecting your privacy. This policy explains how we handle your information.
 
+## Data Storage and Security
+
+- ✅ **All prescription data is stored ONLY on your device**
+- ✅ **Zero server-side storage** - Your data never leaves your phone
+- ✅ **No cloud backup** - Complete privacy and control
+- ✅ **Secure local storage** using iOS Keychain / Android Keystore
+- ⚠️ **Deleting the app permanently removes all data**
+
+## What We Track
+
+### Local Storage (On Your Device Only)
+- Family member names
+- Prescription images
+- Notes and dates
+
+### Analytics (Anonymous, Opt-in)
+- App opens and usage patterns (via AdMob)
+- Device type (iOS/Android)
+- **No personally identifiable information**
+
 ## Information We Collect
 
 ### Information You Provide
-- **Family Member Names**: Names you enter to organize prescriptions
-- **Prescription Images**: Photos of optical prescriptions you capture or upload
+- **Family Member Names**: Names you enter to organize prescriptions (stored locally)
+- **Prescription Images**: Photos of optical prescriptions you capture or upload (stored locally)
 
 ### Automatically Collected Information
 - **Advertising Identifiers**: Used to show personalized ads (only with your consent on iOS)
@@ -20,13 +40,6 @@ Optical Rx Now ("we", "our", or "the app") is committed to protecting your priva
 - **Family Member Names**: Stored locally on your device to organize and label prescriptions
 - **Prescription Images**: Stored locally on your device for your personal reference and sharing
 - **Advertising Data**: Used by Google AdMob to display relevant advertisements
-
-## Data Storage and Security
-
-- **All prescription data is stored locally** on your device using secure storage
-- **No prescription data is transmitted** to our servers or any third party
-- **No cloud backup** - data remains only on your device
-- If you delete the app, all data is permanently removed
 
 ## Third-Party Services
 
@@ -38,24 +51,24 @@ We use Google AdMob to display advertisements. AdMob may collect:
 
 [View Google's Privacy Policy](https://policies.google.com/privacy)
 
-## Your Rights and Choices
+## Your Data Rights
 
 ### iOS Users
-- You can opt out of personalized ads via the App Tracking Transparency prompt
-- You can change this setting anytime in iOS Settings > Privacy > Tracking
+- Use "App Tracking Transparency" to control ad personalization
+- Settings > Privacy & Security > Tracking
 
-### Android Users
-- You can opt out of personalized ads in your device's Google Settings
+### Android Users  
 - Settings > Google > Ads > Opt out of Ads Personalization
 
-### Data Deletion
-- Deleting the app removes all stored data from your device
-- No server-side data exists to delete
+### Data Export/Deletion
+- Use in-app "Share" feature to export prescriptions
+- Deleting the app removes ALL data - no server-side copies exist
 
 ## Permissions We Request
 
 - **Camera**: To capture photos of prescriptions
 - **Photo Library**: To select existing prescription images
+- **Location** (Optional): To find nearby optical stores
 - **Ad Tracking** (iOS): To show personalized ads (optional)
 
 ## Children's Privacy

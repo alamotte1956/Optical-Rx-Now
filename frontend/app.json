@@ -10,10 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.opticalrxnow",
       "infoPlist": {
-        "NSCameraUsageDescription": "Capture your eyeglass or contact lens prescription",
-        "NSPhotoLibraryUsageDescription": "Select prescription images from gallery",
-        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club"
+        "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
+        "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       }
     },
     "android": {
@@ -22,7 +24,13 @@
         "backgroundColor": "#0a1628"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["android.permission.CAMERA", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION"]
+      "package": "com.yourcompany.opticalrxnow",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
