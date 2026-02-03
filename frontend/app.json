@@ -15,7 +15,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
         "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
-        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club"
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -69,11 +70,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID_HERE"
-      }
     },
     "privacy": "https://opticalrxnow.com/privacy"
   }
