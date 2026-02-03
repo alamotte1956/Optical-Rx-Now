@@ -148,6 +148,11 @@ const saveFamilyMember = async (member: FamilyMember) => {
 
 ## Analytics Integration
 
+### Environment Configuration
+- Use `expo-constants` to access environment-specific configuration
+- Configure API URL via `app.json` or `app.config.js` in the `extra` field
+- Never hardcode API URLs in components
+
 ### Anonymous Analytics Only
 - Only send anonymous device IDs and event types
 - Never include personal information in analytics
@@ -156,12 +161,16 @@ const saveFamilyMember = async (member: FamilyMember) => {
 ### Example Analytics:
 ```typescript
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+// Use environment variable for API URL
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:8000';
 
 const trackAnalytics = async (eventType: string, metadata?: string) => {
   const deviceId = await getDeviceId(); // Anonymous device identifier
   
   try {
-    await fetch('https://api.example.com/api/analytics/track', {
+    await fetch(`${API_URL}/api/analytics/track`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -274,7 +283,7 @@ interface Affiliate {
 
 const fetchAffiliates = async (): Promise<Affiliate[]> => {
   try {
-    const response = await fetch('https://api.example.com/api/affiliates');
+    const response = await fetch(`${API_URL}/api/affiliates`);
     const data = await response.json();
     return data.affiliates || [];
   } catch (error) {
