@@ -16,7 +16,7 @@
         "NSCameraUsageDescription": "We need camera access to let you take photos of your prescriptions.",
         "NSPhotoLibraryUsageDescription": "We need access to your photos to help you save and manage prescription images.",
         "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
-        "NSUserTrackingUsageDescription": "This app uses your data to show you personalized ads that help keep the app free."
+        "NSUserTrackingUsageDescription": "This app uses your device's advertising identifier to show you personalized ads that help keep the app free."
       },
       "config": {
         "usesNonExemptEncryption": false

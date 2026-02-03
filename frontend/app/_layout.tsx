@@ -5,6 +5,10 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import { requestTrackingPermission } from "./utils/tracking";
 
+// Delay before showing ATT dialog to ensure app is fully loaded
+// This prevents the dialog from appearing before the app UI is ready
+const ATT_DIALOG_DELAY_MS = 1000;
+
 export default function RootLayout() {
   useEffect(() => {
     // Request App Tracking Transparency permission on iOS
@@ -19,7 +23,7 @@ export default function RootLayout() {
             console.log('Tracking permission denied');
           }
         });
-      }, 1000);
+      }, ATT_DIALOG_DELAY_MS);
 
       return () => clearTimeout(timer);
     }
