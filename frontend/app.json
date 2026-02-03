@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.opticalrxnow",
+      "bundleIdentifier": "com.opticalrxnow.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
         "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
@@ -27,7 +27,6 @@
         "backgroundColor": "#0a1628"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.yourcompany.opticalrxnow",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
