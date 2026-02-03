@@ -265,7 +265,7 @@ async def get_analytics_dashboard(x_admin_key: Optional[str] = Header(None)):
 class AffiliatePartnerCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1, max_length=500)
-    url: str = Field(..., regex=r'^https?://.+')
+    url: str = Field(..., pattern=r'^https?://.+')
     category: Literal['eyeglasses', 'contacts', 'both']
     discount: str = Field(..., max_length=200)
     commission: Optional[str] = Field(None, max_length=50)
