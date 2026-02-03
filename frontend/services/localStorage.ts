@@ -52,7 +52,7 @@ export const createFamilyMember = async (
 ): Promise<FamilyMember> => {
   const newMember: FamilyMember = {
     ...member,
-    id: `member_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
     created_at: new Date().toISOString(),
   };
   const members = await getFamilyMembers();
@@ -100,7 +100,7 @@ export const createPrescription = async (
 ): Promise<Prescription> => {
   await ensureImageDirExists();
   
-  const id = `rx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const id = `rx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   const imageFileName = `${id}.jpg`;
   
   // Create file reference

@@ -106,7 +106,6 @@ export default function AddRxScreen() {
         imageBase64: imageBase64,
         notes: notes.trim(),
         date_taken: dateTaken,
-        expiry_date: '', // This will be calculated by createPrescription
       });
       router.back();
     } catch (error) {
