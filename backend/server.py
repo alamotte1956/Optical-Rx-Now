@@ -1,15 +1,20 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, validator
+from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timedelta
 from bson import ObjectId
+from bson.errors import InvalidId
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import json
 
 
 ROOT_DIR = Path(__file__).parent
@@ -22,8 +27,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Admin key for protected endpoints (from environment variable)
-ADMIN_KEY = os.getenv('ADMIN_KEY', 'change-this-in-production')
+# Environment detection and admin key validation
+ENV = os.getenv('ENV', 'development')
+ADMIN_KEY = os.getenv('ADMIN_KEY')
+
+if ENV == 'production':
+    if not ADMIN_KEY or ADMIN_KEY == 'change-this-in-production':
+        raise ValueError("ADMIN_KEY must be set to a secure value in production")
+elif not ADMIN_KEY:
+    ADMIN_KEY = 'dev-only-key-DO-NOT-USE-IN-PROD'
+    logger.warning("Using development admin key - NOT FOR PRODUCTION")
 
 # Default allowed CORS origins
 DEFAULT_ALLOWED_ORIGINS = 'http://localhost:3000,http://localhost:8000'
@@ -39,6 +52,11 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Rate limiter configuration
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 # Define Models
 # Prescription and family member models removed - data stored locally on device
@@ -51,6 +69,14 @@ def convert_mongo_doc(doc):
     doc['id'] = str(doc['_id'])
     del doc['_id']
     return doc
+
+
+def validate_object_id(id_string: str) -> ObjectId:
+    """Safely convert string to ObjectId"""
+    try:
+        return ObjectId(id_string)
+    except (InvalidId, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid ID format")
 
 
 # Admin authentication helper
@@ -82,14 +108,21 @@ async def root():
 # ==================== Analytics Endpoints ====================
 
 class AnalyticsEvent(BaseModel):
-    device_id: str
-    event_type: str = "app_open"  # app_open, ad_click, affiliate_click
-    platform: Optional[str] = None  # ios, android, web
-    app_version: Optional[str] = None
+    device_id: str = Field(..., min_length=10, max_length=100, description="Unique device identifier")
+    event_type: Literal["app_open", "ad_click", "affiliate_click"] = "app_open"
+    platform: Optional[Literal["ios", "android", "web"]] = None
+    app_version: Optional[str] = Field(None, max_length=20)
     metadata: Optional[dict] = None
+    
+    @validator('metadata')
+    def validate_metadata_size(cls, v):
+        if v and len(json.dumps(v)) > 1000:
+            raise ValueError('Metadata too large')
+        return v
 
 @api_router.post("/analytics/track")
-async def track_event(event: AnalyticsEvent):
+@limiter.limit("60/minute")  # 60 requests per minute per IP
+async def track_event(request: Request, event: AnalyticsEvent):
     """Track analytics events from the app"""
     now = datetime.utcnow()
     today = now.strftime("%Y-%m-%d")
@@ -231,15 +264,15 @@ async def get_analytics_dashboard(x_admin_key: Optional[str] = Header(None)):
 # ==================== Affiliate Links ====================
 
 class AffiliatePartnerCreate(BaseModel):
-    name: str
-    description: str
-    url: str
-    category: str  # 'eyeglasses', 'contacts', 'both'
-    discount: str
-    commission: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(..., min_length=1, max_length=500)
+    url: str = Field(..., pattern=r'^https?://.+')
+    category: Literal['eyeglasses', 'contacts', 'both']
+    discount: str = Field(..., max_length=200)
+    commission: Optional[str] = Field(None, max_length=50)
     is_featured: bool = False
     is_active: bool = True
-    order: int = 100  # Lower number = higher in list
+    order: int = Field(100, ge=0, le=9999)
 
 class AffiliatePartner(BaseModel):
     id: str
@@ -404,30 +437,26 @@ async def create_affiliate(affiliate: AffiliatePartnerCreate, x_admin_key: Optio
 async def update_affiliate(affiliate_id: str, affiliate: AffiliatePartnerCreate, x_admin_key: Optional[str] = Header(None)):
     """Update an existing affiliate partner (admin only)"""
     verify_admin_key(x_admin_key)
-    try:
-        result = await db.affiliates.update_one(
-            {"_id": ObjectId(affiliate_id)},
-            {"$set": affiliate.dict()}
-        )
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Affiliate not found")
-        updated = await db.affiliates.find_one({"_id": ObjectId(affiliate_id)})
-        return AffiliatePartner(**convert_mongo_doc(updated))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    oid = validate_object_id(affiliate_id)  # Use helper
+    result = await db.affiliates.update_one(
+        {"_id": oid},
+        {"$set": affiliate.dict()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Affiliate not found")
+    updated = await db.affiliates.find_one({"_id": oid})
+    return AffiliatePartner(**convert_mongo_doc(updated))
 
 
 @api_router.delete("/affiliates/{affiliate_id}")
 async def delete_affiliate(affiliate_id: str, x_admin_key: Optional[str] = Header(None)):
     """Delete an affiliate partner (admin only)"""
     verify_admin_key(x_admin_key)
-    try:
-        result = await db.affiliates.delete_one({"_id": ObjectId(affiliate_id)})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Affiliate not found")
-        return {"message": "Affiliate deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    oid = validate_object_id(affiliate_id)  # Use helper
+    result = await db.affiliates.delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Affiliate not found")
+    return {"message": "Affiliate deleted successfully"}
 
 
 # Include the router in the main app
@@ -450,6 +479,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_db_indexes():
+    """Create database indexes for optimal query performance"""
+    try:
+        # Analytics indexes
+        await db.devices.create_index([("last_active", -1)])
+        await db.devices.create_index([("first_seen", -1)])
+        await db.devices.create_index([("device_id", 1)], unique=True)
+        await db.analytics_events.create_index([("date", -1), ("event_type", 1)])
+        await db.analytics_events.create_index([("device_id", 1), ("timestamp", -1)])
+        
+        # Affiliate indexes
+        await db.affiliates.create_index([("is_active", 1), ("order", 1)])
+        
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.error(f"Error creating indexes: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

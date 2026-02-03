@@ -20,6 +20,16 @@ import * as MailComposer from "expo-mail-composer";
 import { File } from "expo-file-system";
 import { getPrescriptionById, getFamilyMembers, deletePrescription, type Prescription, type FamilyMember } from "../services/localStorage";
 
+const escapeHtml = (text: string): string => {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 export default function RxDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -76,9 +86,9 @@ export default function RxDetailScreen() {
       const html = `
         <html>
           <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
+            <h1>${escapeHtml(familyMember?.name || "")}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
+            <p><strong>Date:</strong> ${escapeHtml(prescription.date_taken)}</p>
+            ${prescription.notes ? `<p><strong>Notes:</strong> ${escapeHtml(prescription.notes)}</p>` : ""}
             <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
@@ -123,9 +133,9 @@ Please see attached prescription image.
       const html = `
         <html>
           <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
+            <h1>${escapeHtml(familyMember?.name || "")}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
+            <p><strong>Date:</strong> ${escapeHtml(prescription.date_taken)}</p>
+            ${prescription.notes ? `<p><strong>Notes:</strong> ${escapeHtml(prescription.notes)}</p>` : ""}
             <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
@@ -156,9 +166,9 @@ Please see attached prescription image.
       const html = `
         <html>
           <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
+            <h1>${escapeHtml(familyMember?.name || "")}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
+            <p><strong>Date:</strong> ${escapeHtml(prescription.date_taken)}</p>
+            ${prescription.notes ? `<p><strong>Notes:</strong> ${escapeHtml(prescription.notes)}</p>` : ""}
             <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
