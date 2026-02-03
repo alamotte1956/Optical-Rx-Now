@@ -1,10 +1,60 @@
 # iOS & Android Platform Compliance Implementation
 
-## Overview
+## ⚠️ IMPORTANT: ATT Not Currently Implemented
 
-This document describes the iOS App Tracking Transparency (ATT) and AdMob configuration implementation that ensures app store compliance.
+**As of February 3, 2026**, App Tracking Transparency (ATT) is **NOT** implemented in this app.
 
-## ✅ What's Been Implemented
+### Why ATT is Not Implemented:
+- The app is launching **without ads or tracking**
+- Apple **rejects apps** that request tracking permission without actually doing any tracking
+- The app does not track users, show ads, or collect advertising identifiers
+- All user data is stored locally on the device only
+
+### Current Privacy Posture:
+- ✅ **No tracking** - App does not track users across apps or websites
+- ✅ **No ads** - App does not display advertisements
+- ✅ **Local storage only** - All prescription data stays on the user's device
+- ✅ **Minimal permissions** - Only requests permissions for features actively used (camera, photos, location)
+
+### Required Permissions (Actually Used):
+The app only requests permissions for features it actively uses:
+
+1. **Camera** (NSCameraUsageDescription)
+   - Purpose: Take photos of prescription documents
+   - Description: "Take photos of your eyeglass and contact lens prescriptions"
+
+2. **Photo Library** (NSPhotoLibraryUsageDescription)
+   - Purpose: Import existing prescription photos
+   - Description: "Select prescription photos from your gallery"
+
+3. **Location** (NSLocationWhenInUseUsageDescription)
+   - Purpose: Find nearby optical stores
+   - Description: "Find nearby optical stores like Sam's Club"
+   - Note: Only used when user actively searches for stores
+
+### Future AdMob Integration:
+If you decide to add ads in a future version, you will need to:
+1. Install `expo-tracking-transparency` package
+2. Implement ATT permission request
+3. Add `NSUserTrackingUsageDescription` to `app.json`
+4. Create ad components that respect ATT permission
+5. Follow AdMob setup procedures
+
+**For now, the app is compliant for App Store submission without ads or tracking.**
+
+---
+
+# Historical Reference: Previous ATT Implementation
+
+The sections below describe a previous implementation of ATT that has been removed. They are kept for reference only.
+
+---
+
+## Overview (HISTORICAL - ATT Removed)
+
+This section previously described the iOS App Tracking Transparency (ATT) and AdMob configuration implementation. That code has been removed as the app is launching without ads.
+
+## ✅ What's Been Implemented (HISTORICAL - ATT Removed)
 
 ### 1. iOS App Tracking Transparency (ATT)
 
