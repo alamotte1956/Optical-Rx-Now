@@ -1,8 +1,47 @@
 # Implementation Summary: iOS/Android App Store Compliance
 
+## ⚠️ IMPORTANT: ATT and AdMob Removed for Initial Launch
+
+**As of February 3, 2026**, all App Tracking Transparency (ATT) and AdMob-related code has been **removed** from this app.
+
+### Why This Was Removed:
+- The app is launching **without ads** initially
+- Apple **rejects apps** that request tracking permission without actually tracking users or showing ads
+- Requesting ATT without using it is a violation of App Store guidelines
+- The app does not track users or display advertisements
+
+### What Was Removed:
+- ❌ `expo-tracking-transparency` package dependency
+- ❌ ATT permission request code in `app/_layout.tsx`
+- ❌ `app/utils/tracking.ts` utility file
+- ❌ `app/components/AdBanner.tsx` reference component
+- ❌ `ADMOB_SETUP.md` documentation
+- ❌ ATT-related documentation and setup guides
+
+### What Remains:
+- ✅ Camera permission (NSCameraUsageDescription) - actively used
+- ✅ Photo Library permission (NSPhotoLibraryUsageDescription) - actively used
+- ✅ Location permission (NSLocationWhenInUseUsageDescription) - actively used
+- ✅ Privacy policy and compliance documentation
+- ✅ All app functionality works normally without ads
+
+### Future AdMob Integration:
+If you decide to monetize with ads in a future version, you will need to:
+1. Add `expo-tracking-transparency` back to `package.json`
+2. Implement ATT permission request in `app/_layout.tsx`
+3. Add `NSUserTrackingUsageDescription` to `app.json`
+4. Create ad components that respect ATT permission
+5. Configure AdMob with production ad unit IDs
+
+**The app is now compliant for App Store submission without ads.**
+
+---
+
+# Previous Implementation Summary (Historical Reference)
+
 ## ✅ All Critical Issues Resolved
 
-This document summarizes the implementation of iOS App Tracking Transparency (ATT) and AdMob configuration improvements to ensure app store compliance.
+This document previously summarized the implementation of iOS App Tracking Transparency (ATT) and AdMob configuration. That implementation has now been removed as described above.
 
 ---
 

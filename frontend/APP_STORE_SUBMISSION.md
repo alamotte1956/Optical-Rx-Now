@@ -1,20 +1,5 @@
 # App Store Submission Guide
 
-## ⚠️ IMPORTANT: App Tracking Transparency (ATT) Implementation Status
-
-### ✅ Implemented (iOS 14.5+)
-- [x] **App Tracking Transparency (ATT)** permission request added to `app/_layout.tsx`
-- [x] **NSUserTrackingUsageDescription** added to `app.json`
-- [x] **expo-tracking-transparency** package installed in `package.json`
-- [x] **Tracking utility** created at `app/utils/tracking.ts`
-
-### 📝 Next Steps for AdMob Integration
-When you're ready to add AdMob ads:
-1. Replace test AdMob IDs in `.env.example` with your production IDs
-2. Create an `AdBanner` component that uses `getTrackingPermission()` utility
-3. Only show ads if tracking permission is granted (iOS) or on Android
-4. See `app/utils/tracking.ts` for usage examples
-
 ## Pre-Submission Checklist
 
 ### ✅ iOS App Store (Apple)
@@ -26,7 +11,6 @@ When you're ready to add AdMob ads:
 - [ ] Privacy policy URL: https://opticalrxnow.com/privacy
 
 #### iOS Privacy & Permissions (✅ Already Configured)
-- [x] **NSUserTrackingUsageDescription**: "This app uses your data to show you personalized ads that help keep the app free."
 - [x] **NSPhotoLibraryUsageDescription**: "We need access to your photos to help you save and manage prescription images."
 - [x] **NSCameraUsageDescription**: "We need camera access to let you take photos of your prescriptions."
 - [x] **NSLocationWhenInUseUsageDescription**: "Find nearby optical stores like Sam's Club"
@@ -41,12 +25,11 @@ When you're ready to add AdMob ads:
 - [ ] Set pricing (Free)
 
 #### Testing
-- [ ] Test on iOS 14.5+ (ATT dialog appears on first launch)
+- [ ] Test on iOS 14.5+
 - [ ] Test all permission requests work properly
 - [ ] TestFlight beta testing (recommended)
 - [ ] Verify camera and photo library access
 - [ ] Verify location services work
-- [ ] Verify ATT permission can be granted/denied without crashes
 
 ### ✅ Google Play Store (Android)
 
@@ -92,6 +75,16 @@ Answer as follows:
 - **Purpose:** Find nearby optical stores
 - **User-facing description:** "Find nearby optical stores like Sam's Club"
 - **Note:** Only used when user actively searches for stores
+
+## Note About Ads and Tracking
+
+This app **launches without ads or tracking**. App Tracking Transparency (ATT) and AdMob have been removed to ensure App Store compliance. The app does not request tracking permission as it does not track users or show ads.
+
+**Future Monetization**: AdMob and ATT can be added in a future version if you decide to monetize with ads. At that time, you would need to:
+1. Add `expo-tracking-transparency` package back
+2. Implement ATT permission request
+3. Add `NSUserTrackingUsageDescription` to `app.json`
+4. Configure AdMob with production ad units
 
 ## Medical Disclaimer
 
