@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 import * as MailComposer from "expo-mail-composer";
-import * as FileSystem from "expo-file-system";
+import { File } from "expo-file-system";
 import { getPrescriptionById, getFamilyMembers, deletePrescription, type Prescription, type FamilyMember } from "../services/localStorage";
 
 export default function RxDetailScreen() {
@@ -67,10 +67,9 @@ export default function RxDetailScreen() {
     }
 
     try {
-      // Read the image from local file system and convert to base64
-      const imageBase64 = await FileSystem.readAsStringAsync(prescription.image_uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
       // Create HTML for sharing
@@ -115,10 +114,9 @@ ${prescription.notes ? `Notes: ${prescription.notes}` : ""}
 Please see attached prescription image.
       `;
 
-      // Read the image from local file system and convert to base64
-      const imageBase64 = await FileSystem.readAsStringAsync(prescription.image_uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
       // Create PDF to attach
@@ -150,10 +148,9 @@ Please see attached prescription image.
     if (!prescription) return;
 
     try {
-      // Read the image from local file system and convert to base64
-      const imageBase64 = await FileSystem.readAsStringAsync(prescription.image_uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
       const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
 
       const html = `

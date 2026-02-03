@@ -1,16 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import { Paths, File, Directory } from 'expo-file-system';
 
 // Storage Keys
 const FAMILY_MEMBERS_KEY = '@optical_rx_family_members';
 const PRESCRIPTIONS_KEY = '@optical_rx_prescriptions';
-const PRESCRIPTION_IMAGES_DIR = `${FileSystem.documentDirectory}prescription_images/`;
+
+// Prescription images directory
+const getImagesDirectory = () => {
+  return new Directory(Paths.document, 'prescription_images');
+};
 
 // Ensure images directory exists
 const ensureImageDirExists = async () => {
-  const dirInfo = await FileSystem.getInfoAsync(PRESCRIPTION_IMAGES_DIR);
-  if (!dirInfo.exists) {
-    await FileSystem.makeDirectoryAsync(PRESCRIPTION_IMAGES_DIR, { intermediates: true });
+  const imagesDir = getImagesDirectory();
+  if (!imagesDir.exists) {
+    imagesDir.create();
   }
 };
 
@@ -98,16 +102,20 @@ export const createPrescription = async (
   
   const id = `rx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const imageFileName = `${id}.jpg`;
-  const imageUri = `${PRESCRIPTION_IMAGES_DIR}${imageFileName}`;
+  
+  // Create file reference
+  const imagesDir = getImagesDirectory();
+  const imageFile = new File(imagesDir, imageFileName);
   
   // Save image to file system
   const base64Data = prescription.imageBase64.includes(',') 
     ? prescription.imageBase64.split(',')[1] 
     : prescription.imageBase64;
-    
-  await FileSystem.writeAsStringAsync(imageUri, base64Data, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  
+  // Create the file first
+  imageFile.create();
+  // Then write the base64 data
+  imageFile.write(base64Data, { encoding: 'base64' });
   
   // Calculate expiry date (1 year from date_taken)
   const dateTaken = new Date(prescription.date_taken);
@@ -118,7 +126,7 @@ export const createPrescription = async (
     id,
     family_member_id: prescription.family_member_id,
     rx_type: prescription.rx_type,
-    image_uri: imageUri,
+    image_uri: imageFile.uri,
     notes: prescription.notes || '',
     date_taken: prescription.date_taken,
     expiry_date: expiryDate.toISOString().split('T')[0],
@@ -140,11 +148,11 @@ export const deletePrescription = async (id: string): Promise<void> => {
 };
 
 const deletePrescriptionImage = async (prescriptionId: string): Promise<void> => {
-  const imageUri = `${PRESCRIPTION_IMAGES_DIR}${prescriptionId}.jpg`;
   try {
-    const fileInfo = await FileSystem.getInfoAsync(imageUri);
-    if (fileInfo.exists) {
-      await FileSystem.deleteAsync(imageUri);
+    const imagesDir = getImagesDirectory();
+    const imageFile = new File(imagesDir, `${prescriptionId}.jpg`);
+    if (imageFile.exists) {
+      imageFile.delete();
     }
   } catch (error) {
     console.error('Error deleting image:', error);
