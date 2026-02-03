@@ -96,7 +96,7 @@ export const getPrescriptionById = async (id: string): Promise<Prescription | nu
 };
 
 export const createPrescription = async (
-  prescription: Omit<Prescription, 'id' | 'created_at' | 'image_uri'> & { imageBase64: string }
+  prescription: Omit<Prescription, 'id' | 'created_at' | 'image_uri' | 'expiry_date'> & { imageBase64: string }
 ): Promise<Prescription> => {
   await ensureImageDirExists();
   
