@@ -21,7 +21,7 @@ export const getDeviceId = async (): Promise<string> => {
 
 // Track analytics event
 export const trackEvent = async (
-  eventType: "app_open" | "ad_click" | "affiliate_click",
+  eventType: "app_open" | "affiliate_click",
   metadata?: Record<string, any>
 ) => {
   try {
@@ -47,9 +47,6 @@ export const trackEvent = async (
 
 // Track app open (call on app launch)
 export const trackAppOpen = () => trackEvent("app_open");
-
-// Track ad click
-export const trackAdClick = (adId?: string) => trackEvent("ad_click", { ad_id: adId });
 
 // Track affiliate click
 export const trackAffiliateClick = (partnerId: string) =>

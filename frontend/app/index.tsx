@@ -90,7 +90,7 @@ export default function WelcomeScreen() {
 
           {/* Title */}
           <Text style={styles.subtitle}>
-            Store and manage your family's eyeglass and contact lens prescriptions
+            Store and manage your family&apos;s eyeglass and contact lens prescriptions
           </Text>
 
           {/* Open My Vault / Get Started Button */}
