@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -19,6 +19,9 @@
       }
     },
     "android": {
+      "package": "com.opticalrxnow.app",
+      "versionCode": 110,
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0a1628"
@@ -42,15 +45,34 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Import prescription photos from your gallery",
+          "cameraPermission": "Take photos of your prescriptions to store them"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Find nearby optical stores for eyewear shopping"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "optical-rx-now"
+      }
+    },
+    "privacy": "https://opticalrxnow.com/privacy"
   }
 }

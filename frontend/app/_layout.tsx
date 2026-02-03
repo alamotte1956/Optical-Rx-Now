@@ -13,8 +13,8 @@ export default function RootLayout() {
           animation: "slide_from_right",
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
         <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
         <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
         <Stack.Screen name="add-member" options={{ presentation: "modal" }} />

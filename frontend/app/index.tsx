@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,6 +40,17 @@ export default function WelcomeScreen() {
     router.push("/(tabs)");
   };
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: "Check out Optical Rx Now - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now.",
+        title: "Optical Rx Now",
+      });
+    } catch (error) {
+      console.log("Error sharing:", error);
+    }
+  };
+
   const handleAdminAccess = () => {
     Alert.alert(
       "Admin Area",
@@ -54,6 +65,14 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Share Button in Header */}
+      <View style={styles.header}>
+        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Ionicons name="share-outline" size={24} color="#4a9eff" />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {/* Logo - Long press for admin access */}
@@ -71,33 +90,30 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
 
           {/* Title */}
-          <Text style={styles.title}>Optical Rx Now</Text>
           <Text style={styles.subtitle}>
             Store and manage your family's eyeglass and contact lens prescriptions
           </Text>
 
-          {/* Ad Banner */}
+          {/* Need New Eyewear Button (Ad Banner) */}
           <View style={styles.adContainer}>
             <AdBanner />
           </View>
 
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            <View style={styles.featureItem}>
-              <Ionicons name="camera" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Capture Rx photos</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="people" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Organize by family member</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Ionicons name="share" size={24} color="#4a9eff" />
-              <Text style={styles.featureText}>Share or print anytime</Text>
-            </View>
-          </View>
+          {/* Open My Vault / Get Started Button */}
+          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.buttonText}>
+                  {stats.family_members > 0 ? "Open My Vault" : "Get Started"}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+              </>
+            )}
+          </TouchableOpacity>
 
-          {/* Stats (if returning user) */}
+          {/* Your Vault Stats (if returning user) */}
           {!loading && (stats.family_members > 0 || stats.total_prescriptions > 0) && (
             <View style={styles.statsContainer}>
               <Text style={styles.statsTitle}>Your Vault</Text>
@@ -114,19 +130,11 @@ export default function WelcomeScreen() {
             </View>
           )}
 
-          {/* CTA Button */}
-          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.buttonText}>
-                  {stats.family_members > 0 ? "Open My Vault" : "Get Started"}
-                </Text>
-                <Ionicons name="arrow-forward" size={20} color="#fff" />
-              </>
-            )}
-          </TouchableOpacity>
+          {/* Future Ad Banner Placeholder */}
+          <View style={styles.adPlaceholder}>
+            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
+            <Text style={styles.adPlaceholderText}>Ad Space</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -138,6 +146,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0a1628",
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  headerPlaceholder: {
+    width: 44,
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollContent: {
     flexGrow: 1,
   },
@@ -148,8 +174,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoContainer: {
-    width: 150,
-    height: 150,
+    width: 400,
+    height: 300,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
@@ -174,32 +200,31 @@ const styles = StyleSheet.create({
   },
   adContainer: {
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  featuresContainer: {
-    width: "100%",
-    marginBottom: 20,
-  },
-  featureItem: {
+  button: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "rgba(74, 158, 255, 0.05)",
-    borderRadius: 12,
-    marginBottom: 8,
+    justifyContent: "center",
+    backgroundColor: "#4a9eff",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    marginBottom: 16,
+    width: "100%",
+    gap: 8,
   },
-  featureText: {
-    fontSize: 16,
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "600",
     color: "#fff",
-    marginLeft: 16,
   },
   statsContainer: {
     width: "100%",
     backgroundColor: "rgba(74, 158, 255, 0.1)",
     borderRadius: 16,
     padding: 20,
-    marginBottom: 32,
+    marginBottom: 16,
   },
   statsTitle: {
     fontSize: 14,
@@ -226,22 +251,23 @@ const styles = StyleSheet.create({
     color: "#8899a6",
     marginTop: 4,
   },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#4a9eff",
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 30,
-    marginTop: "auto",
-    marginBottom: 32,
+  adPlaceholder: {
     width: "100%",
+    height: 100,
+    backgroundColor: "rgba(74, 158, 255, 0.05)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(74, 158, 255, 0.2)",
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 32,
     gap: 8,
   },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
+  adPlaceholderText: {
+    fontSize: 14,
+    color: "#6b7c8f",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });

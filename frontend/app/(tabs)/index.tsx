@@ -11,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
@@ -18,15 +19,19 @@ import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescriptio
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
+  // Navigate back to welcome screen
   const goToHome = () => {
-    // Go back to the welcome screen
-    router.back();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'index' }],
+    });
   };
 
   useFocusEffect(
@@ -88,14 +93,19 @@ export default function PrescriptionsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={goToHome}
+          onPress={() => {
+            // Navigate to welcome screen using Linking
+            const url = Linking.createURL("/");
+            Linking.openURL(url);
+          }}
+          activeOpacity={0.7}
         >
-          <Ionicons name="home" size={22} color="#4a9eff" />
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
         <View style={styles.headerButtons}>
@@ -263,15 +273,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
+  },
+  homeButtonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  homeButtonText: {
+    color: "#4a9eff",
+    fontSize: 14,
+    fontWeight: "500",
   },
   homeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "rgba(74, 158, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   headerTitle: {
     fontSize: 24,

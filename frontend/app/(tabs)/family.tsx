@@ -113,6 +113,17 @@ export default function FamilyScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => {
+            // Navigate to welcome screen using Linking
+            const url = Linking.createURL("/");
+            Linking.openURL(url);
+          }}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Family Members</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -174,7 +185,6 @@ export default function FamilyScreen() {
                   handleDeleteMember(member);
                 }}
                 activeOpacity={0.6}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons name="trash" size={22} color="#fff" />
                 <Text style={styles.deleteText}>Delete</Text>
@@ -249,10 +259,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
+  homeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
+    flex: 1,
+    marginLeft: 12,
   },
   addButton: {
     width: 44,
