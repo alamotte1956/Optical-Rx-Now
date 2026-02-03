@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -15,6 +16,16 @@ from bson import ObjectId
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Configure logging (before first use)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Admin key for protected endpoints (from environment variable)
+ADMIN_KEY = os.getenv('ADMIN_KEY', 'change-this-in-production')
+
 # MongoDB connection - use getenv with defaults for deployment flexibility
 mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
 client = AsyncIOMotorClient(mongo_url)
@@ -28,39 +39,7 @@ api_router = APIRouter(prefix="/api")
 
 
 # Define Models
-class FamilyMemberCreate(BaseModel):
-    name: str
-    relationship: str
-
-class FamilyMember(BaseModel):
-    id: str
-    name: str
-    relationship: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-class PrescriptionCreate(BaseModel):
-    family_member_id: str
-    rx_type: str  # 'eyeglass' or 'contact'
-    image_base64: str
-    notes: Optional[str] = ""
-    date_taken: Optional[str] = None
-    expiry_date: Optional[str] = None
-
-class Prescription(BaseModel):
-    id: str
-    family_member_id: str
-    rx_type: str
-    image_base64: str
-    notes: str = ""
-    date_taken: str
-    expiry_date: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-class PrescriptionUpdate(BaseModel):
-    rx_type: Optional[str] = None
-    notes: Optional[str] = None
-    date_taken: Optional[str] = None
-    expiry_date: Optional[str] = None
+# Prescription and family member models removed - data stored locally on device
 
 
 # Helper function to convert MongoDB document
@@ -72,6 +51,14 @@ def convert_mongo_doc(doc):
     return doc
 
 
+# Admin authentication helper
+def verify_admin_key(x_admin_key: Optional[str] = Header(None)):
+    """Verify admin key from header"""
+    if not x_admin_key or x_admin_key != ADMIN_KEY:
+        raise HTTPException(status_code=403, detail="Invalid or missing admin key")
+    return True
+
+
 # Root endpoint
 @api_router.get("/")
 async def root():
@@ -79,159 +66,15 @@ async def root():
 
 
 # ==================== Family Member Endpoints ====================
-
-@api_router.post("/family-members", response_model=FamilyMember)
-async def create_family_member(member: FamilyMemberCreate):
-    member_dict = member.dict()
-    member_dict['created_at'] = datetime.utcnow()
-    result = await db.family_members.insert_one(member_dict)
-    member_dict['id'] = str(result.inserted_id)
-    return FamilyMember(**member_dict)
-
-
-@api_router.get("/family-members", response_model=List[FamilyMember])
-async def get_family_members():
-    members = await db.family_members.find(
-        {}, 
-        {"_id": 1, "name": 1, "relationship": 1, "created_at": 1}
-    ).to_list(100)
-    return [FamilyMember(**convert_mongo_doc(m)) for m in members]
-
-
-@api_router.get("/family-members/{member_id}", response_model=FamilyMember)
-async def get_family_member(member_id: str):
-    try:
-        member = await db.family_members.find_one({"_id": ObjectId(member_id)})
-        if not member:
-            raise HTTPException(status_code=404, detail="Family member not found")
-        return FamilyMember(**convert_mongo_doc(member))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@api_router.put("/family-members/{member_id}", response_model=FamilyMember)
-async def update_family_member(member_id: str, member: FamilyMemberCreate):
-    try:
-        result = await db.family_members.update_one(
-            {"_id": ObjectId(member_id)},
-            {"$set": member.dict()}
-        )
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Family member not found")
-        updated = await db.family_members.find_one({"_id": ObjectId(member_id)})
-        return FamilyMember(**convert_mongo_doc(updated))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@api_router.delete("/family-members/{member_id}")
-async def delete_family_member(member_id: str):
-    try:
-        # Delete all prescriptions for this member
-        await db.prescriptions.delete_many({"family_member_id": member_id})
-        # Delete the member
-        result = await db.family_members.delete_one({"_id": ObjectId(member_id)})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Family member not found")
-        return {"message": "Family member and their prescriptions deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# Family member endpoints removed - data stored locally on device
 
 
 # ==================== Prescription Endpoints ====================
-
-@api_router.post("/prescriptions", response_model=Prescription)
-async def create_prescription(rx: PrescriptionCreate):
-    # Verify family member exists
-    try:
-        member = await db.family_members.find_one({"_id": ObjectId(rx.family_member_id)})
-        if not member:
-            raise HTTPException(status_code=404, detail="Family member not found")
-    except:
-        raise HTTPException(status_code=400, detail="Invalid family member ID")
-    
-    rx_dict = rx.dict()
-    rx_dict['created_at'] = datetime.utcnow()
-    rx_dict['date_taken'] = rx.date_taken or datetime.utcnow().strftime("%Y-%m-%d")
-    
-    # Set default expiry date (1 year from date taken)
-    if not rx_dict.get('expiry_date'):
-        date_taken = datetime.strptime(rx_dict['date_taken'], "%Y-%m-%d")
-        expiry = date_taken + timedelta(days=365)
-        rx_dict['expiry_date'] = expiry.strftime("%Y-%m-%d")
-    
-    result = await db.prescriptions.insert_one(rx_dict)
-    rx_dict['id'] = str(result.inserted_id)
-    return Prescription(**rx_dict)
-
-
-@api_router.get("/prescriptions", response_model=List[Prescription])
-async def get_prescriptions(family_member_id: Optional[str] = None):
-    query = {}
-    if family_member_id:
-        query['family_member_id'] = family_member_id
-    
-    prescriptions = await db.prescriptions.find(query).sort("created_at", -1).to_list(100)
-    return [Prescription(**convert_mongo_doc(p)) for p in prescriptions]
-
-
-@api_router.get("/prescriptions/{rx_id}", response_model=Prescription)
-async def get_prescription(rx_id: str):
-    try:
-        rx = await db.prescriptions.find_one({"_id": ObjectId(rx_id)})
-        if not rx:
-            raise HTTPException(status_code=404, detail="Prescription not found")
-        return Prescription(**convert_mongo_doc(rx))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@api_router.put("/prescriptions/{rx_id}", response_model=Prescription)
-async def update_prescription(rx_id: str, rx_update: PrescriptionUpdate):
-    try:
-        update_data = {k: v for k, v in rx_update.dict().items() if v is not None}
-        if not update_data:
-            raise HTTPException(status_code=400, detail="No fields to update")
-        
-        result = await db.prescriptions.update_one(
-            {"_id": ObjectId(rx_id)},
-            {"$set": update_data}
-        )
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Prescription not found")
-        
-        updated = await db.prescriptions.find_one({"_id": ObjectId(rx_id)})
-        return Prescription(**convert_mongo_doc(updated))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@api_router.delete("/prescriptions/{rx_id}")
-async def delete_prescription(rx_id: str):
-    try:
-        result = await db.prescriptions.delete_one({"_id": ObjectId(rx_id)})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Prescription not found")
-        return {"message": "Prescription deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# Prescription endpoints removed - data stored locally on device
 
 
 # ==================== Stats Endpoint ====================
-
-@api_router.get("/stats")
-async def get_stats():
-    members_count = await db.family_members.count_documents({})
-    prescriptions_count = await db.prescriptions.count_documents({})
-    eyeglass_count = await db.prescriptions.count_documents({"rx_type": "eyeglass"})
-    contact_count = await db.prescriptions.count_documents({"rx_type": "contact"})
-    
-    return {
-        "family_members": members_count,
-        "total_prescriptions": prescriptions_count,
-        "eyeglass_prescriptions": eyeglass_count,
-        "contact_prescriptions": contact_count
-    }
+# Stats endpoint removed - relied on prescription data stored locally on device
 
 
 # ==================== Analytics Endpoints ====================
@@ -283,10 +126,9 @@ async def track_event(event: AnalyticsEvent):
 
 
 @api_router.get("/analytics/dashboard")
-async def get_analytics_dashboard(admin_key: Optional[str] = None):
-    """Get analytics dashboard data for advertiser pitches"""
-    # Simple admin protection - in production, use proper auth
-    # For now, anyone can access - add admin_key check if needed
+async def get_analytics_dashboard(x_admin_key: Optional[str] = Header(None)):
+    """Get analytics dashboard data for advertiser pitches (admin only)"""
+    verify_admin_key(x_admin_key)
     
     now = datetime.utcnow()
     today = now.strftime("%Y-%m-%d")
@@ -361,10 +203,6 @@ async def get_analytics_dashboard(admin_key: Optional[str] = None):
             "new_users": day_new
         })
     
-    # Content stats
-    total_prescriptions = await db.prescriptions.count_documents({})
-    total_family_members = await db.family_members.count_documents({})
-    
     return {
         "summary": {
             "total_downloads": total_downloads,
@@ -381,9 +219,7 @@ async def get_analytics_dashboard(admin_key: Optional[str] = None):
         },
         "engagement": {
             "ad_clicks_30d": ad_clicks,
-            "affiliate_clicks_30d": affiliate_clicks,
-            "total_prescriptions": total_prescriptions,
-            "total_family_members": total_family_members
+            "affiliate_clicks_30d": affiliate_clicks
         },
         "daily_breakdown": daily_stats,
         "generated_at": now.isoformat()
@@ -543,8 +379,9 @@ async def get_affiliate_links():
 
 
 @api_router.get("/affiliates/all")
-async def get_all_affiliates():
+async def get_all_affiliates(x_admin_key: Optional[str] = Header(None)):
     """Return all affiliates including inactive (for admin)"""
+    verify_admin_key(x_admin_key)
     await seed_affiliates()
     
     affiliates = await db.affiliates.find().sort("order", 1).to_list(100)
@@ -552,8 +389,9 @@ async def get_all_affiliates():
 
 
 @api_router.post("/affiliates", response_model=AffiliatePartner)
-async def create_affiliate(affiliate: AffiliatePartnerCreate):
-    """Create a new affiliate partner"""
+async def create_affiliate(affiliate: AffiliatePartnerCreate, x_admin_key: Optional[str] = Header(None)):
+    """Create a new affiliate partner (admin only)"""
+    verify_admin_key(x_admin_key)
     affiliate_dict = affiliate.dict()
     result = await db.affiliates.insert_one(affiliate_dict)
     affiliate_dict['id'] = str(result.inserted_id)
@@ -561,8 +399,9 @@ async def create_affiliate(affiliate: AffiliatePartnerCreate):
 
 
 @api_router.put("/affiliates/{affiliate_id}", response_model=AffiliatePartner)
-async def update_affiliate(affiliate_id: str, affiliate: AffiliatePartnerCreate):
-    """Update an existing affiliate partner"""
+async def update_affiliate(affiliate_id: str, affiliate: AffiliatePartnerCreate, x_admin_key: Optional[str] = Header(None)):
+    """Update an existing affiliate partner (admin only)"""
+    verify_admin_key(x_admin_key)
     try:
         result = await db.affiliates.update_one(
             {"_id": ObjectId(affiliate_id)},
@@ -577,8 +416,9 @@ async def update_affiliate(affiliate_id: str, affiliate: AffiliatePartnerCreate)
 
 
 @api_router.delete("/affiliates/{affiliate_id}")
-async def delete_affiliate(affiliate_id: str):
-    """Delete an affiliate partner"""
+async def delete_affiliate(affiliate_id: str, x_admin_key: Optional[str] = Header(None)):
+    """Delete an affiliate partner (admin only)"""
+    verify_admin_key(x_admin_key)
     try:
         result = await db.affiliates.delete_one({"_id": ObjectId(affiliate_id)})
         if result.deleted_count == 0:
@@ -596,20 +436,18 @@ app.include_router(api_router)
 async def root_health_check():
     return {"status": "healthy", "service": "Optical Rx Now API"}
 
+# CORS middleware - restrict to specific origins in production
+# Set ALLOWED_ORIGINS environment variable to comma-separated list of allowed origins
+allowed_origins_str = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000,https://lens-rx-tracker.preview.emergentagent.com')
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',')]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
