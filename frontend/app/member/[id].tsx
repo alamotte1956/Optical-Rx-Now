@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import AdBanner from '../components/AdBanner';
 
 interface Prescription {
   id: string;
@@ -298,9 +297,6 @@ export default function MemberDetailScreen() {
       </View>
 
       <Text style={styles.hint}>Long press on a prescription to delete</Text>
-      
-      {/* AdMob Banner */}
-      <AdBanner />
     </SafeAreaView>
   );
 }

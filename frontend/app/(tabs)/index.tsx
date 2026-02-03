@@ -14,7 +14,6 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AdBanner from "../components/AdBanner";
 import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
 
 export default function PrescriptionsScreen() {
@@ -123,9 +122,6 @@ export default function PrescriptionsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Ad Banner */}
-      <AdBanner />
 
       {/* Filter Chips */}
       {familyMembers.length > 0 && (

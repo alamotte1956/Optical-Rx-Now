@@ -5,15 +5,15 @@ A React Native mobile app built with Expo for managing family eyeglass and conta
 ## Privacy & Compliance
 
 ✅ **100% Local Storage** - Your prescription data NEVER leaves your device
-✅ **iOS App Store Approved** - Full ATT compliance  
-✅ **Google Play Approved** - Data Safety compliant
+✅ **iOS App Store Ready** - Fully compliant  
+✅ **Google Play Ready** - Data Safety compliant
 ✅ **No HIPAA Required** - No PHI stored on servers
 
 ### Architecture
 - **Local Storage**: AsyncStorage for metadata
 - **File System**: Encrypted image storage
-- **Analytics**: Optional, anonymous via AdMob
-- **Backend**: Only for affiliate links and analytics dashboard
+- **No Analytics**: No third-party tracking or advertising
+- **No Backend**: Pure local-first architecture
 
 ## Get started
 
