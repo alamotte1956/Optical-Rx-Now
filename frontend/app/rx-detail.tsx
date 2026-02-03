@@ -18,7 +18,7 @@ import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 import * as MailComposer from "expo-mail-composer";
 import { File } from "expo-file-system";
-import { getPrescriptionById, getFamilyMembers, deletePrescription, type Prescription, type FamilyMember } from "../services/localStorage";
+import { getPrescriptionById, getFamilyMembers, deletePrescription, clonePrescription, type Prescription, type FamilyMember } from "../services/localStorage";
 
 const escapeHtml = (text: string): string => {
   if (!text) return '';
@@ -38,6 +38,7 @@ export default function RxDetailScreen() {
   const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [cloning, setCloning] = useState(false);
 
   useEffect(() => {
     fetchPrescription();
@@ -185,6 +186,34 @@ Please see attached prescription image.
     setDeleteModalVisible(true);
   };
 
+  const handleClone = async () => {
+    if (!prescription) return;
+    
+    setCloning(true);
+    try {
+      const clonedPrescription = await clonePrescription(id);
+      Alert.alert(
+        "Success",
+        "Prescription cloned successfully!",
+        [
+          {
+            text: "View Clone",
+            onPress: () => router.replace(`/rx-detail?id=${clonedPrescription.id}`)
+          },
+          {
+            text: "OK",
+            style: "cancel"
+          }
+        ]
+      );
+    } catch (error) {
+      console.error("Error cloning prescription:", error);
+      Alert.alert("Error", "Failed to clone prescription");
+    } finally {
+      setCloning(false);
+    }
+  };
+
   const confirmDelete = async () => {
     setDeleting(true);
     try {
@@ -314,7 +343,25 @@ Please see attached prescription image.
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          <Text style={styles.actionsTitle}>Share & Export</Text>
+          <Text style={styles.actionsTitle}>Actions</Text>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={handleClone}
+              disabled={cloning}
+            >
+              <View style={styles.actionIconContainer}>
+                {cloning ? (
+                  <ActivityIndicator size="small" color="#4a9eff" />
+                ) : (
+                  <Ionicons name="copy-outline" size={24} color="#4a9eff" />
+                )}
+              </View>
+              <Text style={styles.actionText}>Clone</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.actionsTitle, { marginTop: 24 }]}>Share & Export</Text>
           <View style={styles.actionsRow}>
             <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
               <View style={styles.actionIconContainer}>

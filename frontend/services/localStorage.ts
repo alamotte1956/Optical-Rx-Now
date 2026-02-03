@@ -176,6 +176,67 @@ export const deletePrescription = async (id: string): Promise<void> => {
   });
 };
 
+export const clonePrescription = async (id: string): Promise<Prescription> => {
+  return queueOperation(async () => {
+    const original = await getPrescriptionById(id);
+    if (!original) {
+      throw new Error('Prescription not found');
+    }
+
+    await ensureImageDirExists();
+    
+    // Generate new ID for the cloned prescription
+    const newId = `rx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+    const newImageFileName = `${newId}.jpg`;
+    
+    const imagesDir = getImagesDirectory();
+    const originalImageFile = new File(imagesDir, `${original.id}.jpg`);
+    const newImageFile = new File(imagesDir, newImageFileName);
+    
+    try {
+      // Copy the image file
+      if (originalImageFile.exists) {
+        const imageData = await originalImageFile.text();
+        newImageFile.create();
+        newImageFile.write(imageData, { encoding: 'base64' });
+      }
+      
+      // Set the date to today
+      const today = new Date();
+      const dateTaken = today.toISOString().split('T')[0];
+      const expiryDate = new Date(today);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      
+      const clonedPrescription: Prescription = {
+        id: newId,
+        family_member_id: original.family_member_id,
+        rx_type: original.rx_type,
+        image_uri: newImageFile.uri,
+        notes: original.notes,
+        date_taken: dateTaken,
+        expiry_date: expiryDate.toISOString().split('T')[0],
+        created_at: new Date().toISOString(),
+      };
+      
+      const prescriptions = await getPrescriptions();
+      prescriptions.push(clonedPrescription);
+      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(prescriptions));
+      
+      return clonedPrescription;
+    } catch (error) {
+      // Cleanup on error
+      if (newImageFile.exists) {
+        try {
+          newImageFile.delete();
+        } catch (deleteError) {
+          console.error('Error cleaning up cloned image file:', deleteError);
+        }
+      }
+      throw error;
+    }
+  });
+};
+
 const deletePrescriptionImage = async (prescriptionId: string): Promise<void> => {
   try {
     const imagesDir = getImagesDirectory();
