@@ -35,7 +35,8 @@
         "android.permission.CAMERA",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -71,6 +72,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "privacy": "https://opticalrxnow.com/privacy"
+    "privacy": "https://opticalrxnow.com/privacy",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
+      }
+    },
+    "owner": "alamotte1956"
   }
 }
