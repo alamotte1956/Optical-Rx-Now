@@ -1,10 +1,28 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 export default function AdBanner() {
   const router = useRouter();
+  const [hasPermission, setHasPermission] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS === 'ios') {
+        try {
+          const Tracking = await import('expo-tracking-transparency');
+          const { status } = await Tracking.requestTrackingPermissionsAsync();
+          setHasPermission(status === 'granted');
+        } catch (error) {
+          console.log('Tracking transparency not available');
+          setHasPermission(true);
+        }
+      } else {
+        setHasPermission(true); // Android doesn't need ATT
+      }
+    })();
+  }, []);
 
   const handleAdPress = async () => {
     // Track ad click for analytics (non-blocking)
@@ -15,6 +33,11 @@ export default function AdBanner() {
     // Navigate to shop page with eyewear retailers
     router.push("/shop");
   };
+
+  // Only show ads after permission check
+  if (!hasPermission && Platform.OS === 'ios') {
+    return null;
+  }
 
   return (
     <TouchableOpacity style={styles.container} onPress={handleAdPress}>

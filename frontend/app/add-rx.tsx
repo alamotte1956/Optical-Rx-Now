@@ -16,14 +16,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-}
+import { getFamilyMembers, createPrescription, type FamilyMember } from "../services/localStorage";
 
 export default function AddRxScreen() {
   const router = useRouter();
@@ -55,13 +48,10 @@ export default function AddRxScreen() {
 
   const fetchFamilyMembers = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/family-members`);
-      if (response.ok) {
-        const data = await response.json();
-        setFamilyMembers(data);
-        if (data.length > 0) {
-          setSelectedMember(data[0].id);
-        }
+      const data = await getFamilyMembers();
+      setFamilyMembers(data);
+      if (data.length > 0) {
+        setSelectedMember(data[0].id);
       }
     } catch (error) {
       console.error("Error fetching family members:", error);
@@ -110,24 +100,14 @@ export default function AddRxScreen() {
 
     setSaving(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/prescriptions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          family_member_id: selectedMember,
-          rx_type: rxType,
-          image_base64: imageBase64,
-          notes: notes.trim(),
-          date_taken: dateTaken,
-        }),
+      await createPrescription({
+        family_member_id: selectedMember,
+        rx_type: rxType,
+        imageBase64: imageBase64,
+        notes: notes.trim(),
+        date_taken: dateTaken,
       });
-
-      if (response.ok) {
-        router.back();
-      } else {
-        const errorData = await response.json();
-        Alert.alert("Error", errorData.detail || "Failed to save prescription");
-      }
+      router.back();
     } catch (error) {
       Alert.alert("Error", "Failed to save prescription");
     } finally {

@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import AdBanner from '../../components/AdBanner';
+import AdBanner from '../components/AdBanner';
 
 interface Prescription {
   id: string;

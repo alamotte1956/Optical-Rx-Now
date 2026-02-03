@@ -17,24 +17,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
 import * as MailComposer from "expo-mail-composer";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-}
-
-interface Prescription {
-  id: string;
-  family_member_id: string;
-  rx_type: string;
-  image_base64: string;
-  notes: string;
-  date_taken: string;
-  created_at: string;
-}
+import { File } from "expo-file-system";
+import { getPrescriptionById, getFamilyMembers, deletePrescription, type Prescription, type FamilyMember } from "../services/localStorage";
 
 export default function RxDetailScreen() {
   const router = useRouter();
@@ -51,18 +35,15 @@ export default function RxDetailScreen() {
 
   const fetchPrescription = async () => {
     try {
-      const rxRes = await fetch(`${BACKEND_URL}/api/prescriptions/${id}`);
-      if (rxRes.ok) {
-        const rxData = await rxRes.json();
+      const rxData = await getPrescriptionById(id);
+      if (rxData) {
         setPrescription(rxData);
 
         // Fetch family member info
-        const memberRes = await fetch(
-          `${BACKEND_URL}/api/family-members/${rxData.family_member_id}`
-        );
-        if (memberRes.ok) {
-          const memberData = await memberRes.json();
-          setFamilyMember(memberData);
+        const members = await getFamilyMembers();
+        const member = members.find(m => m.id === rxData.family_member_id);
+        if (member) {
+          setFamilyMember(member);
         }
       } else {
         Alert.alert("Error", "Prescription not found");
@@ -86,6 +67,11 @@ export default function RxDetailScreen() {
     }
 
     try {
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
       // Create HTML for sharing
       const html = `
         <html>
@@ -93,7 +79,7 @@ export default function RxDetailScreen() {
             <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
             <p><strong>Date:</strong> ${prescription.date_taken}</p>
             ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
+            <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
       `;
@@ -128,6 +114,11 @@ ${prescription.notes ? `Notes: ${prescription.notes}` : ""}
 Please see attached prescription image.
       `;
 
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
       // Create PDF to attach
       const html = `
         <html>
@@ -135,7 +126,7 @@ Please see attached prescription image.
             <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
             <p><strong>Date:</strong> ${prescription.date_taken}</p>
             ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
+            <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
       `;
@@ -157,13 +148,18 @@ Please see attached prescription image.
     if (!prescription) return;
 
     try {
+      // Read the image from local file system
+      const imageFile = new File(prescription.image_uri);
+      const imageBase64 = await imageFile.text();
+      const imageDataUri = `data:image/jpeg;base64,${imageBase64}`;
+
       const html = `
         <html>
           <body style="font-family: Arial, sans-serif; padding: 20px;">
             <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
             <p><strong>Date:</strong> ${prescription.date_taken}</p>
             ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
+            <img src="${imageDataUri}" style="max-width: 100%; margin-top: 20px;" />
           </body>
         </html>
       `;
@@ -182,16 +178,9 @@ Please see attached prescription image.
   const confirmDelete = async () => {
     setDeleting(true);
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/prescriptions/${id}`,
-        { method: "DELETE" }
-      );
-      if (response.ok) {
-        setDeleteModalVisible(false);
-        router.back();
-      } else {
-        Alert.alert("Error", "Failed to delete prescription");
-      }
+      await deletePrescription(id);
+      setDeleteModalVisible(false);
+      router.back();
     } catch (error) {
       Alert.alert("Error", "Failed to delete prescription");
     } finally {
@@ -247,7 +236,7 @@ Please see attached prescription image.
         {/* Prescription Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: prescription.image_base64 }}
+            source={{ uri: prescription.image_uri }}
             style={styles.image}
             resizeMode="contain"
           />

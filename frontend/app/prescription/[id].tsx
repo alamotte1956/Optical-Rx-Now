@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
-import * as FileSystem from 'expo-file-system';
+import { Paths, File } from 'expo-file-system';
 
 interface Prescription {
   id: string;
@@ -78,12 +78,10 @@ export default function PrescriptionDetailScreen() {
       }
 
       // Create a temporary file for sharing
-      const fileUri = `${FileSystem.cacheDirectory}prescription_${prescription.id}.jpg`;
-      await FileSystem.writeAsStringAsync(fileUri, prescription.imageBase64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const tempFile = new File(Paths.cache, `prescription_${prescription.id}.jpg`);
+      await tempFile.write(prescription.imageBase64, { encoding: 'base64' });
 
-      await Sharing.shareAsync(fileUri, {
+      await Sharing.shareAsync(tempFile.uri, {
         mimeType: 'image/jpeg',
         dialogTitle: 'Share Prescription',
       });
