@@ -16,7 +16,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.alamotte.opticalrxnow",
       "buildNumber": "1.0.0",
-      "deploymentTarget": "15.0",
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
         "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
@@ -83,13 +82,14 @@
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "15.0"
+            "deploymentTarget": "15.1"
           },
           "android": {
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,
             "minSdkVersion": 24,
-            "buildToolsVersion": "34.0.0"
+            "buildToolsVersion": "34.0.0",
+            "kotlinVersion": "1.9.0"
           }
         }
       ]
@@ -101,7 +101,10 @@
       "eas": {
         "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
       },
-      "privacyPolicyUrl": "https://opticalrxnow.com/privacy"
-    }
+      "router": {
+        "origin": false
+      }
+    },
+    "owner": "alamotte1956"
   }
 }
