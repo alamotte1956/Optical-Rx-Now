@@ -1,5 +1,70 @@
 # iOS & Android Platform Compliance Implementation
 
+## 2026 App Store and Play Store Requirements
+
+### Current Compliance Status (February 2026)
+
+#### iOS Platform Requirements ✅
+- **iOS Deployment Target:** 15.0 (Apple's minimum requirement for new apps as of April 2025)
+- **Build Properties Plugin:** Configured with expo-build-properties
+- **Privacy Manifest:** Documentation provided in `frontend/ios/PrivacyInfo.md`
+- **Health Data Disclaimer:** Added to prevent App Review questions for medical apps
+- **Required Permissions:** Camera, Photo Library, Location (all configured)
+
+#### Android Platform Requirements ✅
+- **Target SDK Version:** 34 (Android 14) - Required for Play Store 2026
+- **Compile SDK Version:** 34
+- **Minimum SDK Version:** 24 (Android 7.0)
+- **Build Tools Version:** 34.0.0
+- **Required Permissions:** Camera, Media Images, Location (all configured)
+
+### SDK Version Configuration
+
+The app uses `expo-build-properties` plugin to set platform-specific build configurations:
+
+```json
+{
+  "ios": {
+    "deploymentTarget": "15.0"
+  },
+  "android": {
+    "compileSdkVersion": 34,
+    "targetSdkVersion": 34,
+    "minSdkVersion": 24,
+    "buildToolsVersion": "34.0.0"
+  }
+}
+```
+
+### iOS Privacy Manifest
+
+Apple requires apps to include a Privacy Manifest that declares:
+- Tracking status (this app: no tracking)
+- Data collection (this app: none - local storage only)
+- Required system APIs (UserDefaults, FileTimestamp, etc.)
+
+**Complete instructions:** See `frontend/ios/PrivacyInfo.md`
+
+**Key points:**
+- File must be named `PrivacyInfo.xcprivacy`
+- Must be included in the iOS app bundle
+- Declares NSPrivacyTracking: false (no tracking)
+- Lists all required APIs with reason codes
+- Automatically validated during App Store Connect upload
+
+### Health Data Disclaimer (iOS)
+
+Medical/health apps receive additional scrutiny from App Review. Even though this app doesn't use HealthKit, we declare this in `app.json`:
+
+```json
+"NSHealthShareUsageDescription": "This app does not access Health data"
+"NSHealthUpdateUsageDescription": "This app does not access Health data"
+```
+
+This prevents App Review questions and clarifies that the app is for prescription storage only, not health data tracking.
+
+---
+
 ## ⚠️ IMPORTANT: ATT Not Currently Implemented
 
 **As of February 3, 2026**, App Tracking Transparency (ATT) is **NOT** implemented in this app.
@@ -163,28 +228,32 @@ if (Platform.OS === 'ios') {
 
 Before building for production:
 
-### AdMob Setup:
-- [ ] Create AdMob account at https://admob.google.com/
-- [ ] Register iOS app in AdMob
-- [ ] Register Android app in AdMob
-- [ ] Copy production App IDs
-- [ ] Update `.env` with production IDs
-- [ ] Test ads in TestFlight/Internal Testing
-
-### iOS Compliance:
-- [x] ATT permission implemented
-- [x] NSUserTrackingUsageDescription added
+### iOS Compliance (2026):
+- [x] iOS deployment target set to 15.0
+- [x] expo-build-properties plugin configured
+- [x] Privacy Manifest documentation created (frontend/ios/PrivacyInfo.md)
+- [x] NSHealthShareUsageDescription added
+- [x] NSHealthUpdateUsageDescription added
 - [x] NSCameraUsageDescription added
 - [x] NSPhotoLibraryUsageDescription added
+- [x] NSLocationWhenInUseUsageDescription added
 - [x] usesNonExemptEncryption set to false
+- [ ] Privacy Manifest file manually added to Xcode project (see PrivacyInfo.md)
 - [ ] Privacy policy URL publicly accessible
-- [ ] Test on iOS 14.5+ device
+- [ ] Test on iOS 15.0+ device
 
-### Android Compliance:
+### Android Compliance (2026):
+- [x] Target SDK version set to 34
+- [x] Compile SDK version set to 34
+- [x] Minimum SDK version set to 24
+- [x] Build tools version set to 34.0.0
+- [x] expo-build-properties plugin configured
 - [x] Camera permission configured
 - [x] Photo picker permission configured (Android 13+)
+- [x] Location permission configured
 - [ ] Privacy policy URL publicly accessible
-- [ ] Test on Android 13+ device
+- [ ] Test on Android 13+ device (API 33+)
+- [ ] Test on Android 14 device with target SDK 34
 
 ## 🧪 Testing
 
