@@ -1,0 +1,35 @@
+[
+  {
+    "id": "samsclub",
+    "name": "Sam's Club Optical",
+    "description": "In-store eye exams & quality eyewear",
+    "url": "https://www.samsclub.com/optical",
+    "category": "both",
+    "discount": "Members save up to 50%",
+    "is_featured": true,
+    "is_active": true,
+    "order": 1
+  },
+  {
+    "id": "zenni",
+    "name": "Zenni Optical",
+    "description": "Affordable prescription glasses online starting at $6.95",
+    "url": "https://www.zennioptical.com",
+    "category": "eyeglasses",
+    "discount": "Starting at $6.95",
+    "is_featured": false,
+    "is_active": true,
+    "order": 2
+  },
+  {
+    "id": "1800contacts",
+    "name": "1-800 Contacts",
+    "description": "Fast, convenient contact lens delivery",
+    "url": "https://www.1800contacts.com",
+    "category": "contacts",
+    "discount": "Free shipping on all orders",
+    "is_featured": false,
+    "is_active": true,
+    "order": 3
+  }
+]

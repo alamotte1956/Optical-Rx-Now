@@ -69,6 +69,12 @@
         {
           "locationWhenInUsePermission": "Find nearby optical stores for eyewear shopping"
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Optical Rx Now to use Face ID for secure access to your prescriptions"
+        }
       ]
     ],
     "experiments": {

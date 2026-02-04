@@ -11,34 +11,21 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { getFamilyMembers, getPrescriptions } from "../services/localStorage";
+import { getLocalStats } from "../services/analytics";
 
 interface AnalyticsData {
   summary: {
-    total_downloads: number;
-    daily_active_users: number;
-    weekly_active_users: number;
-    monthly_active_users: number;
-    new_users_this_week: number;
-    new_users_this_month: number;
-  };
-  platforms: {
-    ios: number;
-    android: number;
-    web: number;
-  };
-  engagement: {
-    ad_clicks_30d: number;
-    affiliate_clicks_30d: number;
-    total_prescriptions: number;
     total_family_members: number;
+    total_prescriptions: number;
+    app_opens_7d: number;
+    app_opens_30d: number;
   };
-  daily_breakdown: Array<{
-    date: string;
-    active_users: number;
-    new_users: number;
-  }>;
+  prescriptions_by_type: {
+    eyeglass: number;
+    contact: number;
+  };
+  recent_activity: Record<string, number>;
   generated_at: string;
 }
 
@@ -54,13 +41,29 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/analytics/dashboard`);
-      if (response.ok) {
-        const analyticsData = await response.json();
-        setData(analyticsData);
-      }
+      // Get local data stats
+      const members = await getFamilyMembers();
+      const prescriptions = await getPrescriptions();
+      const eventStats = await getLocalStats();
+      
+      const analyticsData: AnalyticsData = {
+        summary: {
+          total_family_members: members.length,
+          total_prescriptions: prescriptions.length,
+          app_opens_7d: eventStats.last_7_days,
+          app_opens_30d: eventStats.last_30_days,
+        },
+        prescriptions_by_type: {
+          eyeglass: prescriptions.filter(p => p.rx_type === 'eyeglass').length,
+          contact: prescriptions.filter(p => p.rx_type === 'contact').length,
+        },
+        recent_activity: eventStats.by_type,
+        generated_at: new Date().toISOString(),
+      };
+      
+      setData(analyticsData);
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      console.error("Error calculating stats:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -114,11 +117,11 @@ export default function AdminDashboard() {
       >
         {/* Pitch Banner */}
         <View style={styles.pitchBanner}>
-          <Ionicons name="megaphone" size={24} color="#f5a623" />
+          <Ionicons name="shield-checkmark" size={24} color="#4CAF50" />
           <View style={styles.pitchContent}>
-            <Text style={styles.pitchTitle}>Advertiser Pitch Ready</Text>
+            <Text style={styles.pitchTitle}>Local-Only Analytics</Text>
             <Text style={styles.pitchText}>
-              Use these metrics to pitch to advertisers
+              All data stored securely on your device
             </Text>
           </View>
         </View>
@@ -143,119 +146,65 @@ export default function AdminDashboard() {
         <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Key Metrics</Text>
         <View style={styles.statsGrid}>
           <StatCard
-            title="Total Downloads"
-            value={data?.summary.total_downloads || 0}
-            icon="download"
-            color="#4CAF50"
-          />
-          <StatCard
-            title="Monthly Active"
-            value={data?.summary.monthly_active_users || 0}
+            title="Family Members"
+            value={data?.summary.total_family_members || 0}
             icon="people"
             color="#4a9eff"
           />
           <StatCard
-            title="Weekly Active"
-            value={data?.summary.weekly_active_users || 0}
+            title="Prescriptions"
+            value={data?.summary.total_prescriptions || 0}
+            icon="document-text"
+            color="#4CAF50"
+          />
+          <StatCard
+            title="Opens (7d)"
+            value={data?.summary.app_opens_7d || 0}
             icon="calendar"
             color="#9c27b0"
           />
           <StatCard
-            title="Daily Active"
-            value={data?.summary.daily_active_users || 0}
+            title="Opens (30d)"
+            value={data?.summary.app_opens_30d || 0}
             icon="today"
             color="#ff9800"
           />
         </View>
 
-        {/* Growth */}
-        <Text style={styles.sectionTitle}>Growth</Text>
+        {/* Prescription Types */}
+        <Text style={styles.sectionTitle}>Prescriptions by Type</Text>
         <View style={styles.growthCard}>
           <View style={styles.growthRow}>
             <View style={styles.growthItem}>
               <Text style={styles.growthValue}>
-                +{data?.summary.new_users_this_week || 0}
+                {data?.prescriptions_by_type.eyeglass || 0}
               </Text>
-              <Text style={styles.growthLabel}>New this week</Text>
+              <Text style={styles.growthLabel}>Eyeglass</Text>
             </View>
             <View style={styles.growthDivider} />
             <View style={styles.growthItem}>
               <Text style={styles.growthValue}>
-                +{data?.summary.new_users_this_month || 0}
+                {data?.prescriptions_by_type.contact || 0}
               </Text>
-              <Text style={styles.growthLabel}>New this month</Text>
+              <Text style={styles.growthLabel}>Contact Lens</Text>
             </View>
           </View>
         </View>
 
-        {/* Platform Breakdown */}
-        <Text style={styles.sectionTitle}>Platform Breakdown</Text>
-        <View style={styles.platformCard}>
-          <View style={styles.platformRow}>
-            <View style={styles.platformItem}>
-              <Ionicons name="logo-apple" size={28} color="#fff" />
-              <Text style={styles.platformValue}>{data?.platforms.ios || 0}</Text>
-              <Text style={styles.platformLabel}>iOS</Text>
-            </View>
-            <View style={styles.platformItem}>
-              <Ionicons name="logo-android" size={28} color="#3DDC84" />
-              <Text style={styles.platformValue}>{data?.platforms.android || 0}</Text>
-              <Text style={styles.platformLabel}>Android</Text>
-            </View>
-            <View style={styles.platformItem}>
-              <Ionicons name="globe" size={28} color="#4a9eff" />
-              <Text style={styles.platformValue}>{data?.platforms.web || 0}</Text>
-              <Text style={styles.platformLabel}>Web</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Engagement */}
-        <Text style={styles.sectionTitle}>Engagement (30 Days)</Text>
-        <View style={styles.engagementCard}>
-          <View style={styles.engagementRow}>
-            <View style={styles.engagementItem}>
-              <Ionicons name="megaphone" size={20} color="#f5a623" />
-              <Text style={styles.engagementValue}>{data?.engagement.ad_clicks_30d || 0}</Text>
-              <Text style={styles.engagementLabel}>Ad Clicks</Text>
-            </View>
-            <View style={styles.engagementItem}>
-              <Ionicons name="cart" size={20} color="#4CAF50" />
-              <Text style={styles.engagementValue}>{data?.engagement.affiliate_clicks_30d || 0}</Text>
-              <Text style={styles.engagementLabel}>Affiliate Clicks</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Content Stats */}
-        <Text style={styles.sectionTitle}>Content Created</Text>
+        {/* Recent Activity */}
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
         <View style={styles.contentCard}>
-          <View style={styles.contentRow}>
-            <View style={styles.contentItem}>
-              <Text style={styles.contentValue}>{data?.engagement.total_prescriptions || 0}</Text>
-              <Text style={styles.contentLabel}>Prescriptions Stored</Text>
-            </View>
-            <View style={styles.contentItem}>
-              <Text style={styles.contentValue}>{data?.engagement.total_family_members || 0}</Text>
-              <Text style={styles.contentLabel}>Family Members</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Daily Breakdown */}
-        <Text style={styles.sectionTitle}>Last 7 Days</Text>
-        <View style={styles.dailyCard}>
-          {data?.daily_breakdown.map((day, index) => (
-            <View key={day.date} style={styles.dailyRow}>
-              <Text style={styles.dailyDate}>
-                {new Date(day.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+          {Object.entries(data?.recent_activity || {}).map(([type, count]) => (
+            <View key={type} style={styles.activityRow}>
+              <Text style={styles.activityType}>
+                {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </Text>
-              <View style={styles.dailyStats}>
-                <Text style={styles.dailyActive}>{day.active_users} active</Text>
-                <Text style={styles.dailyNew}>+{day.new_users} new</Text>
-              </View>
+              <Text style={styles.activityCount}>{count as number}</Text>
             </View>
           ))}
+          {Object.keys(data?.recent_activity || {}).length === 0 && (
+            <Text style={styles.noActivityText}>No activity recorded yet</Text>
+          )}
         </View>
 
         {/* Last Updated */}
@@ -499,6 +448,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#8899a6",
     marginTop: 4,
+  },
+  activityRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#0f1d30",
+  },
+  activityType: {
+    fontSize: 14,
+    color: "#fff",
+  },
+  activityCount: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#4a9eff",
+  },
+  noActivityText: {
+    fontSize: 14,
+    color: "#8899a6",
+    textAlign: "center",
+    paddingVertical: 20,
   },
   dailyCard: {
     backgroundColor: "#1a2d45",

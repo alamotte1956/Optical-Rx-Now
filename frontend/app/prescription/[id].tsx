@@ -11,63 +11,63 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
-import { Paths, File } from 'expo-file-system';
-
-interface Prescription {
-  id: string;
-  type: 'eyeglass' | 'contact';
-  imageBase64: string;
-  createdAt: string;
-  notes?: string;
-}
+import { Paths, File, Directory } from 'expo-file-system';
+import { getPrescriptionById, loadPrescriptionImage } from '../../services/localStorage';
+import { authenticateUser } from '../../services/authentication';
 
 export default function PrescriptionDetailScreen() {
-  const { id, memberId } = useLocalSearchParams<{ id: string; memberId: string }>();
-  const [prescription, setPrescription] = useState<Prescription | null>(null);
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [prescription, setPrescription] = useState<any>(null);
+  const [imageBase64, setImageBase64] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
 
-  const PRESCRIPTIONS_KEY = `@rx_vault_prescriptions_${memberId}`;
-
   useEffect(() => {
-    loadPrescription();
-  }, [id, memberId]);
+    loadPrescriptionData();
+  }, [id]);
 
-  const loadPrescription = async () => {
+  const loadPrescriptionData = async () => {
     try {
-      const data = await AsyncStorage.getItem(PRESCRIPTIONS_KEY);
-      if (data) {
-        const prescriptions: Prescription[] = JSON.parse(data);
-        const found = prescriptions.find((p) => p.id === id);
-        if (found) {
-          setPrescription(found);
-        }
+      // Require authentication
+      const authenticated = await authenticateUser("Authenticate to view prescription");
+      
+      if (!authenticated) {
+        Alert.alert("Authentication Failed", "Cannot view prescription");
+        router.back();
+        return;
+      }
+      
+      // Load prescription data
+      const rx = await getPrescriptionById(id);
+      if (!rx) {
+        Alert.alert("Error", "Prescription not found");
+        router.back();
+        return;
+      }
+      
+      setPrescription(rx);
+      
+      // Load encrypted image
+      if (rx.image_uri) {
+        const decryptedImage = await loadPrescriptionImage(rx.image_uri);
+        setImageBase64(decryptedImage);
       }
     } catch (error) {
       console.error('Error loading prescription:', error);
+      Alert.alert("Error", "Failed to load prescription");
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   const shareImage = async () => {
-    if (!prescription) return;
+    if (!prescription || !imageBase64) return;
 
     setSharing(true);
     try {
@@ -78,13 +78,23 @@ export default function PrescriptionDetailScreen() {
       }
 
       // Create a temporary file for sharing
-      const tempFile = new File(Paths.cache, `prescription_${prescription.id}.jpg`);
-      await tempFile.write(prescription.imageBase64, { encoding: 'base64' });
+      const tempDir = new Directory(Paths.cache, 'temp_shares');
+      if (!tempDir.exists) {
+        tempDir.create();
+      }
+      const tempFile = new File(tempDir, `prescription_${prescription.id}.jpg`);
+      tempFile.create();
+      await tempFile.write(imageBase64, { encoding: 'base64' });
 
       await Sharing.shareAsync(tempFile.uri, {
         mimeType: 'image/jpeg',
         dialogTitle: 'Share Prescription',
       });
+      
+      // Clean up
+      if (tempFile.exists) {
+        tempFile.delete();
+      }
     } catch (error) {
       console.error('Error sharing:', error);
       Alert.alert('Error', 'Failed to share prescription');
@@ -94,7 +104,7 @@ export default function PrescriptionDetailScreen() {
   };
 
   const printPrescription = async () => {
-    if (!prescription) return;
+    if (!prescription || !imageBase64) return;
 
     try {
       const html = `
@@ -122,9 +132,10 @@ export default function PrescriptionDetailScreen() {
             </style>
           </head>
           <body>
-            <h1>${prescription.type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'} Prescription</h1>
-            <p class="info">Date: ${formatDate(prescription.createdAt)}</p>
-            <img src="data:image/jpeg;base64,${prescription.imageBase64}" />
+            <h1>${prescription.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'} Prescription</h1>
+            <p class="info">Date: ${new Date(prescription.date_taken).toLocaleDateString()}</p>
+            ${prescription.notes ? `<p class="info">Notes: ${prescription.notes}</p>` : ''}
+            <img src="data:image/jpeg;base64,${imageBase64}" />
           </body>
         </html>
       `;
@@ -144,7 +155,7 @@ export default function PrescriptionDetailScreen() {
     );
   }
 
-  if (!prescription) {
+  if (!prescription || !imageBase64) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
@@ -159,14 +170,14 @@ export default function PrescriptionDetailScreen() {
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <Stack.Screen
         options={{
-          title: prescription.type === 'eyeglass' ? 'Eyeglass Rx' : 'Contact Lens Rx',
+          title: prescription.rx_type === 'eyeglass' ? 'Eyeglass Rx' : 'Contact Lens Rx',
         }}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: `data:image/jpeg;base64,${prescription.imageBase64}` }}
+            source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
             style={styles.image}
             resizeMode="contain"
           />
@@ -176,23 +187,29 @@ export default function PrescriptionDetailScreen() {
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Ionicons
-                name={prescription.type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
+                name={prescription.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
                 size={28}
                 color="#4facfe"
               />
               <Text style={styles.infoLabel}>Type</Text>
               <Text style={styles.infoValue}>
-                {prescription.type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
+                {prescription.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
               </Text>
             </View>
             <View style={styles.infoItem}>
               <Ionicons name="calendar-outline" size={28} color="#4facfe" />
-              <Text style={styles.infoLabel}>Saved On</Text>
+              <Text style={styles.infoLabel}>Date Taken</Text>
               <Text style={styles.infoValue}>
-                {new Date(prescription.createdAt).toLocaleDateString()}
+                {new Date(prescription.date_taken).toLocaleDateString()}
               </Text>
             </View>
           </View>
+          {prescription.notes && (
+            <View style={styles.notesSection}>
+              <Text style={styles.notesLabel}>Notes</Text>
+              <Text style={styles.notesText}>{prescription.notes}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -287,6 +304,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
     marginTop: 4,
+  },
+  notesSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(79, 172, 254, 0.2)',
+  },
+  notesLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 8,
+  },
+  notesText: {
+    fontSize: 14,
+    color: '#fff',
+    lineHeight: 20,
   },
   actionContainer: {
     flexDirection: 'row',
