@@ -8,10 +8,10 @@ This document contains all copy-paste ready content for Apple App Store and Goog
 **Character Limit:** 80 characters (Android)
 
 ```
-Family prescription manager. Store eyeglass & contact lens prescriptions privately.
+Family prescription manager. Store eyeglass & contact prescriptions privately.
 ```
 
-**Character Count:** 80 characters ✅
+**Character Count:** 78 characters ✅
 
 ---
 
@@ -22,7 +22,7 @@ Family prescription manager. Store eyeglass & contact lens prescriptions private
 Keep your family's eyeglass and contact lens prescriptions organized and accessible. 100% private - all data stored locally on your device.
 ```
 
-**Character Count:** 154 characters ✅
+**Character Count:** 139 characters ✅
 
 ---
 
@@ -44,7 +44,7 @@ Family Prescription Manager
 prescription,eyeglasses,contacts,optical,health,medical,vision,eye,glasses,family
 ```
 
-**Character Count:** 89 characters ✅
+**Character Count:** 81 characters ✅
 
 ---
 
