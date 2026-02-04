@@ -16,7 +16,6 @@ import { getFamilyMembers, deleteFamilyMember, type FamilyMember } from "../../s
 
 export default function FamilyScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [members, setMembers] = useState<FamilyMember[]>([]);
@@ -129,7 +128,9 @@ export default function FamilyScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          members.map((member) => (
+          members.map((member) => {
+            const prescriptionCount = member.prescription_count || 0;
+            return (
             <TouchableOpacity
               key={member.id}
               style={styles.memberCard}
@@ -145,12 +146,13 @@ export default function FamilyScreen() {
                 <Text style={styles.memberName}>{member.name}</Text>
                 <Text style={styles.memberRelationship}>{member.relationship}</Text>
                 <Text style={styles.memberStats}>
-                  {member.prescription_count || 0} prescription{(member.prescription_count || 0) !== 1 ? 's' : ''}
+                  {prescriptionCount} prescription{prescriptionCount !== 1 ? 's' : ''}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
             </TouchableOpacity>
-          ))
+          );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
