@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
@@ -85,10 +85,10 @@
             "deploymentTarget": "15.1"
           },
           "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
             "minSdkVersion": 24,
-            "buildToolsVersion": "34.0.0"
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]
