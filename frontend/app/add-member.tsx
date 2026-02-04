@@ -56,6 +56,7 @@ export default function AddMemberScreen() {
       console.error('Error creating family member:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       Alert.alert("Error", `Failed to add family member: ${errorMessage}\n\nPlease try again.`);
+    } finally {
       setSaving(false);
     }
   };
