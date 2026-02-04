@@ -100,6 +100,9 @@ export default function SettingsScreen() {
           style={styles.actionButton}
           onPress={handleExportBackup}
           disabled={exporting}
+          accessibilityLabel="Export encrypted backup of your data"
+          accessibilityState={{ disabled: exporting }}
+          accessibilityHint="Creates an encrypted backup file you can save"
         >
           <View style={styles.actionIcon}>
             <Ionicons name="download-outline" size={24} color="#4a9eff" />

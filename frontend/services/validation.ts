@@ -1,4 +1,6 @@
-// Sanitize text inputs (prevent XSS)
+// Sanitize text inputs (basic XSS prevention)
+// Note: This provides basic protection by removing angle brackets
+// For HTML rendering contexts, use a proper HTML sanitization library
 export const sanitizeText = (input: string): string => {
   return input
     .trim()
@@ -18,9 +20,9 @@ export const isValidUrl = (url: string): boolean => {
 
 // Validate image type
 export const isValidImageType = (uri: string): boolean => {
-  const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
   const lowerUri = uri.toLowerCase();
-  return validTypes.some(type => lowerUri.includes(type));
+  return validExtensions.some(ext => lowerUri.endsWith(ext));
 };
 
 // Validate date format (YYYY-MM-DD)

@@ -35,6 +35,9 @@ export default function PrescriptionDetailScreen() {
         
         if (!authenticated) {
           Alert.alert("Authentication Failed", "Cannot view prescription");
+          // Clear any potentially loaded data before navigating back
+          setPrescription(null);
+          setImageBase64('');
           router.back();
           return;
         }
@@ -57,6 +60,9 @@ export default function PrescriptionDetailScreen() {
       } catch (error) {
         console.error('Error loading prescription:', error);
         Alert.alert("Error", "Failed to load prescription");
+        // Clear data on error
+        setPrescription(null);
+        setImageBase64('');
       } finally {
         setLoading(false);
       }

@@ -7,8 +7,8 @@ const ENCRYPTION_KEY_NAME = 'app_encryption_key';
 export const getEncryptionKey = async (): Promise<string> => {
   let key = await SecureStore.getItemAsync(ENCRYPTION_KEY_NAME);
   if (!key) {
-    // Generate new 256-bit key
-    key = CryptoJS.lib.WordArray.random(32).toString();
+    // Generate new 256-bit key using hex encoding
+    key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
     await SecureStore.setItemAsync(ENCRYPTION_KEY_NAME, key);
   }
   return key;
