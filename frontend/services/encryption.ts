@@ -54,13 +54,23 @@ export const decryptData = async (encryptedData: string): Promise<any> => {
 
 // Encrypt base64 image
 export const encryptImage = async (base64Image: string): Promise<string> => {
-  const key = await getEncryptionKey();
-  return CryptoJS.AES.encrypt(base64Image, key).toString();
+  try {
+    const key = await getEncryptionKey();
+    return CryptoJS.AES.encrypt(base64Image, key).toString();
+  } catch (error) {
+    console.error('Error encrypting image:', error);
+    throw new Error('Failed to encrypt image');
+  }
 };
 
 // Decrypt base64 image
 export const decryptImage = async (encryptedImage: string): Promise<string> => {
-  const key = await getEncryptionKey();
-  const decrypted = CryptoJS.AES.decrypt(encryptedImage, key);
-  return decrypted.toString(CryptoJS.enc.Utf8);
+  try {
+    const key = await getEncryptionKey();
+    const decrypted = CryptoJS.AES.decrypt(encryptedImage, key);
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  } catch (error) {
+    console.error('Error decrypting image:', error);
+    throw new Error('Failed to decrypt image');
+  }
 };
