@@ -69,3 +69,68 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+---
+
+## 📱 App Store Submission
+
+This app is ready for submission to Apple App Store and Google Play Store!
+
+### Submission Resources
+- [Store Listing Content](../docs/app-store-description.md) - Copy-paste descriptions, keywords, and metadata
+- [App Review Notes](../docs/app-review-notes.md) - Important information for reviewers
+- [Screenshot Guide](../docs/screenshot-guide.md) - How to create required screenshots
+- [Testing Checklist](../docs/final-testing-checklist.md) - Complete pre-submission testing
+- [Support Email Template](../docs/support-email-template.md) - Auto-response for support inquiries
+- [Privacy Policy](https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html) - Live privacy policy
+
+### Quick Start for Submission
+
+1. **Review Documentation**
+   - Read `docs/app-review-notes.md`
+   - Review `docs/final-testing-checklist.md`
+
+2. **Create Visual Assets**
+   - Follow `docs/screenshot-guide.md`
+   - Create 2-8 screenshots per platform
+   - Ensure app icon is 1024x1024 (iOS) and 512x512 (Android)
+
+3. **Set Up Support**
+   - Activate support@opticalrxnow.com email
+   - Enable GitHub Pages for privacy policy
+   - Test privacy policy URL is accessible
+
+4. **Test on Physical Devices**
+   - Test on iPhone (iOS 15.1+)
+   - Test on Android phone (Android 7.0+)
+   - Complete all items in testing checklist
+
+5. **Build for Production**
+   ```bash
+   cd frontend
+   eas build --platform ios --profile production
+   eas build --platform android --profile production
+   ```
+
+6. **Submit to Stores**
+   - Copy content from `docs/app-store-description.md`
+   - Upload screenshots
+   - Complete age rating and privacy questionnaires
+   - Add `docs/app-review-notes.md` content to review notes
+   - Submit for review
+
+### Support
+- **Email:** support@opticalrxnow.com
+- **Privacy Policy:** https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+- **Website:** https://alamotte1956.github.io/Optical-Rx-Now/
+
+### Compliance Status
+✅ iOS 15.1+ deployment target  
+✅ Android SDK 34 target  
+✅ Privacy Manifest documented  
+✅ Age verification (18+) implemented  
+✅ COPPA compliant  
+✅ GDPR compliant  
+✅ CCPA compliant  
+✅ No data collection or tracking  
+✅ Local storage only
