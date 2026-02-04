@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 
 const ENCRYPTION_KEY_NAME = 'app_encryption_key';
 

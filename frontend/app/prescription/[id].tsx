@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  Platform,
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
@@ -29,42 +28,42 @@ export default function PrescriptionDetailScreen() {
   const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
-    loadPrescriptionData();
-  }, [id]);
+    const loadPrescriptionData = async () => {
+      try {
+        // Require authentication
+        const authenticated = await authenticateUser("Authenticate to view prescription");
+        
+        if (!authenticated) {
+          Alert.alert("Authentication Failed", "Cannot view prescription");
+          router.back();
+          return;
+        }
+        
+        // Load prescription data
+        const rx = await getPrescriptionById(id);
+        if (!rx) {
+          Alert.alert("Error", "Prescription not found");
+          router.back();
+          return;
+        }
+        
+        setPrescription(rx);
+        
+        // Load encrypted image
+        if (rx.image_uri) {
+          const decryptedImage = await loadPrescriptionImage(rx.image_uri);
+          setImageBase64(decryptedImage);
+        }
+      } catch (error) {
+        console.error('Error loading prescription:', error);
+        Alert.alert("Error", "Failed to load prescription");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadPrescriptionData = async () => {
-    try {
-      // Require authentication
-      const authenticated = await authenticateUser("Authenticate to view prescription");
-      
-      if (!authenticated) {
-        Alert.alert("Authentication Failed", "Cannot view prescription");
-        router.back();
-        return;
-      }
-      
-      // Load prescription data
-      const rx = await getPrescriptionById(id);
-      if (!rx) {
-        Alert.alert("Error", "Prescription not found");
-        router.back();
-        return;
-      }
-      
-      setPrescription(rx);
-      
-      // Load encrypted image
-      if (rx.image_uri) {
-        const decryptedImage = await loadPrescriptionImage(rx.image_uri);
-        setImageBase64(decryptedImage);
-      }
-    } catch (error) {
-      console.error('Error loading prescription:', error);
-      Alert.alert("Error", "Failed to load prescription");
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadPrescriptionData();
+  }, [id, router]);
 
   const shareImage = async () => {
     if (!prescription || !imageBase64) return;
