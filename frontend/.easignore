@@ -1,52 +1,18 @@
-# Dependencies
-node_modules/**/*
+# Ignore native directories - let EAS prebuild generate them
+/android
+/ios
 
-# Build artifacts
-.expo/
-.expo-shared/
-dist/
-build/
-
-# Development files
-.git/
-.github/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS files
+# Ignore common development files
+node_modules
+.git
+.expo
+.expo-shared
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
 .DS_Store
-Thumbs.db
-
-# Test files
-__tests__/
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
-coverage/
-
-# Documentation
-docs/
-*.md
-!README.md
-
-# Large media files (if present)
-*.mov
-*.mp4
-*.avi
-
-# Environment files (use EAS Secrets instead)
-.env
-.env.*
-
-# Scripts
-scripts/
