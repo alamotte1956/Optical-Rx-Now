@@ -59,7 +59,7 @@ export const encryptImage = async (base64Image: string): Promise<string> => {
     return CryptoJS.AES.encrypt(base64Image, key).toString();
   } catch (error) {
     console.error('Error encrypting image:', error);
-    throw new Error('Failed to encrypt image');
+    throw new Error(`Failed to encrypt image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -71,6 +71,6 @@ export const decryptImage = async (encryptedImage: string): Promise<string> => {
     return decrypted.toString(CryptoJS.enc.Utf8);
   } catch (error) {
     console.error('Error decrypting image:', error);
-    throw new Error('Failed to decrypt image');
+    throw new Error(`Failed to decrypt image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
