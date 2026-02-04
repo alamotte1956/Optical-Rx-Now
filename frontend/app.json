@@ -16,10 +16,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.alamotte.opticalrxnow",
       "buildNumber": "1.0.0",
+      "deploymentTarget": "15.0",
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your eyeglass and contact lens prescriptions",
         "NSPhotoLibraryUsageDescription": "Select prescription photos from your gallery",
-        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club"
+        "NSLocationWhenInUseUsageDescription": "Find nearby optical stores like Sam's Club",
+        "NSHealthShareUsageDescription": "This app does not access Health data",
+        "NSHealthUpdateUsageDescription": "This app does not access Health data"
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -74,6 +77,20 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "Allow Optical Rx Now to use Face ID for secure access to your prescriptions"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.0"
+          },
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 24,
+            "buildToolsVersion": "34.0.0"
+          }
         }
       ]
     ],
