@@ -8,6 +8,10 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "androidStatusBar": {
+      "backgroundColor": "#0a1628",
+      "barStyle": "light-content"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alamotte.opticalrxnow",
@@ -50,7 +54,7 @@
           "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#000000"
         }
       ],
       [
@@ -70,11 +74,11 @@
     "experiments": {
       "typedRoutes": true
     },
-    "privacy": "https://opticalrxnow.com/privacy",
     "extra": {
       "eas": {
         "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
-      }
+      },
+      "privacyPolicyUrl": "https://opticalrxnow.com/privacy"
     }
   }
 }
