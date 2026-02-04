@@ -31,5 +31,82 @@
     "is_featured": false,
     "is_active": true,
     "order": 3
+  },
+  {
+    "id": "warbyparker",
+    "name": "Warby Parker",
+    "description": "Designer eyewear at a revolutionary price",
+    "url": "https://www.warbyparker.com",
+    "category": "eyeglasses",
+    "discount": "Starting at $95 including prescription lenses",
+    "is_featured": false,
+    "is_active": true,
+    "order": 4
+  },
+  {
+    "id": "eyebuydirect",
+    "name": "EyeBuyDirect",
+    "description": "Stylish prescription eyewear at affordable prices",
+    "url": "https://www.eyebuydirect.com",
+    "category": "eyeglasses",
+    "discount": "Frames starting at $6",
+    "is_featured": false,
+    "is_active": true,
+    "order": 5
+  },
+  {
+    "id": "coastal",
+    "name": "Coastal",
+    "description": "Premium eyewear and contact lenses online",
+    "url": "https://www.coastal.com",
+    "category": "both",
+    "discount": "First pair free for new customers",
+    "is_featured": false,
+    "is_active": true,
+    "order": 6
+  },
+  {
+    "id": "lensabl",
+    "name": "Lensabl",
+    "description": "Replace lenses in your favorite frames",
+    "url": "https://www.lensabl.com",
+    "category": "eyeglasses",
+    "discount": "Lens replacement from $77",
+    "is_featured": false,
+    "is_active": true,
+    "order": 7
+  },
+  {
+    "id": "hubble",
+    "name": "Hubble Contacts",
+    "description": "Daily contact lenses delivered to your door",
+    "url": "https://www.hubblecontacts.com",
+    "category": "contacts",
+    "discount": "Daily contacts for $1/day",
+    "is_featured": false,
+    "is_active": true,
+    "order": 8
+  },
+  {
+    "id": "glassesusa",
+    "name": "GlassesUSA",
+    "description": "Buy prescription glasses and sunglasses online",
+    "url": "https://www.glassesusa.com",
+    "category": "eyeglasses",
+    "discount": "Up to 70% off retail prices",
+    "is_featured": false,
+    "is_active": true,
+    "order": 9
+  },
+  {
+    "id": "lenscrafters",
+    "name": "LensCrafters",
+    "description": "Premium eyewear with in-store services",
+    "url": "https://www.lenscrafters.com",
+    "category": "both",
+    "discount": "Same-day service available",
+    "is_featured": false,
+    "is_active": true,
+    "order": 10
   }
 ]
