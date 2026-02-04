@@ -1,11 +1,18 @@
-// ... other code above
+import { useEffect } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-// Removed clonePrescription import
+export default function RxDetailRedirect() {
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
 
-// Removed handleClone function
+  useEffect(() => {
+    // Redirect to the prescription/[id] route
+    if (id) {
+      router.replace({ pathname: "/prescription/[id]", params: { id, memberId: "" } });
+    } else {
+      router.back();
+    }
+  }, [id]);
 
-// Removing cloning state variable
-
-// ... other code below
-
-// Keep Share, Email, and Print buttons intact
+  return null;
+}
