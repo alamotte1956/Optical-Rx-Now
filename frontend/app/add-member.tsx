@@ -51,6 +51,7 @@ export default function AddMemberScreen() {
       await new Promise(resolve => setTimeout(resolve, 100));
       
       // Navigate back to family tab with replace to force refresh
+      setSaving(false);
       router.replace('/(tabs)/family');
     } catch (error) {
       console.error('Error creating family member:', error);
