@@ -43,14 +43,19 @@ export default function AddMemberScreen() {
 
     setSaving(true);
     try {
+      console.log('Starting to create family member...');
       const newMember = await createFamilyMember({ name: name.trim(), relationship });
       console.log('Family member created successfully:', newMember);
+      
+      // Add a small delay to ensure state is properly updated
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Navigate back to family tab with replace to force refresh
       router.replace('/(tabs)/family');
     } catch (error) {
       console.error('Error creating family member:', error);
-      Alert.alert("Error", "Failed to add family member. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      Alert.alert("Error", `Failed to add family member: ${errorMessage}\n\nPlease try again.`);
       setSaving(false);
     }
   };
