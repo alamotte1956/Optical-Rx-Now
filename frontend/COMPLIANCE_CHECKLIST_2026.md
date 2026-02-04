@@ -12,7 +12,7 @@ This document provides comprehensive guidance for submitting Optical Rx Now to b
 - [x] Age Verification Modal implemented
 - [x] Root layout updated with age gate
 - [x] Health disclaimers added to iOS infoPlist
-- [x] expo-build-properties configured (iOS 15.0+, Android SDK 34)
+- [x] expo-build-properties configured (iOS 15.1+, Android SDK 34)
 - [x] AsyncStorage dependency verified
 
 ### Testing Requirements
@@ -41,7 +41,7 @@ This document provides comprehensive guidance for submitting Optical Rx Now to b
 7. Verify the file appears in your app target's "Copy Bundle Resources" build phase
 
 #### Build Settings Verification
-- **Deployment Target:** iOS 15.0 or later
+- **Deployment Target:** iOS 15.1 or later
 - **Privacy Manifest:** Included in app bundle
 - **Bundle ID:** `com.alamotte.opticalrxnow`
 - **Build Number:** Incremented from previous version
@@ -346,7 +346,7 @@ Google Play Console offers automated pre-launch testing. Use it to:
 #### Decline Flow
 - [ ] Selecting "No, I'm under 18" shows alert message
 - [ ] Alert explains age requirement clearly
-- [ ] Pressing "OK" exits the app (iOS: BackHandler.exitApp())
+- [ ] Pressing "OK" exits the app on Android (iOS does not support programmatic exit)
 - [ ] App does not save any data on decline
 
 #### Edge Cases
@@ -385,7 +385,7 @@ Google Play Console offers automated pre-launch testing. Use it to:
 
 #### 3. Age Verification Insufficient
 **Issue:** Age gate can be bypassed  
-**Solution:** Ensure modal is not dismissible and BackHandler.exitApp() works
+**Solution:** Ensure modal is not dismissible. On Android, BackHandler.exitApp() closes the app. On iOS, the app remains in background state (iOS does not support programmatic exit per Apple policy).
 
 #### 4. Privacy Policy Missing
 **Issue:** Privacy policy URL not accessible  
@@ -438,7 +438,7 @@ Please let us know if you need any additional information.
 - [x] Local storage only (AsyncStorage)
 
 ### Technical Compliance
-- [x] iOS 15.0+ deployment target
+- [x] iOS 15.1+ deployment target
 - [x] Android SDK 34 target
 - [x] Health disclaimers in infoPlist
 - [x] Required API declarations with reason codes

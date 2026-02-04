@@ -115,7 +115,7 @@ Updated Optical Rx Now to meet current 2026 App Store and Play Store compliance 
 - `frontend/IMPLEMENTATION_SUMMARY.md` (this file)
 
 **APP_STORE_SUBMISSION.md Updates:**
-- Added iOS 15.0+ requirement
+- Added iOS 15.1+ requirement
 - Added Android API 33+ (SDK 34) requirement
 - Added Privacy Manifest verification step
 - Added platform requirements section (2026)
