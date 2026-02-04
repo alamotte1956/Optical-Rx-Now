@@ -25,11 +25,12 @@
 - [ ] Set pricing (Free)
 
 #### Testing
-- [ ] Test on iOS 14.5+
+- [ ] Test on iOS 15.0+ (required for 2026 submissions)
 - [ ] Test all permission requests work properly
 - [ ] TestFlight beta testing (recommended)
 - [ ] Verify camera and photo library access
 - [ ] Verify location services work
+- [ ] Confirm Privacy Manifest is included in build (see frontend/ios/PrivacyInfo.md)
 
 ### ✅ Google Play Store (Android)
 
@@ -56,10 +57,12 @@ Answer as follows:
 - **Data handling:** All data stored locally on device
 
 #### Testing
-- [ ] Test on Android 13+ (modern photo picker)
-- [ ] Test on Android 10+ (older photo picker)
+- [ ] Test on Android 13+ (API 33+, required for 2026)
+- [ ] Test with target SDK 34 (Android 14)
 - [ ] Internal testing track (recommended)
 - [ ] Verify all permissions work correctly
+- [ ] Test modern photo picker (Android 13+)
+- [ ] Test on Android 10+ for compatibility
 
 ## Permissions Explained
 
@@ -109,6 +112,20 @@ eas build --platform android --profile production
 ## Review Timeline
 - **Apple App Store:** Typically 24-48 hours
 - **Google Play Store:** Typically hours to a few days
+
+## Platform Requirements (2026)
+
+### iOS Requirements
+- **Minimum iOS Version:** 15.0+ (Apple requirement as of April 2025)
+- **Deployment Target:** iOS 15.0
+- **Privacy Manifest:** Required (see frontend/ios/PrivacyInfo.md)
+- **Build Number:** Incremental for updates
+
+### Android Requirements
+- **Target SDK:** 34 (Android 14) - Required for Play Store 2026
+- **Compile SDK:** 34
+- **Minimum SDK:** 24 (Android 7.0)
+- **Build Tools:** 34.0.0
 
 ## Common Rejection Reasons
 

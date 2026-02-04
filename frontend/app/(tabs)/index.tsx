@@ -11,26 +11,20 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
-  // Navigate back to welcome screen
   const goToHome = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'index' }],
-    });
+    router.push("/");
   };
 
   useFocusEffect(
@@ -97,11 +91,7 @@ export default function PrescriptionsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => {
-            // Navigate to welcome screen using Linking
-            const url = Linking.createURL("/");
-            Linking.openURL(url);
-          }}
+          onPress={goToHome}
           activeOpacity={0.7}
         >
           <Ionicons name="home-outline" size={22} color="#4a9eff" />

@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Paths, File, Directory } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { encryptData, decryptData, encryptImage, decryptImage } from './encryption';
 
 // Storage Keys
 const FAMILY_MEMBERS_KEY = '@optical_rx_family_members';
@@ -50,27 +52,37 @@ export interface Prescription {
 
 // Family Members CRUD
 export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
-  try {
-    const data = await AsyncStorage.getItem(FAMILY_MEMBERS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (error) {
-    console.error('Error loading family members:', error);
-    return [];
-  }
+  return queueOperation(async () => {
+    try {
+      const encrypted = await AsyncStorage.getItem(FAMILY_MEMBERS_KEY);
+      if (!encrypted) return [];
+      
+      const decrypted = await decryptData(encrypted);
+      return decrypted;
+    } catch (error) {
+      console.error('Error getting family members:', error);
+      return [];
+    }
+  });
 };
 
 export const createFamilyMember = async (
   member: Omit<FamilyMember, 'id' | 'created_at'>
 ): Promise<FamilyMember> => {
   return queueOperation(async () => {
+    const members = await getFamilyMembers();
+    
     const newMember: FamilyMember = {
       ...member,
       id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       created_at: new Date().toISOString(),
     };
-    const members = await getFamilyMembers();
+    
     members.push(newMember);
-    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, JSON.stringify(members));
+    
+    const encrypted = await encryptData(members);
+    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
+    
     return newMember;
   });
 };
@@ -79,12 +91,14 @@ export const deleteFamilyMember = async (id: string): Promise<void> => {
   return queueOperation(async () => {
     const members = await getFamilyMembers();
     const filtered = members.filter(m => m.id !== id);
-    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, JSON.stringify(filtered));
+    const encrypted = await encryptData(filtered);
+    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
     
     // Delete all prescriptions for this member
     const prescriptions = await getPrescriptions();
     const remainingPrescriptions = prescriptions.filter(p => p.family_member_id !== id);
-    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(remainingPrescriptions));
+    const encryptedPrescriptions = await encryptData(remainingPrescriptions);
+    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encryptedPrescriptions);
     
     // Delete prescription images
     const deletedPrescriptions = prescriptions.filter(p => p.family_member_id === id);
@@ -96,14 +110,19 @@ export const deleteFamilyMember = async (id: string): Promise<void> => {
 
 // Prescriptions CRUD
 export const getPrescriptions = async (familyMemberId?: string): Promise<Prescription[]> => {
-  try {
-    const data = await AsyncStorage.getItem(PRESCRIPTIONS_KEY);
-    const prescriptions: Prescription[] = data ? JSON.parse(data) : [];
-    return familyMemberId ? prescriptions.filter(p => p.family_member_id === familyMemberId) : prescriptions;
-  } catch (error) {
-    console.error('Error loading prescriptions:', error);
-    return [];
-  }
+  return queueOperation(async () => {
+    try {
+      const encrypted = await AsyncStorage.getItem(PRESCRIPTIONS_KEY);
+      if (!encrypted) return [];
+      
+      const decrypted = await decryptData(encrypted);
+      const prescriptions: Prescription[] = decrypted;
+      return familyMemberId ? prescriptions.filter(p => p.family_member_id === familyMemberId) : prescriptions;
+    } catch (error) {
+      console.error('Error getting prescriptions:', error);
+      return [];
+    }
+  });
 };
 
 export const getPrescriptionById = async (id: string): Promise<Prescription | null> => {
@@ -118,7 +137,7 @@ export const createPrescription = async (
     await ensureImageDirExists();
     
     const id = `rx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-    const imageFileName = `${id}.jpg`;
+    const imageFileName = `${id}.enc`;
     
     const imagesDir = getImagesDirectory();
     const imageFile = new File(imagesDir, imageFileName);
@@ -128,14 +147,15 @@ export const createPrescription = async (
       : prescription.imageBase64;
     
     try {
-      // Create and write image
+      // Encrypt and save image
+      const encryptedImage = await encryptImage(base64Data);
       imageFile.create();
-      imageFile.write(base64Data, { encoding: 'base64' });
+      imageFile.write(encryptedImage);
       
       // Calculate expiry date
       const dateTaken = new Date(prescription.date_taken);
       const expiryDate = new Date(dateTaken);
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 2);
       
       const newPrescription: Prescription = {
         id,
@@ -150,7 +170,9 @@ export const createPrescription = async (
       
       const prescriptions = await getPrescriptions();
       prescriptions.push(newPrescription);
-      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(prescriptions));
+      
+      const encrypted = await encryptData(prescriptions);
+      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
       
       return newPrescription;
     } catch (error) {
@@ -171,7 +193,8 @@ export const deletePrescription = async (id: string): Promise<void> => {
   return queueOperation(async () => {
     const prescriptions = await getPrescriptions();
     const filtered = prescriptions.filter(p => p.id !== id);
-    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(filtered));
+    const encrypted = await encryptData(filtered);
+    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
     await deletePrescriptionImage(id);
   });
 };
@@ -187,25 +210,25 @@ export const clonePrescription = async (id: string): Promise<Prescription> => {
     
     // Generate new ID for the cloned prescription
     const newId = `rx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-    const newImageFileName = `${newId}.jpg`;
+    const newImageFileName = `${newId}.enc`;
     
     const imagesDir = getImagesDirectory();
-    const originalImageFile = new File(imagesDir, `${original.id}.jpg`);
+    const originalImageFile = new File(imagesDir, `${original.id}.enc`);
     const newImageFile = new File(imagesDir, newImageFileName);
     
     try {
-      // Copy the image file
+      // Copy the encrypted image file
       if (originalImageFile.exists) {
         const imageData = await originalImageFile.text();
         newImageFile.create();
-        newImageFile.write(imageData, { encoding: 'base64' });
+        newImageFile.write(imageData);
       }
       
       // Set the date to today
       const today = new Date();
       const dateTaken = today.toISOString().split('T')[0];
       const expiryDate = new Date(today);
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 2);
       
       const clonedPrescription: Prescription = {
         id: newId,
@@ -220,7 +243,9 @@ export const clonePrescription = async (id: string): Promise<Prescription> => {
       
       const prescriptions = await getPrescriptions();
       prescriptions.push(clonedPrescription);
-      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(prescriptions));
+      
+      const encrypted = await encryptData(prescriptions);
+      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
       
       return clonedPrescription;
     } catch (error) {
@@ -240,12 +265,73 @@ export const clonePrescription = async (id: string): Promise<Prescription> => {
 const deletePrescriptionImage = async (prescriptionId: string): Promise<void> => {
   try {
     const imagesDir = getImagesDirectory();
-    const imageFile = new File(imagesDir, `${prescriptionId}.jpg`);
+    const imageFile = new File(imagesDir, `${prescriptionId}.enc`);
     if (imageFile.exists) {
       imageFile.delete();
     }
   } catch (error) {
     console.error('Error deleting image:', error);
+  }
+};
+
+// Load encrypted prescription image
+export const loadPrescriptionImage = async (imageUri: string): Promise<string> => {
+  try {
+    const imageFile = new File(Paths.document, imageUri.replace(Paths.document + '/', ''));
+    const encryptedImage = await imageFile.text();
+    const decryptedImage = await decryptImage(encryptedImage);
+    return decryptedImage;
+  } catch (error) {
+    console.error('Error loading prescription image:', error);
+    throw error;
+  }
+};
+
+// Export encrypted backup
+export const exportEncryptedBackup = async (): Promise<void> => {
+  try {
+    const members = await getFamilyMembers();
+    const prescriptions = await getPrescriptions();
+    
+    const backup = {
+      version: '1.0',
+      app: 'Optical Rx Now',
+      exported_at: new Date().toISOString(),
+      members,
+      prescriptions: prescriptions.map(p => ({
+        ...p,
+        image_uri: 'EXCLUDED_FROM_BACKUP', // Don't include file paths
+      })),
+    };
+    
+    // Encrypt entire backup
+    const encrypted = await encryptData(backup);
+    
+    // Save to temporary file
+    const fileName = `optical-rx-backup-${Date.now()}.encrypted`;
+    const tempDir = new Directory(Paths.cache, 'backups');
+    if (!tempDir.exists) {
+      tempDir.create();
+    }
+    const backupFile = new File(tempDir, fileName);
+    backupFile.create();
+    await backupFile.write(encrypted);
+    
+    // Share file
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(backupFile.uri, {
+        mimeType: 'application/octet-stream',
+        dialogTitle: 'Save encrypted backup',
+      });
+    }
+    
+    // Clean up temp file
+    if (backupFile.exists) {
+      backupFile.delete();
+    }
+  } catch (error) {
+    console.error('Error exporting backup:', error);
+    throw error;
   }
 };
 

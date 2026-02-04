@@ -18,11 +18,6 @@ interface AffiliateCardProps {
 
 export default function AffiliateCard({ partner }: AffiliateCardProps) {
   const handlePress = async () => {
-    // Track affiliate click for analytics (non-blocking)
-    try {
-      const { trackAffiliateClick } = await import("../../services/analytics");
-      trackAffiliateClick(partner.id);
-    } catch (e) {}
     await WebBrowser.openBrowserAsync(partner.url);
   };
 

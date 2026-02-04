@@ -7,49 +7,36 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Modal,
+  Alert,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getFamilyMembers, getPrescriptions, deleteFamilyMember, type FamilyMember } from "../../services/localStorage";
-
-interface Stats {
-  [key: string]: number;
-}
+import { getFamilyMembers, deleteFamilyMember, type FamilyMember } from "../../services/localStorage";
 
 export default function FamilyScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [prescriptionCounts, setPrescriptionCounts] = useState<Stats>({});
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
-  const [deleting, setDeleting] = useState(false);
+
+  const goToHome = () => {
+    router.push("/");
+  };
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      fetchMembers();
     }, [])
   );
 
-  const fetchData = async () => {
+  const fetchMembers = async () => {
     try {
-      const [membersData, rxData] = await Promise.all([
-        getFamilyMembers(),
-        getPrescriptions(),
-      ]);
-
-      setMembers(membersData);
-
-      const counts: Stats = {};
-      rxData.forEach((rx: any) => {
-        counts[rx.family_member_id] = (counts[rx.family_member_id] || 0) + 1;
-      });
-      setPrescriptionCounts(counts);
+      const data = await getFamilyMembers();
+      setMembers(data);
     } catch (error) {
-      console.log("Error fetching data:", error);
+      console.error("Error fetching members:", error);
+      Alert.alert("Error", "Failed to load family members");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,44 +45,29 @@ export default function FamilyScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchData();
+    fetchMembers();
   };
 
-  const handleDeleteMember = (member: FamilyMember) => {
-    console.log("Delete button pressed for:", member.name);
-    setMemberToDelete(member);
-    setDeleteModalVisible(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!memberToDelete) return;
-    
-    setDeleting(true);
-    console.log("Deleting member:", memberToDelete.id);
-    try {
-      await deleteFamilyMember(memberToDelete.id);
-      setDeleteModalVisible(false);
-      setMemberToDelete(null);
-      fetchData();
-    } catch (error) {
-      console.log("Error deleting member:", error);
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const cancelDelete = () => {
-    setDeleteModalVisible(false);
-    setMemberToDelete(null);
-  };
-
-  const getRelationshipIcon = (relationship: string): string => {
-    const rel = relationship.toLowerCase();
-    if (rel.includes("self") || rel.includes("me")) return "person";
-    if (rel.includes("spouse") || rel.includes("wife") || rel.includes("husband")) return "heart";
-    if (rel.includes("child") || rel.includes("son") || rel.includes("daughter")) return "happy";
-    if (rel.includes("parent") || rel.includes("mom") || rel.includes("dad")) return "people";
-    return "person-outline";
+  const handleDeleteMember = (memberId: string, memberName: string) => {
+    Alert.alert(
+      "Delete Family Member",
+      `Are you sure you want to delete ${memberName}? This will also delete all their prescriptions.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteFamilyMember(memberId);
+              fetchMembers();
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete family member");
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -110,16 +82,12 @@ export default function FamilyScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => {
-            // Navigate to welcome screen using Linking
-            const url = Linking.createURL("/");
-            Linking.openURL(url);
-          }}
+          onPress={goToHome}
           activeOpacity={0.7}
         >
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
@@ -129,11 +97,11 @@ export default function FamilyScreen() {
           style={styles.addButton}
           onPress={() => router.push("/add-member")}
         >
-          <Ionicons name="person-add" size={22} color="#fff" />
+          <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* Members List */}
+      {/* Family Members List */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -148,91 +116,45 @@ export default function FamilyScreen() {
         {members.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="people-outline" size={64} color="#3a4d63" />
-            <Text style={styles.emptyTitle}>No Family Members</Text>
+            <Text style={styles.emptyTitle}>No Family Members Yet</Text>
             <Text style={styles.emptyText}>
-              Add your family members to start managing prescriptions
+              Tap the + button to add your first family member
             </Text>
             <TouchableOpacity
               style={styles.emptyButton}
               onPress={() => router.push("/add-member")}
             >
-              <Ionicons name="person-add" size={20} color="#fff" />
-              <Text style={styles.emptyButtonText}>Add First Member</Text>
+              <Text style={styles.emptyButtonText}>Add Family Member</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          members.map((member) => (
-            <View key={member.id} style={styles.memberCard}>
-              <View style={styles.memberIconContainer}>
-                <Ionicons
-                  name={getRelationshipIcon(member.relationship) as any}
-                  size={28}
-                  color="#4a9eff"
-                />
+          members.map((member) => {
+            const prescriptionCount = member.prescription_count || 0;
+            return (
+            <TouchableOpacity
+              key={member.id}
+              style={styles.memberCard}
+              onPress={() =>
+                router.push({ pathname: "/member/[id]", params: { id: member.id } })
+              }
+              onLongPress={() => handleDeleteMember(member.id, member.name)}
+            >
+              <View style={styles.memberIcon}>
+                <Ionicons name="person" size={32} color="#4a9eff" />
               </View>
               <View style={styles.memberInfo}>
                 <Text style={styles.memberName}>{member.name}</Text>
                 <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                <Text style={styles.memberRxCount}>
-                  {prescriptionCounts[member.id] || 0} prescription
-                  {(prescriptionCounts[member.id] || 0) !== 1 ? "s" : ""}
+                <Text style={styles.memberStats}>
+                  {prescriptionCount} prescription{prescriptionCount !== 1 ? 's' : ''}
                 </Text>
               </View>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => {
-                  console.log("Delete tapped for:", member.name);
-                  handleDeleteMember(member);
-                }}
-                activeOpacity={0.6}
-              >
-                <Ionicons name="trash" size={22} color="#fff" />
-                <Text style={styles.deleteText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          ))
+              <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
+            </TouchableOpacity>
+          );
+          })
         )}
       </ScrollView>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={deleteModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={cancelDelete}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Ionicons name="warning" size={48} color="#ff5c5c" />
-            <Text style={styles.modalTitle}>Delete Family Member?</Text>
-            <Text style={styles.modalMessage}>
-              {memberToDelete && (prescriptionCounts[memberToDelete.id] || 0) > 0
-                ? `This will also delete ${prescriptionCounts[memberToDelete.id]} prescription(s) for ${memberToDelete?.name}. This cannot be undone.`
-                : `Are you sure you want to delete ${memberToDelete?.name}?`}
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={cancelDelete}
-                disabled={deleting}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.confirmDeleteButton}
-                onPress={confirmDelete}
-                disabled={deleting}
-              >
-                {deleting ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Text style={styles.confirmDeleteText}>Delete</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -257,7 +179,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   homeButton: {
     width: 44,
@@ -287,41 +209,38 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 100,
   },
   emptyState: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 60,
-    paddingHorizontal: 20,
+    paddingTop: 100,
   },
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     marginTop: 16,
-    marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6b7c8f",
+    color: "#8899a6",
     textAlign: "center",
-    marginBottom: 24,
+    marginTop: 8,
+    paddingHorizontal: 40,
   },
   emptyButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    marginTop: 24,
     backgroundColor: "#4a9eff",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 25,
-    gap: 8,
+    borderRadius: 20,
   },
   emptyButtonText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "600",
+    fontSize: 14,
   },
   memberCard: {
     flexDirection: "row",
@@ -331,104 +250,31 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 12,
   },
-  memberIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  memberIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: "rgba(74, 158, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 16,
   },
   memberInfo: {
     flex: 1,
-    marginLeft: 12,
   },
   memberName: {
     fontSize: 18,
     fontWeight: "600",
     color: "#fff",
+    marginBottom: 4,
   },
   memberRelationship: {
     fontSize: 14,
-    color: "#6b7c8f",
-    marginTop: 2,
-  },
-  memberRxCount: {
-    fontSize: 12,
     color: "#4a9eff",
-    marginTop: 4,
+    marginBottom: 2,
   },
-  deleteButton: {
-    width: 70,
-    height: 50,
-    borderRadius: 12,
-    backgroundColor: "#ff5c5c",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 8,
-  },
-  deleteText: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: "#1a2d45",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 320,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  modalMessage: {
-    fontSize: 14,
+  memberStats: {
+    fontSize: 12,
     color: "#8899a6",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: "#3a4d63",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  confirmDeleteButton: {
-    flex: 1,
-    backgroundColor: "#ff5c5c",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  confirmDeleteText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });

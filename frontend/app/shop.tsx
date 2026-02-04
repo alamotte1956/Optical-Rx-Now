@@ -6,8 +6,6 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
-  Alert,
-  Linking,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,8 +14,7 @@ import { TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import * as WebBrowser from "expo-web-browser";
 import AffiliateCard from "./components/AffiliateCard";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import affiliateData from "../data/affiliates.json";
 
 interface AffiliatePartner {
   id: string;
@@ -64,13 +61,10 @@ export default function ShopScreen() {
 
   const fetchPartners = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/affiliates`);
-      if (response.ok) {
-        const data = await response.json();
-        setPartners(data.partners);
-      }
+      // Use static data instead of fetching from backend
+      setPartners(affiliateData);
     } catch (error) {
-      console.error("Error fetching partners:", error);
+      console.error("Error loading affiliates:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -79,12 +73,6 @@ export default function ShopScreen() {
 
   const handleSamsClubPress = async () => {
     setLocationLoading(true);
-    
-    // Track affiliate click (non-blocking)
-    try {
-      const { trackAffiliateClick } = await import("../services/analytics");
-      trackAffiliateClick("samsclub");
-    } catch (e) {}
     
     try {
       let url = "https://www.samsclub.com/locator";

@@ -1,15 +1,15 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const DEVICE_ID_KEY = "@optical_rx_device_id";
+const EVENTS_KEY = "@app_events";
+const MAX_EVENTS = 100;
 
-// Generate or retrieve a persistent device ID
+// Generate or retrieve device ID (local only, for user stats)
 export const getDeviceId = async (): Promise<string> => {
   try {
     let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
     if (!deviceId) {
-      // Generate a unique ID for this device
       deviceId = `${Platform.OS}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
@@ -19,38 +19,56 @@ export const getDeviceId = async (): Promise<string> => {
   }
 };
 
-// Track analytics event
+// Store events locally for user's own stats
 export const trackEvent = async (
-  eventType: "app_open" | "ad_click" | "affiliate_click",
+  eventType: "app_open" | "prescription_added" | "member_added" | "export_data",
   metadata?: Record<string, any>
 ) => {
   try {
-    const deviceId = await getDeviceId();
-    const platform = Platform.OS; // 'ios', 'android', or 'web'
+    const eventsJson = await AsyncStorage.getItem(EVENTS_KEY);
+    const events = eventsJson ? JSON.parse(eventsJson) : [];
     
-    await fetch(`${BACKEND_URL}/api/analytics/track`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        device_id: deviceId,
-        event_type: eventType,
-        platform: platform,
-        app_version: "1.0.0",
-        metadata: metadata,
-      }),
+    events.push({
+      type: eventType,
+      timestamp: new Date().toISOString(),
+      platform: Platform.OS,
+      metadata,
     });
+    
+    // Keep only last MAX_EVENTS
+    const trimmedEvents = events.slice(-MAX_EVENTS);
+    await AsyncStorage.setItem(EVENTS_KEY, JSON.stringify(trimmedEvents));
   } catch (error) {
-    // Silently fail - don't interrupt user experience
-    console.log("Analytics error:", error);
+    console.error('Error tracking event locally:', error);
   }
 };
 
-// Track app open (call on app launch)
+// Get local stats for user
+export const getLocalStats = async () => {
+  try {
+    const eventsJson = await AsyncStorage.getItem(EVENTS_KEY);
+    const events = eventsJson ? JSON.parse(eventsJson) : [];
+    
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    return {
+      total_events: events.length,
+      last_7_days: events.filter((e: any) => new Date(e.timestamp) > sevenDaysAgo).length,
+      last_30_days: events.filter((e: any) => new Date(e.timestamp) > thirtyDaysAgo).length,
+      by_type: events.reduce((acc: any, e: any) => {
+        acc[e.type] = (acc[e.type] || 0) + 1;
+        return acc;
+      }, {}),
+    };
+  } catch {
+    return { total_events: 0, last_7_days: 0, last_30_days: 0, by_type: {} };
+  }
+};
+
+// Convenience functions
 export const trackAppOpen = () => trackEvent("app_open");
-
-// Track ad click
-export const trackAdClick = (adId?: string) => trackEvent("ad_click", { ad_id: adId });
-
-// Track affiliate click
-export const trackAffiliateClick = (partnerId: string) =>
-  trackEvent("affiliate_click", { partner_id: partnerId });
+export const trackPrescriptionAdded = () => trackEvent("prescription_added");
+export const trackMemberAdded = () => trackEvent("member_added");
+export const trackExportData = () => trackEvent("export_data");
