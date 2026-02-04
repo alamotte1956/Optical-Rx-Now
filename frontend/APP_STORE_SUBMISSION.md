@@ -8,7 +8,7 @@
 - [ ] App name: "Optical Rx Now"
 - [ ] Bundle identifier: `com.alamotte.opticalrxnow`
 - [ ] Version: 1.0.0
-- [ ] Privacy policy URL: https://opticalrxnow.com/privacy
+- [ ] Privacy policy URL: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
 
 #### iOS Privacy & Permissions (✅ Already Configured)
 - [x] **NSPhotoLibraryUsageDescription**: "We need access to your photos to help you save and manage prescription images."
@@ -25,7 +25,7 @@
 - [ ] Set pricing (Free)
 
 #### Testing
-- [ ] Test on iOS 15.0+ (required for 2026 submissions)
+- [ ] Test on iOS 15.1+ (required for 2026 submissions)
 - [ ] Test all permission requests work properly
 - [ ] TestFlight beta testing (recommended)
 - [ ] Verify camera and photo library access
@@ -38,7 +38,7 @@
 - [ ] App name: "Optical Rx Now"
 - [ ] Package name: `com.alamotte.opticalrxnow`
 - [ ] Version: 1.0.0
-- [ ] Privacy policy URL: https://opticalrxnow.com/privacy
+- [ ] Privacy policy URL: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
 
 #### Google Play Console
 - [ ] Complete store listing
@@ -95,6 +95,45 @@ Consider adding a disclaimer in your app description:
 
 > "Optical Rx Now is for storing and organizing prescription information only. It is not intended to provide medical advice, diagnosis, or treatment. Always consult with a qualified eye care professional for medical advice."
 
+## GitHub Pages Setup for Privacy Policy
+
+### Prerequisites
+Before submitting to app stores, you must host the privacy policy publicly using GitHub Pages:
+
+#### Step 1: Enable GitHub Pages
+1. Go to your repository on GitHub: https://github.com/alamotte1956/Optical-Rx-Now
+2. Click on **Settings** (top menu)
+3. Scroll down to **Pages** (left sidebar)
+4. Under **Source**, select **Deploy from a branch**
+5. Select branch: **main** (or your default branch)
+6. Select folder: **/docs**
+7. Click **Save**
+
+#### Step 2: Wait for Deployment
+- GitHub will automatically build and deploy your site
+- Wait 2-5 minutes for the deployment to complete
+- Your privacy policy will be available at: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+
+#### Step 3: Verify Privacy Policy URL
+Before app submission:
+1. Open https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html in your browser
+2. Verify the page loads correctly
+3. Confirm all content is visible and properly formatted
+4. Test on both desktop and mobile browsers
+
+#### Step 4: Update App Store Listings
+Use this URL in both app stores:
+- **Privacy Policy URL:** https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+- This URL is already configured in `frontend/app.json`
+
+### Troubleshooting GitHub Pages
+If the privacy policy URL doesn't load:
+- Check that GitHub Pages is enabled in repository Settings
+- Verify the /docs folder exists with index.html and privacy-policy.html
+- Wait a few more minutes for deployment to complete
+- Check the Actions tab for deployment status
+- Ensure the repository is public (required for GitHub Pages on free accounts)
+
 ## Build Commands
 
 ### iOS Build
@@ -116,8 +155,8 @@ eas build --platform android --profile production
 ## Platform Requirements (2026)
 
 ### iOS Requirements
-- **Minimum iOS Version:** 15.0+ (Apple requirement as of April 2025)
-- **Deployment Target:** iOS 15.0
+- **Minimum iOS Version:** 15.1+ (Apple requirement as of April 2025)
+- **Deployment Target:** iOS 15.1
 - **Privacy Manifest:** Required (see frontend/ios/PrivacyInfo.md)
 - **Build Number:** Incremental for updates
 

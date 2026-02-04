@@ -45,13 +45,34 @@ export default function AddRxScreen() {
   }, []);
 
   const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission Required",
-        "Camera permission is required to capture prescriptions"
-      );
+    if (Platform.OS !== 'web') {
+      // Check camera permission first
+      const { status: cameraExisting } = await ImagePicker.getCameraPermissionsAsync();
+      if (cameraExisting !== 'granted') {
+        const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+        if (cameraStatus !== 'granted') {
+          Alert.alert(
+            'Camera Permission Required',
+            'Please enable camera permission in your device settings to take photos of prescriptions.'
+          );
+          return false;
+        }
+      }
+      
+      // Check media library permission
+      const { status: mediaExisting } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      if (mediaExisting !== 'granted') {
+        const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (mediaStatus !== 'granted') {
+          Alert.alert(
+            'Photo Library Permission Required',
+            'Please enable photo library permission in your device settings to select prescription photos.'
+          );
+          return false;
+        }
+      }
     }
+    return true;
   };
 
   const fetchFamilyMembers = async () => {
