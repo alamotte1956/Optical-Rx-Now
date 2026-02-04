@@ -54,13 +54,20 @@ export interface Prescription {
 export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
   return queueOperation(async () => {
     try {
+      console.log('Getting family members from storage...');
       const encrypted = await AsyncStorage.getItem(FAMILY_MEMBERS_KEY);
-      if (!encrypted) return [];
+      if (!encrypted) {
+        console.log('No family members found in storage, returning empty array');
+        return [];
+      }
       
+      console.log('Decrypting family members data...');
       const decrypted = await decryptData(encrypted);
+      console.log(`Family members retrieved successfully: ${decrypted.length}`);
       return decrypted;
     } catch (error) {
       console.error('Error getting family members:', error);
+      // Return empty array to prevent the app from getting stuck
       return [];
     }
   });
@@ -70,20 +77,30 @@ export const createFamilyMember = async (
   member: Omit<FamilyMember, 'id' | 'created_at'>
 ): Promise<FamilyMember> => {
   return queueOperation(async () => {
-    const members = await getFamilyMembers();
-    
-    const newMember: FamilyMember = {
-      ...member,
-      id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-      created_at: new Date().toISOString(),
-    };
-    
-    members.push(newMember);
-    
-    const encrypted = await encryptData(members);
-    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
-    
-    return newMember;
+    try {
+      console.log('Creating family member:', member);
+      const members = await getFamilyMembers();
+      console.log(`Current members count: ${members.length}`);
+      
+      const newMember: FamilyMember = {
+        ...member,
+        id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+        created_at: new Date().toISOString(),
+      };
+      
+      members.push(newMember);
+      console.log(`New members count: ${members.length}`);
+      
+      const encrypted = await encryptData(members);
+      console.log('Data encrypted successfully');
+      await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
+      console.log('Data saved to AsyncStorage successfully');
+      
+      return newMember;
+    } catch (error) {
+      console.error('Error creating family member:', error);
+      throw error;
+    }
   });
 };
 
