@@ -14,7 +14,7 @@ Updated Optical Rx Now to meet current 2026 App Store and Play Store compliance 
 **Files Modified:** `frontend/app.json`, `frontend/package.json`
 
 **Changes:**
-- Set `ios.deploymentTarget` to `"15.0"` (Apple's minimum requirement as of April 2025)
+- Set `ios.deploymentTarget` to `"15.1"` (Apple's minimum requirement as of April 2025)
 - Added `expo-build-properties` dependency (~0.12.0)
 - Configured build properties plugin with iOS deployment target
 
@@ -49,7 +49,7 @@ Updated Optical Rx Now to meet current 2026 App Store and Play Store compliance 
   "expo-build-properties",
   {
     "ios": {
-      "deploymentTarget": "15.0"
+      "deploymentTarget": "15.1"
     },
     "android": {
       "compileSdkVersion": 34,

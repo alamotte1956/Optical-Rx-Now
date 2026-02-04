@@ -183,5 +183,5 @@ For issues with Privacy Manifest implementation:
 ---
 
 **Last Updated:** February 4, 2026
-**Compatible with:** iOS 15.0+
+**Compatible with:** iOS 15.1+
 **Required for:** App Store submission in 2026

@@ -73,15 +73,30 @@ export default function MemberDetailScreen() {
 
   const requestPermissions = async () => {
     if (Platform.OS !== 'web') {
-      const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-      const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      // Check camera permission first
+      const { status: cameraExisting } = await ImagePicker.getCameraPermissionsAsync();
+      if (cameraExisting !== 'granted') {
+        const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+        if (cameraStatus !== 'granted') {
+          Alert.alert(
+            'Camera Permission Required',
+            'Please enable camera permission in your device settings to take photos of prescriptions.'
+          );
+          return false;
+        }
+      }
       
-      if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
-        Alert.alert(
-          'Permissions Required',
-          'Please enable camera and photo library permissions in your device settings to add prescriptions.'
-        );
-        return false;
+      // Check media library permission
+      const { status: mediaExisting } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      if (mediaExisting !== 'granted') {
+        const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (mediaStatus !== 'granted') {
+          Alert.alert(
+            'Photo Library Permission Required',
+            'Please enable photo library permission in your device settings to select prescription photos.'
+          );
+          return false;
+        }
       }
     }
     return true;

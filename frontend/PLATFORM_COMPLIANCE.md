@@ -5,7 +5,7 @@
 ### Current Compliance Status (February 2026)
 
 #### iOS Platform Requirements ✅
-- **iOS Deployment Target:** 15.0 (Apple's minimum requirement for new apps as of April 2025)
+- **iOS Deployment Target:** 15.1 (Apple's minimum requirement for new apps as of April 2025)
 - **Build Properties Plugin:** Configured with expo-build-properties
 - **Privacy Manifest:** Documentation provided in `frontend/ios/PrivacyInfo.md`
 - **Health Data Disclaimer:** Added to prevent App Review questions for medical apps
@@ -25,7 +25,7 @@ The app uses `expo-build-properties` plugin to set platform-specific build confi
 ```json
 {
   "ios": {
-    "deploymentTarget": "15.0"
+    "deploymentTarget": "15.1"
   },
   "android": {
     "compileSdkVersion": 34,
@@ -229,7 +229,7 @@ if (Platform.OS === 'ios') {
 Before building for production:
 
 ### iOS Compliance (2026):
-- [x] iOS deployment target set to 15.0
+- [x] iOS deployment target set to 15.1
 - [x] expo-build-properties plugin configured
 - [x] Privacy Manifest documentation created (frontend/ios/PrivacyInfo.md)
 - [x] NSHealthShareUsageDescription added
@@ -240,7 +240,7 @@ Before building for production:
 - [x] usesNonExemptEncryption set to false
 - [ ] Privacy Manifest file manually added to Xcode project (see PrivacyInfo.md)
 - [ ] Privacy policy URL publicly accessible
-- [ ] Test on iOS 15.0+ device
+- [ ] Test on iOS 15.1+ device
 
 ### Android Compliance (2026):
 - [x] Target SDK version set to 34

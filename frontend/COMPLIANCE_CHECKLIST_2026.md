@@ -360,9 +360,8 @@ Google Play Console offers automated pre-launch testing. Use it to:
 #### iOS Testing
 - [ ] Privacy Manifest is included in Xcode build
 - [ ] Health disclaimers appear in app info
-- [ ] Deployment target is iOS 15.0+
+- [ ] Deployment target is iOS 15.1+
 - [ ] Age gate appears on physical iPhone
-- [ ] BackHandler.exitApp() works on iOS
 
 #### Android Testing
 - [ ] App compiles with SDK 34

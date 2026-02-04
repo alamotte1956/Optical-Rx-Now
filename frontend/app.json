@@ -8,6 +8,7 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "privacy": "https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html",
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
