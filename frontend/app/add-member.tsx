@@ -43,11 +43,14 @@ export default function AddMemberScreen() {
 
     setSaving(true);
     try {
-      await createFamilyMember({ name: name.trim(), relationship });
-      router.back();
+      const newMember = await createFamilyMember({ name: name.trim(), relationship });
+      console.log('Family member created successfully:', newMember);
+      
+      // Navigate back to family tab with replace to force refresh
+      router.replace('/(tabs)/family');
     } catch (error) {
-      Alert.alert("Error", "Failed to add family member");
-    } finally {
+      console.error('Error creating family member:', error);
+      Alert.alert("Error", "Failed to add family member. Please try again.");
       setSaving(false);
     }
   };
