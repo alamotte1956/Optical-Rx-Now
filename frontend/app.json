@@ -8,7 +8,7 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "privacy": "https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html",
+    "privacy": "https://opticalrxnow.com/privacy",
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
@@ -100,11 +100,7 @@
     "extra": {
       "eas": {
         "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
-      },
-      "router": {
-        "origin": false
       }
-    },
-    "owner": "alamotte1956"
+    }
   }
 }
