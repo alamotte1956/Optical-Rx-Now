@@ -17,7 +17,6 @@ import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescriptio
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
