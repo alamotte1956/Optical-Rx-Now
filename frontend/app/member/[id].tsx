@@ -19,6 +19,68 @@ import {
   type Prescription 
 } from '../../services/localStorage';
 
+// Lazy-loading prescription card component
+const PrescriptionCard = ({ 
+  item, 
+  onPress, 
+  onDelete 
+}: { 
+  item: Prescription; 
+  onPress: () => void; 
+  onDelete: () => void;
+}) => {
+  const [imageError, setImageError] = useState(false);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <View style={styles.cardWrapper}>
+      <TouchableOpacity
+        style={styles.prescriptionCard}
+        onPress={onPress}
+        onLongPress={onDelete}
+      >
+        {item.image_uri && !imageError ? (
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.image_uri}` }}
+            style={styles.prescriptionImage}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <View style={[styles.prescriptionImage, styles.placeholderImage]}>
+            <Ionicons name="image-outline" size={40} color="#666" />
+          </View>
+        )}
+        <View style={styles.prescriptionOverlay}>
+          <View style={styles.prescriptionBadge}>
+            <Ionicons
+              name={item.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
+              size={16}
+              color="#fff"
+            />
+            <Text style={styles.prescriptionType}>
+              {item.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
+            </Text>
+          </View>
+          <Text style={styles.prescriptionDate}>{formatDate(item.created_at)}</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={onDelete}
+      >
+        <Ionicons name="trash-outline" size={18} color="#ff6b6b" />
+      </TouchableOpacity>
+    </View>
+  );
+};
 // Prescription with optional loaded image data
 interface PrescriptionWithImage extends Prescription {
   imageBase64?: string;
@@ -28,7 +90,7 @@ export default function MemberDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [member, setMember] = useState<FamilyMember | null>(null);
-  const [prescriptions, setPrescriptions] = useState<PrescriptionWithImage[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingPrescription, setDeletingPrescription] = useState(false);
 
@@ -51,6 +113,8 @@ export default function MemberDetailScreen() {
       // Load prescriptions for this specific member using proper service
       const allPrescriptions = await getPrescriptions(id); // Pass family member ID to filter
       
+      // Set prescriptions directly without loading images
+      setPrescriptions(allPrescriptions);
       // Don't preload images - just set prescriptions without image data
       // Images will be loaded on-demand or shown as placeholders
       setPrescriptions(allPrescriptions.map(rx => ({ ...rx, imageBase64: undefined })));
@@ -119,6 +183,17 @@ export default function MemberDetailScreen() {
     );
   };
 
+  const renderPrescription = ({ item }: { item: Prescription }) => (
+    <PrescriptionCard
+      item={item}
+      onPress={() =>
+        router.push({
+          pathname: '/prescription/[id]',
+          params: { id: item.id, memberId: id },
+        })
+      }
+      onDelete={() => handleDeletePrescription(item.id)}
+    />
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -284,6 +359,7 @@ const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
   },
+  cardWrapper: {
   prescriptionCardWrapper: {
     position: 'relative',
     width: '48%',
@@ -328,6 +404,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#aaa',
     marginTop: 4,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 12,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
+    zIndex: 10,
   },
   emptyContainer: {
     alignItems: 'center',
