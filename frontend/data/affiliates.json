@@ -30,26 +30,26 @@
     "discount": "Free shipping on all orders",
     "is_featured": false,
     "is_active": true,
-    "order": 3
+    "order": 4
   },
   {
     "id": "warbyparker",
     "name": "Warby Parker",
-    "description": "Designer eyewear at a revolutionary price",
+    "description": "Designer eyewear with free home try-on",
     "url": "https://www.warbyparker.com",
     "category": "eyeglasses",
-    "discount": "Starting at $95 including prescription lenses",
+    "discount": "Free home try-on + Free shipping",
     "is_featured": false,
     "is_active": true,
-    "order": 4
+    "order": 3
   },
   {
     "id": "eyebuydirect",
     "name": "EyeBuyDirect",
-    "description": "Stylish prescription eyewear at affordable prices",
+    "description": "Quality eyewear at affordable prices",
     "url": "https://www.eyebuydirect.com",
     "category": "eyeglasses",
-    "discount": "Frames starting at $6",
+    "discount": "Up to 50% off + Free shipping",
     "is_featured": false,
     "is_active": true,
     "order": 5
@@ -68,21 +68,21 @@
   {
     "id": "lensabl",
     "name": "Lensabl",
-    "description": "Replace lenses in your favorite frames",
+    "description": "Replace lenses in your existing frames",
     "url": "https://www.lensabl.com",
     "category": "eyeglasses",
-    "discount": "Lens replacement from $77",
+    "discount": "Starting at $77",
     "is_featured": false,
     "is_active": true,
     "order": 7
   },
   {
-    "id": "hubble",
+    "id": "hubblecontacts",
     "name": "Hubble Contacts",
     "description": "Daily contact lenses delivered to your door",
     "url": "https://www.hubblecontacts.com",
     "category": "contacts",
-    "discount": "Daily contacts for $1/day",
+    "discount": "First box free",
     "is_featured": false,
     "is_active": true,
     "order": 8
@@ -90,10 +90,10 @@
   {
     "id": "glassesusa",
     "name": "GlassesUSA",
-    "description": "Buy prescription glasses and sunglasses online",
+    "description": "Designer frames at discount prices",
     "url": "https://www.glassesusa.com",
     "category": "eyeglasses",
-    "discount": "Up to 70% off retail prices",
+    "discount": "Up to 70% off + Free shipping",
     "is_featured": false,
     "is_active": true,
     "order": 9
@@ -101,10 +101,10 @@
   {
     "id": "lenscrafters",
     "name": "LensCrafters",
-    "description": "Premium eyewear with in-store services",
+    "description": "Premium eyewear with in-store service",
     "url": "https://www.lenscrafters.com",
     "category": "both",
-    "discount": "Same-day service available",
+    "discount": "Eye exam + 50% off lenses",
     "is_featured": false,
     "is_active": true,
     "order": 10

@@ -85,6 +85,9 @@ export default function AddMemberScreen() {
       // Add a small delay to ensure state is properly updated
       await new Promise(resolve => setTimeout(resolve, 100));
       
+      // Reset saving state before navigation
+      setSaving(false);
+
       // Navigate back to family tab with replace to force refresh
       router.replace('/(tabs)/family');
     } catch (error) {

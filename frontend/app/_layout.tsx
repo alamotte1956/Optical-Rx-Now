@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler, Platform, View, Text, StyleSheet } from "react-native";
+import { BackHandler, Platform, View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import {
   AgeVerificationModal,
   checkAgeVerification,
@@ -22,13 +22,19 @@ export default function RootLayout() {
 
   useEffect(() => {
     const checkAge = async () => {
-      const verified = await checkAgeVerification();
-      const declined = await checkAgeDeclined();
+      try {
+        const verified = await checkAgeVerification();
+        const declined = await checkAgeDeclined();
 
-      setIsAgeVerified(verified);
-      setAgeDeclined(declined);
+        setIsAgeVerified(verified);
+        setAgeDeclined(declined);
 
-      if (!verified && !declined) {
+        if (!verified && !declined) {
+          setShowAgeModal(true);
+        }
+      } catch (error) {
+        console.error('Error checking age verification:', error);
+        setIsAgeVerified(false);
         setShowAgeModal(true);
       }
     };
@@ -61,7 +67,16 @@ export default function RootLayout() {
     }
   };
 
-  if (isAgeVerified === null) return null;
+  if (isAgeVerified === null) {
+    return (
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: '#0a1628', justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#4a9eff" />
+          <Text style={{ color: '#8899a6', marginTop: 16, fontSize: 16 }}>Loading...</Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   if (ageDeclined && Platform.OS === "ios") {
     return (
