@@ -19,9 +19,9 @@ import {
   type Prescription 
 } from '../../services/localStorage';
 
-// Prescription with loaded image data
+// Prescription with optional loaded image data
 interface PrescriptionWithImage extends Prescription {
-  imageBase64: string;
+  imageBase64?: string;
 }
 
 export default function MemberDetailScreen() {
@@ -51,6 +51,9 @@ export default function MemberDetailScreen() {
       // Load prescriptions for this specific member using proper service
       const allPrescriptions = await getPrescriptions(id); // Pass family member ID to filter
       
+      // Don't preload images - just set prescriptions without image data
+      // Images will be loaded on-demand or shown as placeholders
+      setPrescriptions(allPrescriptions.map(rx => ({ ...rx, imageBase64: undefined })));
       // Load images for each prescription
       const prescriptionsWithImages = await Promise.all(
         allPrescriptions.map(async (rx) => {
@@ -126,40 +129,48 @@ export default function MemberDetailScreen() {
   };
 
   const renderPrescription = ({ item }: { item: PrescriptionWithImage }) => (
-    <TouchableOpacity
-      style={styles.prescriptionCard}
-      onPress={() =>
-        router.push({
-          pathname: '/prescription/[id]',
-          params: { id: item.id, memberId: id },
-        })
-      }
-      onLongPress={() => handleDeletePrescription(item.id)}
-    >
-      {item.imageBase64 ? (
-        <Image
-          source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
-          style={styles.prescriptionImage}
-        />
-      ) : (
-        <View style={[styles.prescriptionImage, styles.placeholderImage]}>
-          <Ionicons name="image-outline" size={40} color="#666" />
-        </View>
-      )}
-      <View style={styles.prescriptionOverlay}>
-        <View style={styles.prescriptionBadge}>
-          <Ionicons
-            name={item.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
-            size={16}
-            color="#fff"
+    <View style={styles.prescriptionCardWrapper}>
+      <TouchableOpacity
+        style={styles.prescriptionCard}
+        onPress={() =>
+          router.push({
+            pathname: '/prescription/[id]',
+            params: { id: item.id, memberId: id },
+          })
+        }
+        onLongPress={() => handleDeletePrescription(item.id)}
+      >
+        {item.imageBase64 ? (
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
+            style={styles.prescriptionImage}
           />
-          <Text style={styles.prescriptionType}>
-            {item.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
-          </Text>
+        ) : (
+          <View style={[styles.prescriptionImage, styles.placeholderImage]}>
+            <Ionicons name="image-outline" size={40} color="#666" />
+          </View>
+        )}
+        <View style={styles.prescriptionOverlay}>
+          <View style={styles.prescriptionBadge}>
+            <Ionicons
+              name={item.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
+              size={16}
+              color="#fff"
+            />
+            <Text style={styles.prescriptionType}>
+              {item.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
+            </Text>
+          </View>
+          <Text style={styles.prescriptionDate}>{formatDate(item.created_at)}</Text>
         </View>
-        <Text style={styles.prescriptionDate}>{formatDate(item.created_at)}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDeletePrescription(item.id)}
+      >
+        <Ionicons name="trash-outline" size={20} color="#ff6b6b" />
+      </TouchableOpacity>
+    </View>
   );
 
   const EmptyState = () => (
@@ -225,7 +236,7 @@ export default function MemberDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.hint}>Long press on a prescription to delete</Text>
+      <Text style={styles.hint}>Tap trash icon or long press on a prescription to delete</Text>
     </SafeAreaView>
   );
 }
@@ -273,12 +284,16 @@ const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
   },
-  prescriptionCard: {
+  prescriptionCardWrapper: {
+    position: 'relative',
     width: '48%',
+    marginBottom: 16,
+  },
+  prescriptionCard: {
+    width: '100%',
     aspectRatio: 0.75,
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 12,
     backgroundColor: '#1a1a2e',
   },
   prescriptionImage: {
@@ -361,6 +376,18 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 12,
     paddingBottom: 10,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
   },
 });
 
