@@ -21,7 +21,7 @@ export default function FamilyScreen() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
 
   const goToHome = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   useFocusEffect(
