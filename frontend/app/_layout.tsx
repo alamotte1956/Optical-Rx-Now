@@ -37,7 +37,7 @@ export default function RootLayout() {
       Alert.alert(
         'Age Requirement Not Met',
         'You must be 18 years or older to use this app. Please close the app.',
-        [],
+        [{ text: 'OK', onPress: () => setShowAgeModal(true) }],
         { cancelable: false }
       );
       // Keep the age modal visible
