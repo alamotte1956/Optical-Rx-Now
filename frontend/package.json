@@ -13,7 +13,10 @@
     "test:torture": "jest __tests__/torture --runInBand --verbose",
     "test:torture:watch": "jest __tests__/torture --watch",
     "test:torture:coverage": "jest __tests__/torture --coverage",
-    "test:stress": "npm run test:torture"
+    "test:stress": "npm run test:torture",
+    "build:production": "NODE_ENV=production expo build",
+    "build:ios": "NODE_ENV=production eas build --platform ios",
+    "build:android": "NODE_ENV=production eas build --platform android"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -26,6 +29,7 @@
     "expo-blur": "~15.0.8",
     "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.13",
+    "expo-crypto": "^15.0.8",
     "expo-file-system": "~19.0.0",
     "expo-font": "~14.0.11",
     "expo-haptics": "~15.0.8",
