@@ -14,7 +14,7 @@ import {
   Linking,
   BackHandler,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -30,9 +30,10 @@ const validateImageSize = (base64: string): boolean => {
 
 export default function AddRxScreen() {
   const router = useRouter();
+  const { memberId, rxType } = useLocalSearchParams<{ memberId?: string; rxType?: string }>();
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string>("");
-  const [rxType, setRxType] = useState<"eyeglass" | "contact">("eyeglass");
+  const [rxTypeState, setRxTypeState] = useState<"eyeglass" | "contact">("eyeglass");
   const [imageBase64, setImageBase64] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [dateTaken, setDateTaken] = useState(
@@ -46,6 +47,16 @@ export default function AddRxScreen() {
     fetchFamilyMembers();
     requestPermissions();
   }, []);
+
+  // Handle pre-selected member and type from params
+  useEffect(() => {
+    if (memberId) {
+      setSelectedMember(memberId);
+    }
+    if (rxType === 'eyeglass' || rxType === 'contact') {
+      setRxTypeState(rxType);
+    }
+  }, [memberId, rxType]);
 
   // Handle Android back button
   useEffect(() => {
@@ -362,7 +373,7 @@ export default function AddRxScreen() {
     try {
       await createPrescription({
         family_member_id: selectedMember,
-        rx_type: rxType,
+        rx_type: rxTypeState,
         imageBase64: imageBase64,
         notes: notes.trim(),
         date_taken: dateTaken,
@@ -539,19 +550,19 @@ export default function AddRxScreen() {
             <TouchableOpacity
               style={[
                 styles.typeOption,
-                rxType === "eyeglass" && styles.typeOptionActive,
+                rxTypeState === "eyeglass" && styles.typeOptionActive,
               ]}
-              onPress={() => setRxType("eyeglass")}
+              onPress={() => setRxTypeState("eyeglass")}
             >
               <Ionicons
                 name="glasses"
                 size={24}
-                color={rxType === "eyeglass" ? "#fff" : "#6b7c8f"}
+                color={rxTypeState === "eyeglass" ? "#fff" : "#6b7c8f"}
               />
               <Text
                 style={[
                   styles.typeText,
-                  rxType === "eyeglass" && styles.typeTextActive,
+                  rxTypeState === "eyeglass" && styles.typeTextActive,
                 ]}
               >
                 Eyeglass
@@ -560,19 +571,19 @@ export default function AddRxScreen() {
             <TouchableOpacity
               style={[
                 styles.typeOption,
-                rxType === "contact" && styles.typeOptionActive,
+                rxTypeState === "contact" && styles.typeOptionActive,
               ]}
-              onPress={() => setRxType("contact")}
+              onPress={() => setRxTypeState("contact")}
             >
               <Ionicons
                 name="eye"
                 size={24}
-                color={rxType === "contact" ? "#fff" : "#6b7c8f"}
+                color={rxTypeState === "contact" ? "#fff" : "#6b7c8f"}
               />
               <Text
                 style={[
                   styles.typeText,
-                  rxType === "contact" && styles.typeTextActive,
+                  rxTypeState === "contact" && styles.typeTextActive,
                 ]}
               >
                 Contact Lens
