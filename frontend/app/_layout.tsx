@@ -2,49 +2,45 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler, Platform, Alert, View, Text, StyleSheet } from "react-native";
 import { BackHandler, Platform, View, Text, StyleSheet } from "react-native";
 import {
   AgeVerificationModal,
   checkAgeVerification,
   checkAgeDeclined,
-} from "./components/AgeVerificationModal";
-import { setupGlobalErrorHandlers } from "./utils/errorHandler";
+} from "../components/AgeVerificationModal";
+import { setupGlobalErrorHandlers } from "../utils/errorHandler";
 
 export default function RootLayout() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean | null>(null);
   const [showAgeModal, setShowAgeModal] = useState(false);
   const [ageDeclined, setAgeDeclined] = useState(false);
 
-  // Set up global error handlers
   useEffect(() => {
     const cleanup = setupGlobalErrorHandlers();
     return cleanup;
   }, []);
 
   useEffect(() => {
-    // Check age verification on app launch
     const checkAge = async () => {
       const verified = await checkAgeVerification();
       const declined = await checkAgeDeclined();
-      
+
       setIsAgeVerified(verified);
       setAgeDeclined(declined);
-      
+
       if (!verified && !declined) {
         setShowAgeModal(true);
       }
     };
-    
+
     checkAge();
   }, []);
 
-  // Prevent Android back button during age verification
   useEffect(() => {
-    if (Platform.OS === 'android' && showAgeModal && !isAgeVerified) {
+    if (Platform.OS === "android" && showAgeModal && !isAgeVerified) {
       const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        () => true // Block back button
+        "hardwareBackPress",
+        () => true
       );
       return () => backHandler.remove();
     }
@@ -57,25 +53,17 @@ export default function RootLayout() {
   };
 
   const handleAgeDeclined = () => {
-    if (Platform.OS === 'android') {
-      // Exit the app on Android
+    if (Platform.OS === "android") {
       BackHandler.exitApp();
     } else {
-      // On iOS, show permanent block screen (apps cannot programmatically exit)
-      // On iOS, show a blocking screen since we can't exit
       setAgeDeclined(true);
       setShowAgeModal(false);
     }
   };
 
-  // Don't render main app until age verification is checked
-  if (isAgeVerified === null) {
-    return null; // Or show a splash screen
-  }
+  if (isAgeVerified === null) return null;
 
-  // Show permanent block screen for iOS users who declined
-  // Show blocking screen on iOS if age verification was declined
-  if (ageDeclined && Platform.OS === 'ios') {
+  if (ageDeclined && Platform.OS === "ios") {
     return (
       <SafeAreaProvider>
         <StatusBar style="light" />
@@ -96,14 +84,6 @@ export default function RootLayout() {
               Please close the app manually by swiping up from the bottom of the screen.
             </Text>
           </View>
-        <View style={styles.blockingContainer}>
-          <Text style={styles.blockingTitle}>Age Requirement Not Met</Text>
-          <Text style={styles.blockingText}>
-            You must be 18 years or older to use this app.
-          </Text>
-          <Text style={styles.blockingSubtext}>
-            Please close this app by swiping up from the bottom of the screen.
-          </Text>
         </View>
       </SafeAreaProvider>
     );
@@ -112,15 +92,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      
-      {/* Age Verification Modal */}
+
       <AgeVerificationModal
         visible={showAgeModal}
         onVerified={handleAgeVerified}
         onDeclined={handleAgeDeclined}
       />
 
-      {/* Main App Stack */}
       <Stack
         screenOptions={{
           headerShown: false,
@@ -143,22 +121,21 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   blockScreen: {
-  blockingContainer: {
     flex: 1,
-    backgroundColor: '#0a1628',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#0a1628",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   blockContainer: {
-    backgroundColor: '#1a2332',
+    backgroundColor: "#1a2332",
     borderRadius: 16,
     padding: 32,
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
     borderWidth: 2,
-    borderColor: '#ff4444',
-    alignItems: 'center',
+    borderColor: "#ff4444",
+    alignItems: "center",
   },
   blockIcon: {
     fontSize: 80,
@@ -166,54 +143,33 @@ const styles = StyleSheet.create({
   },
   blockTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#ffffff",
+    textAlign: "center",
     marginBottom: 16,
   },
   blockMessage: {
     fontSize: 16,
-    color: '#b0b8c0',
-    textAlign: 'center',
+    color: "#b0b8c0",
+    textAlign: "center",
     marginBottom: 12,
     lineHeight: 24,
   },
   blockInstructions: {
     fontSize: 16,
-    color: '#ffffff',
-    textAlign: 'center',
+    color: "#ffffff",
+    textAlign: "center",
     marginTop: 20,
     marginBottom: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     lineHeight: 24,
   },
   blockFooter: {
     fontSize: 14,
-    color: '#8a929a',
-    textAlign: 'center',
+    color: "#8a929a",
+    textAlign: "center",
     marginTop: 20,
-    fontStyle: 'italic',
+    fontStyle: "italic",
     lineHeight: 20,
-    padding: 40,
-  },
-  blockingTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  blockingText: {
-    fontSize: 16,
-    color: '#8899a6',
-    marginBottom: 12,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  blockingSubtext: {
-    fontSize: 14,
-    color: '#6b7c8f',
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });
