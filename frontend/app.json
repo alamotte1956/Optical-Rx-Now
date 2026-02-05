@@ -8,7 +8,6 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "privacy": "https://opticalrxnow.com/privacy",
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
@@ -30,7 +29,6 @@
     },
     "android": {
       "package": "com.alamotte.opticalrxnow",
-      "versionCode": 1,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.alamotte.opticalrxnow",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
