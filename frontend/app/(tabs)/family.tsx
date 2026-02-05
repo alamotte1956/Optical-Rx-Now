@@ -12,13 +12,22 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getFamilyMembers, deleteFamilyMember, type FamilyMember } from "../../services/localStorage";
+import {
+  getFamilyMembers,
+  getPrescriptions,
+  deleteFamilyMember,
+  type FamilyMember,
+} from "../../services/localStorage";
+
+type MemberWithCount = FamilyMember & {
+  prescription_count?: number;
+};
 
 export default function FamilyScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [members, setMembers] = useState<FamilyMember[]>([]);
+  const [members, setMembers] = useState<MemberWithCount[]>([]);
   const [deleting, setDeleting] = useState(false);
 
   const goToHome = () => {
@@ -33,8 +42,26 @@ export default function FamilyScreen() {
 
   const fetchMembers = async () => {
     try {
-      const data = await getFamilyMembers();
-      setMembers(data);
+      const family = await getFamilyMembers();
+      const prescriptions = await getPrescriptions();
+
+      console.log("Family:", family);
+      console.log("Prescriptions:", prescriptions);
+
+      const membersWithCounts = family.map((member) => {
+        const count = prescriptions.filter((p) => {
+          if (!p) return false;
+          if (!p.family_member_id) return false;
+          return String(p.family_member_id) === String(member.id);
+        }).length;
+
+        return {
+          ...member,
+          prescription_count: count,
+        };
+      });
+
+      setMembers(membersWithCounts);
     } catch (error) {
       console.error("Error fetching members:", error);
       Alert.alert("Error", "Failed to load family members");
@@ -50,12 +77,11 @@ export default function FamilyScreen() {
   };
 
   const handleDeleteMember = (memberId: string, memberName: string) => {
-    // Prevent double-tap
     if (deleting) return;
-    
+
     Alert.alert(
       "Delete Family Member",
-      `Are you sure you want to delete ${memberName}? This will also delete all their prescriptions.`,
+      `Delete ${memberName}? This will also delete all prescriptions.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -67,19 +93,8 @@ export default function FamilyScreen() {
               await deleteFamilyMember(memberId);
               await fetchMembers();
             } catch (error) {
-              console.error('Error deleting family member:', error);
-              
-              let errorMessage = 'Failed to delete family member. Please try again.';
-              
-              if (error instanceof Error) {
-                if (error.message.includes('storage') || error.message.includes('quota')) {
-                  errorMessage = 'Storage error occurred. Please try again.';
-                } else {
-                  errorMessage = `Failed to delete: ${error.message}`;
-                }
-              }
-              
-              Alert.alert("Error", errorMessage);
+              console.error("Delete error:", error);
+              Alert.alert("Error", "Failed to delete family member");
             } finally {
               setDeleting(false);
             }
@@ -104,14 +119,12 @@ export default function FamilyScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={goToHome}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.homeButton} onPress={goToHome}>
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Family Members</Text>
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push("/add-member")}
@@ -120,7 +133,7 @@ export default function FamilyScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Family Members List */}
+      {/* List */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -148,29 +161,39 @@ export default function FamilyScreen() {
           </View>
         ) : (
           members.map((member) => {
-            const prescriptionCount = member.prescription_count || 0;
+            const count = member.prescription_count || 0;
+
             return (
-            <TouchableOpacity
-              key={member.id}
-              style={styles.memberCard}
-              onPress={() =>
-                router.push({ pathname: "/member/[id]", params: { id: member.id } })
-              }
-              onLongPress={() => handleDeleteMember(member.id, member.name)}
-            >
-              <View style={styles.memberIcon}>
-                <Ionicons name="person" size={32} color="#4a9eff" />
-              </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                <Text style={styles.memberStats}>
-                  {prescriptionCount} prescription{prescriptionCount !== 1 ? 's' : ''}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
-            </TouchableOpacity>
-          );
+              <TouchableOpacity
+                key={member.id}
+                style={styles.memberCard}
+                onPress={() =>
+                  router.push({
+                    pathname: "/member/[id]",
+                    params: { id: member.id },
+                  })
+                }
+                onLongPress={() =>
+                  handleDeleteMember(member.id, member.name)
+                }
+              >
+                <View style={styles.memberIcon}>
+                  <Ionicons name="person" size={32} color="#4a9eff" />
+                </View>
+
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>{member.name}</Text>
+                  <Text style={styles.memberRelationship}>
+                    {member.relationship}
+                  </Text>
+                  <Text style={styles.memberStats}>
+                    {count} prescription{count !== 1 ? "s" : ""}
+                  </Text>
+                </View>
+
+                <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
+              </TouchableOpacity>
+            );
           })
         )}
       </ScrollView>
@@ -179,27 +202,31 @@ export default function FamilyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0a1628",
-  },
+  container: { flex: 1, backgroundColor: "#0a1628" },
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    color: "#8899a6",
-    marginTop: 16,
-    fontSize: 16,
-  },
+
+  loadingText: { color: "#8899a6", marginTop: 16 },
+
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
+
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    flex: 1,
+    marginLeft: 12,
+  },
+
   homeButton: {
     width: 44,
     height: 44,
@@ -208,13 +235,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    flex: 1,
-    marginLeft: 12,
-  },
+
   addButton: {
     width: 44,
     height: 44,
@@ -223,32 +244,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-  },
+
+  scrollView: { flex: 1 },
+
+  scrollContent: { paddingHorizontal: 16, paddingBottom: 100 },
+
   emptyState: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 100,
+    marginTop: 100,
   },
+
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     marginTop: 16,
   },
+
   emptyText: {
     fontSize: 14,
     color: "#8899a6",
     textAlign: "center",
     marginTop: 8,
-    paddingHorizontal: 40,
   },
+
   emptyButton: {
     marginTop: 24,
     backgroundColor: "#4a9eff",
@@ -256,11 +275,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
   },
-  emptyButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14,
-  },
+
+  emptyButtonText: { color: "#fff", fontWeight: "600" },
+
   memberCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -269,6 +286,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 12,
   },
+
   memberIcon: {
     width: 56,
     height: 56,
@@ -278,20 +296,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 16,
   },
-  memberInfo: {
-    flex: 1,
-  },
+
+  memberInfo: { flex: 1 },
+
   memberName: {
     fontSize: 18,
     fontWeight: "600",
     color: "#fff",
-    marginBottom: 4,
   },
+
   memberRelationship: {
     fontSize: 14,
     color: "#4a9eff",
-    marginBottom: 2,
   },
+
   memberStats: {
     fontSize: 12,
     color: "#8899a6",

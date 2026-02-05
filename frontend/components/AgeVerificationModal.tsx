@@ -96,7 +96,7 @@ export function AgeVerificationModal({
 
           <View style={styles.legalText}>
             <Text style={styles.disclaimer}>
-              By selecting "Yes, I'm 18+", you confirm that you meet the age
+              By selecting &quot;Yes, I&apos;m 18+&quot;, you confirm that you meet the age
               requirement and agree to our{' '}
               <Text
                 style={styles.link}
@@ -116,7 +116,7 @@ export function AgeVerificationModal({
               onPress={handleAccept}
               disabled={isProcessing}
             >
-              <Text style={styles.acceptButtonText}>Yes, I'm 18+</Text>
+              <Text style={styles.acceptButtonText}>Yes, I&apos;m 18+</Text>
             </Pressable>
 
             <Pressable
@@ -124,7 +124,7 @@ export function AgeVerificationModal({
               onPress={handleDecline}
               disabled={isProcessing}
             >
-              <Text style={styles.declineButtonText}>No, I'm under 18</Text>
+              <Text style={styles.declineButtonText}>No, I&apos;m under 18</Text>
             </Pressable>
           </View>
 
@@ -261,3 +261,4 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
+

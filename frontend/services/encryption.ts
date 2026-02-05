@@ -17,7 +17,7 @@ export const getEncryptionKey = async (): Promise<string> => {
       console.log('Using existing encryption key');
     }
     return key;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting encryption key:', error);
     throw new Error(`Failed to get encryption key: ${error.message}`);
   }
@@ -30,7 +30,7 @@ export const encryptData = async (data: any): Promise<string> => {
     const jsonString = JSON.stringify(data);
     const encrypted = CryptoJS.AES.encrypt(jsonString, key).toString();
     return encrypted;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error encrypting data:', error);
     throw new Error(`Encryption failed: ${error.message}`);
   }
@@ -46,7 +46,7 @@ export const decryptData = async (encryptedData: string): Promise<any> => {
       throw new Error('Decryption resulted in empty string');
     }
     return JSON.parse(jsonString);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error decrypting data:', error);
     throw new Error(`Decryption failed: ${error.message}`);
   }
@@ -57,7 +57,7 @@ export const encryptImage = async (base64Image: string): Promise<string> => {
   try {
     const key = await getEncryptionKey();
     return CryptoJS.AES.encrypt(base64Image, key).toString();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error encrypting image:', error);
     throw new Error(`Failed to encrypt image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
@@ -69,8 +69,9 @@ export const decryptImage = async (encryptedImage: string): Promise<string> => {
     const key = await getEncryptionKey();
     const decrypted = CryptoJS.AES.decrypt(encryptedImage, key);
     return decrypted.toString(CryptoJS.enc.Utf8);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error decrypting image:', error);
     throw new Error(`Failed to decrypt image: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
+

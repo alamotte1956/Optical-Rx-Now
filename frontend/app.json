@@ -8,12 +8,12 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "newArchEnabled": false,
-    "privacy": "https://opticalrxnow.com/privacy",
+
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
     },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alamotte.opticalrxnow",
@@ -29,6 +29,7 @@
         "usesNonExemptEncryption": false
       }
     },
+
     "android": {
       "package": "com.alamotte.opticalrxnow",
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.alamotte.opticalrxnow",
@@ -44,11 +45,13 @@
         "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
+
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -83,22 +86,22 @@
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "15.1",
-            "newArchEnabled": false
+            "deploymentTarget": "15.1"
           },
           "android": {
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
             "minSdkVersion": 24,
-            "buildToolsVersion": "35.0.0",
-            "newArchEnabled": false
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true
     },
+
     "extra": {
       "eas": {
         "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
@@ -106,3 +109,4 @@
     }
   }
 }
+

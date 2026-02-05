@@ -269,8 +269,7 @@ export async function getStorageInfo(): Promise<{
       }
     }
     
-    return {
-      keys,
+    return {      keys: [...keys],
       estimatedSize,
     };
   } catch (error) {
@@ -281,3 +280,6 @@ export async function getStorageInfo(): Promise<{
     };
   }
 }
+
+
+

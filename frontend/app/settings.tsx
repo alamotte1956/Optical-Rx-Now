@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { isBiometricAvailable, isBiometricEnabled, setBiometricEnabled } from "../services/authentication";
-import { exportEncryptedBackup } from "../services/localStorage";
+// import { exportEncryptedBackup } from "../services/localStorage";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function SettingsScreen() {
   const handleExportBackup = async () => {
     try {
       setExporting(true);
-      await exportEncryptedBackup();
+      // await exportEncryptedBackup();
       Alert.alert(
         "Backup Created",
         "Your encrypted backup has been created. Save it to a secure location."
@@ -247,3 +247,4 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+

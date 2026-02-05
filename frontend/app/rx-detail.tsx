@@ -8,7 +8,7 @@ export default function RxDetailRedirect() {
   useEffect(() => {
     // Redirect to the prescription/[id] route
     if (id) {
-      router.replace({ pathname: "/prescription/[id]", params: { id, memberId: "" } });
+      router.replace({ pathname: "/prescription/[id]", params: { id: Array.isArray(id) ? id[0] : id, memberId: "" } });
     } else {
       router.back();
     }
@@ -16,3 +16,7 @@ export default function RxDetailRedirect() {
 
   return null;
 }
+
+
+
+

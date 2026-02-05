@@ -201,8 +201,7 @@ export default function AddRxScreen() {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.7,  // Reduce file size to stay under 10MB limit
-        maxWidth: 1920,  // Limit dimensions to reduce memory usage
-        maxHeight: 1080,
+        // Limit dimensions to reduce memory usage
         base64: true,
         exif: false,
       });
@@ -317,8 +316,7 @@ export default function AddRxScreen() {
         mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.7,  // Reduce file size to stay under 10MB limit
-        maxWidth: 1920,  // Limit dimensions to reduce memory usage
-        maxHeight: 1080,
+        // Limit dimensions to reduce memory usage
         base64: true,
         exif: false,
       });
@@ -847,3 +845,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
+
+
