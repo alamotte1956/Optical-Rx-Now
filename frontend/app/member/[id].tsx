@@ -15,7 +15,6 @@ import {
   getFamilyMembers, 
   getPrescriptions, 
   deletePrescription as deletePrescriptionService,
-  loadPrescriptionImage,
   type FamilyMember, 
   type Prescription 
 } from '../../services/localStorage';
@@ -56,7 +55,7 @@ export default function MemberDetailScreen() {
       const prescriptionsWithImages = await Promise.all(
         allPrescriptions.map(async (rx) => {
           try {
-            const imageBase64 = await loadPrescriptionImage(rx.image_uri);
+            const imageBase64 = await(rx.image_uri);
             return { ...rx, imageBase64 };
           } catch (error) {
             console.error(`Failed to load image for prescription ${rx.id}:`, error);
@@ -364,3 +363,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 });
+
+
+
+

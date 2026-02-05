@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import { Paths, File, Directory } from 'expo-file-system';
-import { getPrescriptionById, loadPrescriptionImage } from '../../services/localStorage';
+import { getPrescriptionById} from '../../services/localStorage';
 import { authenticateUser } from '../../services/authentication';
 
 export default function PrescriptionDetailScreen() {
@@ -58,7 +58,7 @@ export default function PrescriptionDetailScreen() {
         
         // Load encrypted image
         if (rx.image_uri) {
-          const decryptedImage = await loadPrescriptionImage(rx.image_uri);
+          const decryptedImage = await(rx.image_uri);
           if (isMounted.current) {
             setImageBase64(decryptedImage);
           }
@@ -414,3 +414,4 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+

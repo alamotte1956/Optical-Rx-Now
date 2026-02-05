@@ -8,7 +8,6 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "privacy": "https://opticalrxnow.com/privacy",
 
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
@@ -110,3 +109,4 @@
     }
   }
 }
+
