@@ -7,62 +7,68 @@ import {
   FlatList,
   Alert,
   Image,
-  Platform,
-  Linking,
 } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
+import { 
+  getFamilyMembers, 
+  getPrescriptions, 
+  deletePrescription as deletePrescriptionService,
+  loadPrescriptionImage,
+  type FamilyMember, 
+  type Prescription 
+} from '../../services/localStorage';
 
-interface Prescription {
-  id: string;
-  type: 'eyeglass' | 'contact';
+// Prescription with loaded image data
+interface PrescriptionWithImage extends Prescription {
   imageBase64: string;
-  createdAt: string;
-  notes?: string;
 }
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  createdAt: string;
-  prescriptionCount: number;
-}
-
-const MEMBERS_KEY = '@rx_vault_members';
 
 export default function MemberDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [member, setMember] = useState<FamilyMember | null>(null);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionWithImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [capturingImage, setCapturingImage] = useState(false);
   const [deletingPrescription, setDeletingPrescription] = useState(false);
-
-  const PRESCRIPTIONS_KEY = `@rx_vault_prescriptions_${id}`;
 
   const loadData = async () => {
     try {
-      // Load member info
-      const membersData = await AsyncStorage.getItem(MEMBERS_KEY);
-      if (membersData) {
-        const members: FamilyMember[] = JSON.parse(membersData);
-        const foundMember = members.find((m) => m.id === id);
-        if (foundMember) {
-          setMember(foundMember);
-        }
+      setLoading(true);
+      
+      // Load family members using the proper service
+      const members = await getFamilyMembers();
+      const foundMember = members.find((m) => m.id === id);
+      
+      if (foundMember) {
+        setMember(foundMember);
+      } else {
+        Alert.alert('Error', 'Family member not found');
+        router.back();
+        return;
       }
 
-      // Load prescriptions
-      const prescriptionsData = await AsyncStorage.getItem(PRESCRIPTIONS_KEY);
-      if (prescriptionsData) {
-        setPrescriptions(JSON.parse(prescriptionsData));
-      }
+      // Load prescriptions for this specific member using proper service
+      const allPrescriptions = await getPrescriptions(id); // Pass family member ID to filter
+      
+      // Load images for each prescription
+      const prescriptionsWithImages = await Promise.all(
+        allPrescriptions.map(async (rx) => {
+          try {
+            const imageBase64 = await loadPrescriptionImage(rx.image_uri);
+            return { ...rx, imageBase64 };
+          } catch (error) {
+            console.error(`Failed to load image for prescription ${rx.id}:`, error);
+            return { ...rx, imageBase64: '' };
+          }
+        })
+      );
+      
+      setPrescriptions(prescriptionsWithImages);
     } catch (error) {
       console.error('Error loading data:', error);
+      Alert.alert('Error', 'Failed to load prescriptions');
     } finally {
       setLoading(false);
     }
@@ -74,272 +80,15 @@ export default function MemberDetailScreen() {
     }, [id])
   );
 
-  const requestPermissions = async () => {
-    if (Platform.OS !== 'web') {
-      // Check camera permission first
-      const { status: cameraExisting } = await ImagePicker.getCameraPermissionsAsync();
-      if (cameraExisting !== 'granted') {
-        const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-        if (cameraStatus !== 'granted') {
-          Alert.alert(
-            'Camera Permission Required',
-            'Please enable camera permission in your device settings to take photos of prescriptions.'
-          );
-          return false;
-        }
-      }
-      
-      // Check media library permission
-      const { status: mediaExisting } = await ImagePicker.getMediaLibraryPermissionsAsync();
-      if (mediaExisting !== 'granted') {
-        const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (mediaStatus !== 'granted') {
-          Alert.alert(
-            'Photo Library Permission Required',
-            'Please enable photo library permission in your device settings to select prescription photos.'
-          );
-          return false;
-        }
-      }
-    }
-    return true;
+  const addPrescription = (type: 'eyeglass' | 'contact') => {
+    // Navigate to add-rx screen with pre-selected member
+    router.push({
+      pathname: '/add-rx',
+      params: { memberId: id, rxType: type }
+    });
   };
 
-  const addPrescription = async (type: 'eyeglass' | 'contact') => {
-    // Prevent double-tap
-    if (capturingImage) return;
-    
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    Alert.alert(
-      'Add Prescription',
-      'How would you like to add the prescription?',
-      [
-        {
-          text: 'Take Photo',
-          onPress: () => captureImage(type, 'camera'),
-        },
-        {
-          text: 'Choose from Library',
-          onPress: () => captureImage(type, 'library'),
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
-  };
-
-  const requestCameraPermission = async (): Promise<boolean> => {
-    try {
-      const { status: existingStatus } = await ImagePicker.getCameraPermissionsAsync();
-      
-      // If already denied, guide user to settings
-      if (existingStatus === 'denied') {
-        Alert.alert(
-          'Camera Permission Required',
-          'Camera access is needed to take photos of prescriptions. Please enable camera permission in your device settings.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Open Settings', 
-              onPress: () => {
-                if (Platform.OS === 'ios') {
-                  Linking.openURL('app-settings:');
-                } else {
-                  Linking.openSettings();
-                }
-              }
-            }
-          ]
-        );
-        return false;
-      }
-      
-      if (Platform.OS === 'android' && Platform.Version >= 31) {
-        // Show rationale first on Android 12+
-        return new Promise((resolve) => {
-          Alert.alert(
-            'Camera Permission',
-            'This app needs camera access to photograph your prescriptions for easy storage and reference.',
-            [
-              { 
-                text: 'Cancel', 
-                style: 'cancel',
-                onPress: () => resolve(false)
-              },
-              { 
-                text: 'Allow', 
-                onPress: async () => {
-                  const { status } = await ImagePicker.requestCameraPermissionsAsync();
-                  resolve(status === 'granted');
-                }
-              }
-            ]
-          );
-        });
-      } else {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        return status === 'granted';
-      }
-    } catch (error) {
-      console.error('Error requesting camera permission:', error);
-      Alert.alert('Error', 'Unable to request camera permission. Please try again.');
-      return false;
-    }
-  };
-
-  const requestMediaLibraryPermission = async (): Promise<boolean> => {
-    try {
-      const { status: existingStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
-      
-      // If already denied, guide user to settings
-      if (existingStatus === 'denied') {
-        Alert.alert(
-          'Photo Library Permission Required',
-          'Photo library access is needed to select prescription images. Please enable photo library permission in your device settings.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Open Settings', 
-              onPress: () => {
-                if (Platform.OS === 'ios') {
-                  Linking.openURL('app-settings:');
-                } else {
-                  Linking.openSettings();
-                }
-              }
-            }
-          ]
-        );
-        return false;
-      }
-      
-      if (Platform.OS === 'android' && Platform.Version >= 31) {
-        // Show rationale first on Android 12+
-        return new Promise((resolve) => {
-          Alert.alert(
-            'Photo Library Permission',
-            'This app needs access to your photo library to select prescription images for easy storage and reference.',
-            [
-              { 
-                text: 'Cancel', 
-                style: 'cancel',
-                onPress: () => resolve(false)
-              },
-              { 
-                text: 'Allow', 
-                onPress: async () => {
-                  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-                  resolve(status === 'granted');
-                }
-              }
-            ]
-          );
-        });
-      } else {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        return status === 'granted';
-      }
-    } catch (error) {
-      console.error('Error requesting photo library permission:', error);
-      Alert.alert('Error', 'Unable to request photo library permission. Please try again.');
-      return false;
-    }
-  };
-
-  const captureImage = async (type: 'eyeglass' | 'contact', source: 'camera' | 'library') => {
-    // Prevent double-tap
-    if (capturingImage) return;
-    setCapturingImage(true);
-    
-    try {
-      let result;
-      if (source === 'camera') {
-        // Request camera permission
-        const granted = await requestCameraPermission();
-        if (!granted) {
-          return;
-        }
-
-        result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ['images'],
-          allowsEditing: true,
-          quality: 0.8,
-          base64: true,
-        });
-      } else {
-        // Request media library permission
-        const granted = await requestMediaLibraryPermission();
-        if (!granted) {
-          return;
-        }
-
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['images'],
-          allowsEditing: true,
-          quality: 0.8,
-          base64: true,
-        });
-      }
-
-      if (!result.canceled && result.assets[0].base64) {
-        const newPrescription: Prescription = {
-          id: Date.now().toString(),
-          type,
-          imageBase64: result.assets[0].base64,
-          createdAt: new Date().toISOString(),
-        };
-
-        const updatedPrescriptions = [...prescriptions, newPrescription];
-        await AsyncStorage.setItem(PRESCRIPTIONS_KEY, JSON.stringify(updatedPrescriptions));
-        setPrescriptions(updatedPrescriptions);
-
-        // Update member prescription count
-        await updateMemberCount(updatedPrescriptions.length);
-      }
-    } catch (error) {
-      console.error('Error capturing image:', error);
-      
-      let errorMessage = source === 'camera' 
-        ? 'Failed to access camera. Please try again or select an image from your gallery.'
-        : 'Failed to access photo library. Please try again.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('User cancelled')) {
-          // User cancelled, no need to show error
-          return;
-        } else if (error.message.includes('Camera not available') || error.message.includes('No camera')) {
-          errorMessage = 'No camera is available on this device. Please select an image from your gallery instead.';
-        } else if (error.message.includes('memory') || error.message.includes('Memory')) {
-          errorMessage = 'Not enough memory. Please close some apps and try again.';
-        } else if (error.message.includes('quota') || error.message.includes('storage')) {
-          errorMessage = 'Storage is full. Please free up some space and try again.';
-        }
-      }
-      
-      Alert.alert('Image Capture Error', errorMessage, [{ text: 'OK' }]);
-    } finally {
-      setCapturingImage(false);
-    }
-  };
-
-  const updateMemberCount = async (count: number) => {
-    try {
-      const membersData = await AsyncStorage.getItem(MEMBERS_KEY);
-      if (membersData) {
-        const members: FamilyMember[] = JSON.parse(membersData);
-        const updatedMembers = members.map((m) =>
-          m.id === id ? { ...m, prescriptionCount: count } : m
-        );
-        await AsyncStorage.setItem(MEMBERS_KEY, JSON.stringify(updatedMembers));
-        setMember((prev) => (prev ? { ...prev, prescriptionCount: count } : null));
-      }
-    } catch (error) {
-      console.error('Error updating member count:', error);
-    }
-  };
-
-  const deletePrescription = async (prescriptionId: string) => {
+  const handleDeletePrescription = async (prescriptionId: string) => {
     // Prevent double-tap during deletion
     if (deletingPrescription) return;
     
@@ -354,18 +103,11 @@ export default function MemberDetailScreen() {
           onPress: async () => {
             setDeletingPrescription(true);
             try {
-              const updatedPrescriptions = prescriptions.filter(
-                (p) => p.id !== prescriptionId
-              );
-              await AsyncStorage.setItem(
-                PRESCRIPTIONS_KEY,
-                JSON.stringify(updatedPrescriptions)
-              );
-              setPrescriptions(updatedPrescriptions);
-              await updateMemberCount(updatedPrescriptions.length);
+              await deletePrescriptionService(prescriptionId); // Use the proper service
+              await loadData(); // Reload prescriptions
             } catch (error) {
               console.error('Error deleting prescription:', error);
-              Alert.alert('Error', 'Failed to delete prescription. Please try again.');
+              Alert.alert('Error', 'Failed to delete prescription');
             } finally {
               setDeletingPrescription(false);
             }
@@ -384,7 +126,7 @@ export default function MemberDetailScreen() {
     });
   };
 
-  const renderPrescription = ({ item }: { item: Prescription }) => (
+  const renderPrescription = ({ item }: { item: PrescriptionWithImage }) => (
     <TouchableOpacity
       style={styles.prescriptionCard}
       onPress={() =>
@@ -393,24 +135,30 @@ export default function MemberDetailScreen() {
           params: { id: item.id, memberId: id },
         })
       }
-      onLongPress={() => deletePrescription(item.id)}
+      onLongPress={() => handleDeletePrescription(item.id)}
     >
-      <Image
-        source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
-        style={styles.prescriptionImage}
-      />
+      {item.imageBase64 ? (
+        <Image
+          source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
+          style={styles.prescriptionImage}
+        />
+      ) : (
+        <View style={[styles.prescriptionImage, styles.placeholderImage]}>
+          <Ionicons name="image-outline" size={40} color="#666" />
+        </View>
+      )}
       <View style={styles.prescriptionOverlay}>
         <View style={styles.prescriptionBadge}>
           <Ionicons
-            name={item.type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
+            name={item.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
             size={16}
             color="#fff"
           />
           <Text style={styles.prescriptionType}>
-            {item.type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
+            {item.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
           </Text>
         </View>
-        <Text style={styles.prescriptionDate}>{formatDate(item.createdAt)}</Text>
+        <Text style={styles.prescriptionDate}>{formatDate(item.created_at)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -462,26 +210,16 @@ export default function MemberDetailScreen() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[
-            styles.addButton, 
-            styles.eyeglassButton,
-            capturingImage && styles.addButtonDisabled
-          ]}
+          style={[styles.addButton, styles.eyeglassButton]}
           onPress={() => addPrescription('eyeglass')}
-          disabled={capturingImage}
         >
           <Ionicons name="glasses-outline" size={24} color="#fff" />
           <Text style={styles.addButtonText}>Add Eyeglass Rx</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.addButton, 
-            styles.contactButton,
-            capturingImage && styles.addButtonDisabled
-          ]}
+          style={[styles.addButton, styles.contactButton]}
           onPress={() => addPrescription('contact')}
-          disabled={capturingImage}
         >
           <Ionicons name="eye-outline" size={24} color="#fff" />
           <Text style={styles.addButtonText}>Add Contact Rx</Text>
@@ -549,6 +287,11 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  placeholderImage: {
+    backgroundColor: '#1a1a2e',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   prescriptionOverlay: {
     position: 'absolute',
     bottom: 0,
@@ -602,9 +345,6 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     gap: 8,
-  },
-  addButtonDisabled: {
-    opacity: 0.5,
   },
   eyeglassButton: {
     backgroundColor: '#4facfe',
