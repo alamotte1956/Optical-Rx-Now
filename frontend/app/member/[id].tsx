@@ -29,7 +29,6 @@ const PrescriptionCard = ({
   onPress: () => void; 
   onDelete: () => void;
 }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -52,7 +51,6 @@ const PrescriptionCard = ({
           <Image
             source={{ uri: `data:image/jpeg;base64,${item.image_uri}` }}
             style={styles.prescriptionImage}
-            onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
           />
         ) : (
@@ -76,9 +74,7 @@ const PrescriptionCard = ({
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={(e) => {
-          onDelete();
-        }}
+        onPress={onDelete}
       >
         <Ionicons name="trash-outline" size={18} color="#ff6b6b" />
       </TouchableOpacity>
