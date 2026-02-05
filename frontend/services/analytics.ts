@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Crypto from 'expo-crypto';
 
 const DEVICE_ID_KEY = "@optical_rx_device_id";
 const EVENTS_KEY = "@app_events";
@@ -10,11 +11,17 @@ export const getDeviceId = async (): Promise<string> => {
   try {
     let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
     if (!deviceId) {
-      deviceId = `${Platform.OS}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const randomBytes = await Crypto.getRandomBytesAsync(16);
+      const randomHex = Array.from(randomBytes)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      deviceId = `${Platform.OS}-${Date.now()}-${randomHex}`;
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
     return deviceId;
-  } catch {
+  } catch (error) {
+    console.error('Error getting device ID:', error);
     return `temp-${Date.now()}`;
   }
 };
@@ -72,3 +79,4 @@ export const trackAppOpen = () => trackEvent("app_open");
 export const trackPrescriptionAdded = () => trackEvent("prescription_added");
 export const trackMemberAdded = () => trackEvent("member_added");
 export const trackExportData = () => trackEvent("export_data");
+
