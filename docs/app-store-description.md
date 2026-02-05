@@ -90,7 +90,6 @@ PERFECT FOR:
 MEDICAL DISCLAIMER:
 Optical Rx Now is for storing and organizing prescription information only. It is not intended to provide medical advice, diagnosis, or treatment. Always consult with a qualified eye care professional for medical advice.
 
-Privacy Policy: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
 Privacy Policy: https://opticalrxnow.com/privacy
 Support: support@opticalrxnow.com
 ```
@@ -175,8 +174,8 @@ See [app-review-notes.md](./app-review-notes.md) for detailed information to pro
 ## Support Information
 
 **Support Email:** support@opticalrxnow.com
-**Privacy Policy:** https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
-**Website:** https://alamotte1956.github.io/Optical-Rx-Now/
+**Privacy Policy:** https://opticalrxnow.com/privacy
+**Website:** https://opticalrxnow.com
 
 ---
 
