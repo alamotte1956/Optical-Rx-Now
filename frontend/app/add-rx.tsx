@@ -12,6 +12,7 @@ import {
   Platform,
   ScrollView,
   Linking,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -45,6 +46,29 @@ export default function AddRxScreen() {
     fetchFamilyMembers();
     requestPermissions();
   }, []);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (imageBase64 || notes.trim()) {
+          // Show confirmation if user has entered data
+          Alert.alert(
+            'Discard Prescription?',
+            'You have unsaved changes. Are you sure you want to go back?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Discard', style: 'destructive', onPress: () => router.back() }
+            ]
+          );
+          return true; // Prevent default back behavior
+        }
+        return false; // Allow default back behavior
+      });
+
+      return () => backHandler.remove();
+    }
+  }, [imageBase64, notes, router]);
 
   const requestPermissions = async () => {
     if (Platform.OS !== 'web') {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,6 +31,29 @@ export default function AddMemberScreen() {
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (name.trim() || relationship) {
+          // Show confirmation if user has entered data
+          Alert.alert(
+            'Discard Changes?',
+            'You have unsaved changes. Are you sure you want to go back?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Discard', style: 'destructive', onPress: () => router.back() }
+            ]
+          );
+          return true; // Prevent default back behavior
+        }
+        return false; // Allow default back behavior
+      });
+
+      return () => backHandler.remove();
+    }
+  }, [name, relationship, router]);
 
   const handleSave = async () => {
     // Prevent double-submit
