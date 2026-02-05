@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,8 @@ export default function PrescriptionDetailScreen() {
   const [imageBase64, setImageBase64] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const loadPrescriptionData = async () => {
@@ -50,29 +52,42 @@ export default function PrescriptionDetailScreen() {
           return;
         }
         
-        setPrescription(rx);
+        if (isMounted.current) {
+          setPrescription(rx);
+        }
         
         // Load encrypted image
         if (rx.image_uri) {
           const decryptedImage = await loadPrescriptionImage(rx.image_uri);
-          setImageBase64(decryptedImage);
+          if (isMounted.current) {
+            setImageBase64(decryptedImage);
+          }
         }
       } catch (error) {
         console.error('Error loading prescription:', error);
         Alert.alert("Error", "Failed to load prescription");
         // Clear data on error
-        setPrescription(null);
-        setImageBase64('');
+        if (isMounted.current) {
+          setPrescription(null);
+          setImageBase64('');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
 
     loadPrescriptionData();
+    
+    // Cleanup function to track component unmount
+    return () => {
+      isMounted.current = false;
+    };
   }, [id, router]);
 
   const shareImage = async () => {
-    if (!prescription || !imageBase64) return;
+    if (!prescription || !imageBase64 || sharing) return;
 
     setSharing(true);
     try {
@@ -102,15 +117,30 @@ export default function PrescriptionDetailScreen() {
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      Alert.alert('Error', 'Failed to share prescription');
+      
+      let errorMessage = 'Failed to share prescription. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User cancelled') || error.message.includes('cancelled')) {
+          // User cancelled, no need to show error
+          return;
+        } else if (error.message.includes('storage') || error.message.includes('quota')) {
+          errorMessage = 'Not enough storage space to share. Please free up space and try again.';
+        } else {
+          errorMessage = `Failed to share: ${error.message}`;
+        }
+      }
+      
+      Alert.alert('Error', errorMessage);
     } finally {
       setSharing(false);
     }
   };
 
   const printPrescription = async () => {
-    if (!prescription || !imageBase64) return;
+    if (!prescription || !imageBase64 || printing) return;
 
+    setPrinting(true);
     try {
       const html = `
         <html>
@@ -148,7 +178,21 @@ export default function PrescriptionDetailScreen() {
       await Print.printAsync({ html });
     } catch (error) {
       console.error('Error printing:', error);
-      Alert.alert('Error', 'Failed to print prescription');
+      
+      let errorMessage = 'Failed to print prescription. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User cancelled') || error.message.includes('cancelled')) {
+          // User cancelled, no need to show error
+          return;
+        } else {
+          errorMessage = `Failed to print: ${error.message}`;
+        }
+      }
+      
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setPrinting(false);
     }
   };
 
@@ -220,7 +264,11 @@ export default function PrescriptionDetailScreen() {
 
       <View style={styles.actionContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.shareButton]}
+          style={[
+            styles.actionButton, 
+            styles.shareButton,
+            sharing && styles.actionButtonDisabled
+          ]}
           onPress={shareImage}
           disabled={sharing}
         >
@@ -233,10 +281,19 @@ export default function PrescriptionDetailScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, styles.printButton]}
+          style={[
+            styles.actionButton, 
+            styles.printButton,
+            printing && styles.actionButtonDisabled
+          ]}
           onPress={printPrescription}
+          disabled={printing}
         >
-          <Ionicons name="print-outline" size={24} color="#fff" />
+          {printing ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name="print-outline" size={24} color="#fff" />
+          )}
           <Text style={styles.actionText}>Print</Text>
         </TouchableOpacity>
       </View>
@@ -347,6 +404,9 @@ const styles = StyleSheet.create({
   },
   printButton: {
     backgroundColor: '#00c9a7',
+  },
+  actionButtonDisabled: {
+    opacity: 0.5,
   },
   actionText: {
     fontSize: 16,

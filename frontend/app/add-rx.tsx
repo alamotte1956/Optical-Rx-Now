@@ -11,6 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Linking,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,11 +40,35 @@ export default function AddRxScreen() {
   );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [capturingImage, setCapturingImage] = useState(false);
 
   useEffect(() => {
     fetchFamilyMembers();
     requestPermissions();
   }, []);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (imageBase64 || notes.trim()) {
+          // Show confirmation if user has entered data
+          Alert.alert(
+            'Discard Prescription?',
+            'You have unsaved changes. Are you sure you want to go back?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Discard', style: 'destructive', onPress: () => router.back() }
+            ]
+          );
+          return true; // Prevent default back behavior
+        }
+        return false; // Allow default back behavior
+      });
+
+      return () => backHandler.remove();
+    }
+  }, [imageBase64, notes, router]);
 
   const requestPermissions = async () => {
     if (Platform.OS !== 'web') {
@@ -89,59 +115,240 @@ export default function AddRxScreen() {
     }
   };
 
-  const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.7,  // Reduce file size to stay under 10MB limit
-      maxWidth: 1920,  // Limit dimensions to reduce memory usage
-      maxHeight: 1080,
-      base64: true,
-      exif: false,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = result.assets[0].base64;
+  const requestCameraPermission = async (): Promise<boolean> => {
+    try {
+      const { status: existingStatus } = await ImagePicker.getCameraPermissionsAsync();
       
-      if (!validateImageSize(base64Data)) {
+      // If already denied, guide user to settings
+      if (existingStatus === 'denied') {
         Alert.alert(
-          "Image Too Large",
-          "The image is too large. Please try again with a smaller image or lower quality."
+          'Camera Permission Required',
+          'Camera access is needed to take photos of prescriptions. Please enable camera permission in your device settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Open Settings', 
+              onPress: () => {
+                if (Platform.OS === 'ios') {
+                  Linking.openURL('app-settings:');
+                } else {
+                  Linking.openSettings();
+                }
+              }
+            }
+          ]
         );
-        return;
+        return false;
       }
       
-      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      if (Platform.OS === 'android' && Platform.Version >= 31) {
+        // Show rationale first on Android 12+
+        return new Promise((resolve) => {
+          Alert.alert(
+            'Camera Permission',
+            'This app needs camera access to photograph your prescriptions for easy storage and reference.',
+            [
+              { 
+                text: 'Cancel', 
+                style: 'cancel',
+                onPress: () => resolve(false)
+              },
+              { 
+                text: 'Allow', 
+                onPress: async () => {
+                  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+                  resolve(status === 'granted');
+                }
+              }
+            ]
+          );
+        });
+      } else {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        return status === 'granted';
+      }
+    } catch (error) {
+      console.error('Error requesting camera permission:', error);
+      Alert.alert('Error', 'Unable to request camera permission. Please try again.');
+      return false;
+    }
+  };
+
+  const takePhoto = async () => {
+    // Prevent double-tap
+    if (capturingImage) return;
+    setCapturingImage(true);
+    
+    try {
+      // Request permission first
+      const granted = await requestCameraPermission();
+      if (!granted) {
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,  // Reduce file size to stay under 10MB limit
+        maxWidth: 1920,  // Limit dimensions to reduce memory usage
+        maxHeight: 1080,
+        base64: true,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        const base64Data = result.assets[0].base64;
+        
+        if (!validateImageSize(base64Data)) {
+          Alert.alert(
+            "Image Too Large",
+            "The image is too large (max 10MB). Please try again with a smaller image or lower quality."
+          );
+          return;
+        }
+        
+        setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      
+      let errorMessage = 'Failed to access camera. Please try again or select an image from your gallery.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Camera not available') || error.message.includes('No camera')) {
+          errorMessage = 'No camera is available on this device. Please select an image from your gallery instead.';
+        } else if (error.message.includes('User cancelled')) {
+          // User cancelled, no need to show error
+          return;
+        } else if (error.message.includes('memory') || error.message.includes('Memory')) {
+          errorMessage = 'Not enough memory to capture photo. Please close some apps and try again.';
+        }
+      }
+      
+      Alert.alert('Camera Error', errorMessage, [{ text: 'OK' }]);
+    } finally {
+      setCapturingImage(false);
+    }
+  };
+
+  const requestMediaLibraryPermission = async (): Promise<boolean> => {
+    try {
+      const { status: existingStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      
+      // If already denied, guide user to settings
+      if (existingStatus === 'denied') {
+        Alert.alert(
+          'Photo Library Permission Required',
+          'Photo library access is needed to select prescription images. Please enable photo library permission in your device settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Open Settings', 
+              onPress: () => {
+                if (Platform.OS === 'ios') {
+                  Linking.openURL('app-settings:');
+                } else {
+                  Linking.openSettings();
+                }
+              }
+            }
+          ]
+        );
+        return false;
+      }
+      
+      if (Platform.OS === 'android' && Platform.Version >= 31) {
+        // Show rationale first on Android 12+
+        return new Promise((resolve) => {
+          Alert.alert(
+            'Photo Library Permission',
+            'This app needs access to your photo library to select prescription images for easy storage and reference.',
+            [
+              { 
+                text: 'Cancel', 
+                style: 'cancel',
+                onPress: () => resolve(false)
+              },
+              { 
+                text: 'Allow', 
+                onPress: async () => {
+                  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                  resolve(status === 'granted');
+                }
+              }
+            ]
+          );
+        });
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        return status === 'granted';
+      }
+    } catch (error) {
+      console.error('Error requesting photo library permission:', error);
+      Alert.alert('Error', 'Unable to request photo library permission. Please try again.');
+      return false;
     }
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.7,  // Reduce file size to stay under 10MB limit
-      maxWidth: 1920,  // Limit dimensions to reduce memory usage
-      maxHeight: 1080,
-      base64: true,
-      exif: false,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = result.assets[0].base64;
-      
-      if (!validateImageSize(base64Data)) {
-        Alert.alert(
-          "Image Too Large",
-          "The image is too large. Please try again with a smaller image or lower quality."
-        );
+    // Prevent double-tap
+    if (capturingImage) return;
+    setCapturingImage(true);
+    
+    try {
+      // Request media library permission first
+      const granted = await requestMediaLibraryPermission();
+      if (!granted) {
         return;
       }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,  // Reduce file size to stay under 10MB limit
+        maxWidth: 1920,  // Limit dimensions to reduce memory usage
+        maxHeight: 1080,
+        base64: true,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        const base64Data = result.assets[0].base64;
+        
+        if (!validateImageSize(base64Data)) {
+          Alert.alert(
+            "Image Too Large",
+            "The image is too large (max 10MB). Please select a smaller image."
+          );
+          return;
+        }
+        
+        setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      }
+    } catch (error) {
+      console.error('Image picker error:', error);
       
-      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      let errorMessage = 'Failed to access photo library. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User cancelled')) {
+          // User cancelled, no need to show error
+          return;
+        } else if (error.message.includes('memory') || error.message.includes('Memory')) {
+          errorMessage = 'Not enough memory to load photo. Please select a smaller image.';
+        }
+      }
+      
+      Alert.alert('Photo Library Error', errorMessage, [{ text: 'OK' }]);
+    } finally {
+      setCapturingImage(false);
     }
   };
 
   const handleSave = async () => {
+    // Prevent double-submit
+    if (saving) return;
+    
     if (!selectedMember) {
       Alert.alert("Error", "Please select a family member");
       return;
@@ -162,7 +369,21 @@ export default function AddRxScreen() {
       });
       router.back();
     } catch (error) {
-      Alert.alert("Error", "Failed to save prescription");
+      console.error('Error saving prescription:', error);
+      
+      let errorMessage = 'Failed to save prescription. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('quota') || error.message.includes('storage')) {
+          errorMessage = 'Storage is full. Please free up some space and try again.';
+        } else if (error.message.includes('image') || error.message.includes('encoding')) {
+          errorMessage = 'Failed to process image. Please try a different photo.';
+        } else {
+          errorMessage = `Failed to save prescription: ${error.message}`;
+        }
+      }
+      
+      Alert.alert("Error", errorMessage);
     } finally {
       setSaving(false);
     }
@@ -246,13 +467,39 @@ export default function AddRxScreen() {
               </View>
             ) : (
               <View style={styles.captureContainer}>
-                <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
-                  <Ionicons name="camera" size={40} color="#4a9eff" />
-                  <Text style={styles.captureText}>Take Photo</Text>
+                <TouchableOpacity 
+                  style={[
+                    styles.captureButton,
+                    capturingImage && styles.captureButtonDisabled
+                  ]} 
+                  onPress={takePhoto}
+                  disabled={capturingImage}
+                >
+                  {capturingImage ? (
+                    <ActivityIndicator color="#4a9eff" />
+                  ) : (
+                    <>
+                      <Ionicons name="camera" size={40} color="#4a9eff" />
+                      <Text style={styles.captureText}>Take Photo</Text>
+                    </>
+                  )}
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.captureButton} onPress={pickImage}>
-                  <Ionicons name="images" size={40} color="#4a9eff" />
-                  <Text style={styles.captureText}>Choose from Gallery</Text>
+                <TouchableOpacity 
+                  style={[
+                    styles.captureButton,
+                    capturingImage && styles.captureButtonDisabled
+                  ]} 
+                  onPress={pickImage}
+                  disabled={capturingImage}
+                >
+                  {capturingImage ? (
+                    <ActivityIndicator color="#4a9eff" />
+                  ) : (
+                    <>
+                      <Ionicons name="images" size={40} color="#4a9eff" />
+                      <Text style={styles.captureText}>Choose from Gallery</Text>
+                    </>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
@@ -443,6 +690,9 @@ const styles = StyleSheet.create({
     borderColor: "#1a2d45",
     borderStyle: "dashed",
   },
+  captureButtonDisabled: {
+    opacity: 0.5,
+  },
   captureText: {
     color: "#4a9eff",
     marginTop: 8,
@@ -548,6 +798,7 @@ const styles = StyleSheet.create({
   },
   saveButtonDisabled: {
     backgroundColor: "#3a4d63",
+    opacity: 0.6,
   },
   saveButtonText: {
     fontSize: 16,

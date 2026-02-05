@@ -8,6 +8,8 @@
     "scheme": "opticalrxnow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "newArchEnabled": false,
+    "privacy": "https://opticalrxnow.com/privacy",
     "androidStatusBar": {
       "backgroundColor": "#0a1628",
       "barStyle": "light-content"
@@ -81,13 +83,15 @@
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "15.1"
+            "deploymentTarget": "15.1",
+            "newArchEnabled": false
           },
           "android": {
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
             "minSdkVersion": 24,
-            "buildToolsVersion": "35.0.0"
+            "buildToolsVersion": "35.0.0",
+            "newArchEnabled": false
           }
         }
       ]

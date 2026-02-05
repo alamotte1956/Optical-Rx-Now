@@ -2,6 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Paths, File, Directory } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { encryptData, decryptData, encryptImage, decryptImage } from './encryption';
+import { 
+  safeGetItem, 
+  safeSetItem, 
+  getItemWithRecovery, 
+  StorageError, 
+  handleStorageError 
+} from '../app/utils/storage';
 
 // Storage Keys
 const FAMILY_MEMBERS_KEY = '@optical_rx_family_members';
@@ -55,18 +62,31 @@ export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
   return queueOperation(async () => {
     try {
       console.log('Getting family members from storage...');
-      const encrypted = await AsyncStorage.getItem(FAMILY_MEMBERS_KEY);
-      if (!encrypted) {
-        console.log('No family members found in storage, returning empty array');
-        return [];
+      
+      // Use safe storage with recovery
+      const members = await getItemWithRecovery<FamilyMember[]>(
+        FAMILY_MEMBERS_KEY,
+        []
+      );
+      
+      // If data is encrypted, decrypt it
+      if (typeof members === 'string') {
+        console.log('Decrypting family members data...');
+        const decrypted = await decryptData(members);
+        console.log(`Family members retrieved successfully: ${decrypted.length}`);
+        return decrypted;
       }
       
-      console.log('Decrypting family members data...');
-      const decrypted = await decryptData(encrypted);
-      console.log(`Family members retrieved successfully: ${decrypted.length}`);
-      return decrypted;
+      console.log(`Family members retrieved successfully: ${members.length}`);
+      return members;
     } catch (error) {
       console.error('Error getting family members:', error);
+      
+      // Handle storage errors gracefully
+      if (error instanceof StorageError) {
+        handleStorageError(error);
+      }
+      
       // Return empty array to prevent the app from getting stuck
       return [];
     }
@@ -93,12 +113,20 @@ export const createFamilyMember = async (
       
       const encrypted = await encryptData(members);
       console.log('Data encrypted successfully');
-      await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
+      
+      // Use safe storage with backup
+      await safeSetItem(FAMILY_MEMBERS_KEY, encrypted, true);
       console.log('Data saved to AsyncStorage successfully');
       
       return newMember;
     } catch (error) {
       console.error('Error creating family member:', error);
+      
+      // Handle storage errors
+      if (error instanceof StorageError) {
+        handleStorageError(error);
+      }
+      
       throw error;
     }
   });
@@ -106,21 +134,31 @@ export const createFamilyMember = async (
 
 export const deleteFamilyMember = async (id: string): Promise<void> => {
   return queueOperation(async () => {
-    const members = await getFamilyMembers();
-    const filtered = members.filter(m => m.id !== id);
-    const encrypted = await encryptData(filtered);
-    await AsyncStorage.setItem(FAMILY_MEMBERS_KEY, encrypted);
-    
-    // Delete all prescriptions for this member
-    const prescriptions = await getPrescriptions();
-    const remainingPrescriptions = prescriptions.filter(p => p.family_member_id !== id);
-    const encryptedPrescriptions = await encryptData(remainingPrescriptions);
-    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encryptedPrescriptions);
-    
-    // Delete prescription images
-    const deletedPrescriptions = prescriptions.filter(p => p.family_member_id === id);
-    for (const rx of deletedPrescriptions) {
-      await deletePrescriptionImage(rx.id);
+    try {
+      const members = await getFamilyMembers();
+      const filtered = members.filter(m => m.id !== id);
+      const encrypted = await encryptData(filtered);
+      await safeSetItem(FAMILY_MEMBERS_KEY, encrypted, true);
+      
+      // Delete all prescriptions for this member
+      const prescriptions = await getPrescriptions();
+      const remainingPrescriptions = prescriptions.filter(p => p.family_member_id !== id);
+      const encryptedPrescriptions = await encryptData(remainingPrescriptions);
+      await safeSetItem(PRESCRIPTIONS_KEY, encryptedPrescriptions, true);
+      
+      // Delete prescription images
+      const deletedPrescriptions = prescriptions.filter(p => p.family_member_id === id);
+      for (const rx of deletedPrescriptions) {
+        await deletePrescriptionImage(rx.id);
+      }
+    } catch (error) {
+      console.error('Error deleting family member:', error);
+      
+      if (error instanceof StorageError) {
+        handleStorageError(error);
+      }
+      
+      throw error;
     }
   });
 };
@@ -129,14 +167,26 @@ export const deleteFamilyMember = async (id: string): Promise<void> => {
 export const getPrescriptions = async (familyMemberId?: string): Promise<Prescription[]> => {
   return queueOperation(async () => {
     try {
-      const encrypted = await AsyncStorage.getItem(PRESCRIPTIONS_KEY);
-      if (!encrypted) return [];
+      // Use safe storage with recovery
+      const prescriptions = await getItemWithRecovery<Prescription[]>(
+        PRESCRIPTIONS_KEY,
+        []
+      );
       
-      const decrypted = await decryptData(encrypted);
-      const prescriptions: Prescription[] = decrypted;
+      // If data is encrypted, decrypt it
+      if (typeof prescriptions === 'string') {
+        const decrypted = await decryptData(prescriptions);
+        return familyMemberId ? decrypted.filter(p => p.family_member_id === familyMemberId) : decrypted;
+      }
+      
       return familyMemberId ? prescriptions.filter(p => p.family_member_id === familyMemberId) : prescriptions;
     } catch (error) {
       console.error('Error getting prescriptions:', error);
+      
+      if (error instanceof StorageError) {
+        handleStorageError(error);
+      }
+      
       return [];
     }
   });
@@ -189,7 +239,7 @@ export const createPrescription = async (
       prescriptions.push(newPrescription);
       
       const encrypted = await encryptData(prescriptions);
-      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
+      await safeSetItem(PRESCRIPTIONS_KEY, encrypted, true);
       
       return newPrescription;
     } catch (error) {
@@ -208,11 +258,21 @@ export const createPrescription = async (
 
 export const deletePrescription = async (id: string): Promise<void> => {
   return queueOperation(async () => {
-    const prescriptions = await getPrescriptions();
-    const filtered = prescriptions.filter(p => p.id !== id);
-    const encrypted = await encryptData(filtered);
-    await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
-    await deletePrescriptionImage(id);
+    try {
+      const prescriptions = await getPrescriptions();
+      const filtered = prescriptions.filter(p => p.id !== id);
+      const encrypted = await encryptData(filtered);
+      await safeSetItem(PRESCRIPTIONS_KEY, encrypted, true);
+      await deletePrescriptionImage(id);
+    } catch (error) {
+      console.error('Error deleting prescription:', error);
+      
+      if (error instanceof StorageError) {
+        handleStorageError(error);
+      }
+      
+      throw error;
+    }
   });
 };
 
@@ -262,7 +322,7 @@ export const clonePrescription = async (id: string): Promise<Prescription> => {
       prescriptions.push(clonedPrescription);
       
       const encrypted = await encryptData(prescriptions);
-      await AsyncStorage.setItem(PRESCRIPTIONS_KEY, encrypted);
+      await safeSetItem(PRESCRIPTIONS_KEY, encrypted, true);
       
       return clonedPrescription;
     } catch (error) {

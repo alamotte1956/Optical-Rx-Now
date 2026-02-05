@@ -24,15 +24,24 @@ export default function SettingsScreen() {
   };
   
   const handleToggleBiometric = async (value: boolean) => {
-    await setBiometricEnabled(value);
-    setBiometricEnabledState(value);
-    
-    Alert.alert(
-      value ? "Biometric Enabled" : "Biometric Disabled",
-      value 
-        ? "You'll need to authenticate to view prescriptions"
-        : "Biometric authentication has been disabled"
-    );
+    try {
+      await setBiometricEnabled(value);
+      setBiometricEnabledState(value);
+      
+      Alert.alert(
+        value ? "Biometric Enabled" : "Biometric Disabled",
+        value 
+          ? "You'll need to authenticate to view prescriptions"
+          : "Biometric authentication has been disabled"
+      );
+    } catch (error) {
+      console.error('Biometric toggle error:', error);
+      Alert.alert(
+        'Error',
+        'Failed to update biometric settings. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
   
   const handleExportBackup = async () => {
@@ -47,7 +56,8 @@ export default function SettingsScreen() {
       console.error('Export error:', error);
       Alert.alert(
         "Export Failed",
-        "Failed to create backup. Please try again."
+        "Failed to export backup. Please try again.",
+        [{ text: 'OK' }]
       );
     } finally {
       setExporting(false);

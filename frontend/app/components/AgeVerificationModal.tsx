@@ -11,6 +11,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AGE_VERIFIED_KEY = '@optical_rx_now:age_verified';
+const AGE_DECLINED_KEY = '@optical_rx_now:age_declined';
 
 interface AgeVerificationModalProps {
   visible: boolean;
@@ -37,16 +38,34 @@ export function AgeVerificationModal({
     }
   };
 
-  const handleDecline = () => {
+  const handleDecline = async () => {
     Alert.alert(
-      'Age Requirement',
-      'You must be 18 years or older to use this app. The app will now close.',
+      'Age Requirement Not Met',
+      'This app contains medical prescription information and is restricted to adults 18 years or older. If you decline, you will not be able to access the app.\n\nAre you sure you want to decline?',
       [
         {
-          text: 'OK',
-          onPress: onDeclined,
+          text: 'Cancel',
+          style: 'cancel',
         },
-      ]
+        {
+          text: 'Yes, I Decline',
+          style: 'destructive',
+          onPress: async () => {
+            setIsProcessing(true);
+            try {
+              // Save declined state
+              await AsyncStorage.setItem(AGE_DECLINED_KEY, 'true');
+              onDeclined();
+            } catch (error) {
+              console.error('Error saving age declined state:', error);
+              onDeclined();
+            } finally {
+              setIsProcessing(false);
+            }
+          },
+        },
+      ],
+      { cancelable: false }
     );
   };
 
@@ -56,6 +75,7 @@ export function AgeVerificationModal({
       animationType="fade"
       transparent={true}
       statusBarTranslucent
+      onRequestClose={() => {}}
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
@@ -128,9 +148,20 @@ export async function checkAgeVerification(): Promise<boolean> {
   }
 }
 
+// Export helper function to check if age was declined
+export async function checkAgeDeclined(): Promise<boolean> {
+  try {
+    const declined = await AsyncStorage.getItem(AGE_DECLINED_KEY);
+    return declined === 'true';
+  } catch {
+    return false;
+  }
+}
+
 // Export helper to reset verification (for testing/logout)
 export async function resetAgeVerification(): Promise<void> {
   await AsyncStorage.removeItem(AGE_VERIFIED_KEY);
+  await AsyncStorage.removeItem(AGE_DECLINED_KEY);
 }
 
 const styles = StyleSheet.create({

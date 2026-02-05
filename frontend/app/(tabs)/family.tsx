@@ -19,9 +19,10 @@ export default function FamilyScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [members, setMembers] = useState<FamilyMember[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
   const goToHome = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   useFocusEffect(
@@ -49,6 +50,9 @@ export default function FamilyScreen() {
   };
 
   const handleDeleteMember = (memberId: string, memberName: string) => {
+    // Prevent double-tap
+    if (deleting) return;
+    
     Alert.alert(
       "Delete Family Member",
       `Are you sure you want to delete ${memberName}? This will also delete all their prescriptions.`,
@@ -58,11 +62,26 @@ export default function FamilyScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            setDeleting(true);
             try {
               await deleteFamilyMember(memberId);
-              fetchMembers();
+              await fetchMembers();
             } catch (error) {
-              Alert.alert("Error", "Failed to delete family member");
+              console.error('Error deleting family member:', error);
+              
+              let errorMessage = 'Failed to delete family member. Please try again.';
+              
+              if (error instanceof Error) {
+                if (error.message.includes('storage') || error.message.includes('quota')) {
+                  errorMessage = 'Storage error occurred. Please try again.';
+                } else {
+                  errorMessage = `Failed to delete: ${error.message}`;
+                }
+              }
+              
+              Alert.alert("Error", errorMessage);
+            } finally {
+              setDeleting(false);
             }
           },
         },

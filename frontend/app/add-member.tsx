@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  BackHandler,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,8 +32,36 @@ export default function AddMemberScreen() {
   const [relationship, setRelationship] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (name.trim() || relationship) {
+          // Show confirmation if user has entered data
+          Alert.alert(
+            'Discard Changes?',
+            'You have unsaved changes. Are you sure you want to go back?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Discard', style: 'destructive', onPress: () => router.back() }
+            ]
+          );
+          return true; // Prevent default back behavior
+        }
+        return false; // Allow default back behavior
+      });
+
+      return () => backHandler.remove();
+    }
+  }, [name, relationship, router]);
+
   const handleSave = async () => {
-    if (!name.trim()) {
+    // Prevent double-submit
+    if (saving) return;
+    
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
       Alert.alert("Error", "Please enter a name");
       return;
     }
@@ -41,22 +70,40 @@ export default function AddMemberScreen() {
       return;
     }
 
+    // Validate name length
+    if (trimmedName.length > 50) {
+      Alert.alert("Error", "Name is too long. Please use 50 characters or less.");
+      return;
+    }
+
     setSaving(true);
     try {
       console.log('Starting to create family member...');
-      const newMember = await createFamilyMember({ name: name.trim(), relationship });
+      const newMember = await createFamilyMember({ name: trimmedName, relationship });
       console.log('Family member created successfully:', newMember);
       
       // Add a small delay to ensure state is properly updated
       await new Promise(resolve => setTimeout(resolve, 100));
       
       // Navigate back to family tab with replace to force refresh
-      setSaving(false);
       router.replace('/(tabs)/family');
     } catch (error) {
       console.error('Error creating family member:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      Alert.alert("Error", `Failed to add family member: ${errorMessage}\n\nPlease try again.`);
+      
+      // Provide specific error messages
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('quota') || error.message.includes('storage')) {
+          errorMessage = 'Storage is full. Please free up some space and try again.';
+        } else if (error.message.includes('duplicate')) {
+          errorMessage = 'A family member with this name already exists.';
+        } else {
+          errorMessage = `Failed to add family member: ${error.message}`;
+        }
+      }
+      
+      Alert.alert("Error", errorMessage);
     } finally {
       setSaving(false);
     }
@@ -230,6 +277,7 @@ const styles = StyleSheet.create({
   },
   saveButtonDisabled: {
     backgroundColor: "#3a4d63",
+    opacity: 0.6,
   },
   saveButtonText: {
     fontSize: 16,
