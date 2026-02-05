@@ -8,11 +8,18 @@ import {
   checkAgeVerification,
   checkAgeDeclined,
 } from "./components/AgeVerificationModal";
+import { setupGlobalErrorHandlers } from "./utils/errorHandler";
 
 export default function RootLayout() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean | null>(null);
   const [showAgeModal, setShowAgeModal] = useState(false);
   const [ageDeclined, setAgeDeclined] = useState(false);
+
+  // Set up global error handlers
+  useEffect(() => {
+    const cleanup = setupGlobalErrorHandlers();
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     // Check age verification on app launch
