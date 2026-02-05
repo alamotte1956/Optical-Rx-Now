@@ -7,7 +7,6 @@ import {
   FlatList,
   Alert,
   Image,
-  ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +23,6 @@ import {
 // Prescription with optional loaded image data
 interface PrescriptionWithImage extends Prescription {
   imageBase64?: string;
-  isLoadingImage?: boolean;
 }
 
 export default function MemberDetailScreen() {
@@ -56,7 +54,7 @@ export default function MemberDetailScreen() {
       
       // Don't preload images - just set prescriptions without image data
       // Images will be loaded on-demand or shown as placeholders
-      setPrescriptions(allPrescriptions.map(rx => ({ ...rx, imageBase64: undefined, isLoadingImage: false })));
+      setPrescriptions(allPrescriptions.map(rx => ({ ...rx, imageBase64: undefined })));
     } catch (error) {
       console.error('Error loading data:', error);
       Alert.alert('Error', 'Failed to load prescriptions');
