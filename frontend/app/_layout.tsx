@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler } from "react-native";
+import { BackHandler, Platform, Alert } from "react-native";
 import {
   AgeVerificationModal,
   checkAgeVerification,
@@ -28,8 +28,21 @@ export default function RootLayout() {
   };
 
   const handleAgeDeclined = () => {
-    // Exit the app if user is under 18
-    BackHandler.exitApp();
+    if (Platform.OS === 'android') {
+      // Exit the app on Android
+      BackHandler.exitApp();
+    } else {
+      // On iOS, apps cannot programmatically exit
+      // Show a persistent blocking modal instead
+      Alert.alert(
+        'Age Requirement Not Met',
+        'You must be 18 years or older to use this app. Please close the app.',
+        [{ text: 'OK', onPress: () => setShowAgeModal(true) }],
+        { cancelable: false }
+      );
+      // Keep the age modal visible
+      setShowAgeModal(true);
+    }
   };
 
   // Don't render main app until age verification is checked

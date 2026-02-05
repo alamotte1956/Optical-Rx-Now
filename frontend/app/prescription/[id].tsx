@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ export default function PrescriptionDetailScreen() {
   const [imageBase64, setImageBase64] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const loadPrescriptionData = async () => {
@@ -50,25 +51,38 @@ export default function PrescriptionDetailScreen() {
           return;
         }
         
-        setPrescription(rx);
+        if (isMounted.current) {
+          setPrescription(rx);
+        }
         
         // Load encrypted image
         if (rx.image_uri) {
           const decryptedImage = await loadPrescriptionImage(rx.image_uri);
-          setImageBase64(decryptedImage);
+          if (isMounted.current) {
+            setImageBase64(decryptedImage);
+          }
         }
       } catch (error) {
         console.error('Error loading prescription:', error);
         Alert.alert("Error", "Failed to load prescription");
         // Clear data on error
-        setPrescription(null);
-        setImageBase64('');
+        if (isMounted.current) {
+          setPrescription(null);
+          setImageBase64('');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
 
     loadPrescriptionData();
+    
+    // Cleanup function to track component unmount
+    return () => {
+      isMounted.current = false;
+    };
   }, [id, router]);
 
   const shareImage = async () => {

@@ -123,10 +123,79 @@ export default function MemberDetailScreen() {
     );
   };
 
+  const requestCameraPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'android' && Platform.Version >= 31) {
+      // Show rationale first on Android 12+
+      return new Promise((resolve) => {
+        Alert.alert(
+          'Camera Permission',
+          'This app needs camera access to photograph your prescriptions for easy storage and reference.',
+          [
+            { 
+              text: 'Cancel', 
+              style: 'cancel',
+              onPress: () => resolve(false)
+            },
+            { 
+              text: 'Allow', 
+              onPress: async () => {
+                const { status } = await ImagePicker.requestCameraPermissionsAsync();
+                resolve(status === 'granted');
+              }
+            }
+          ]
+        );
+      });
+    } else {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      return status === 'granted';
+    }
+  };
+
+  const requestMediaLibraryPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'android' && Platform.Version >= 31) {
+      // Show rationale first on Android 12+
+      return new Promise((resolve) => {
+        Alert.alert(
+          'Photo Library Permission',
+          'This app needs access to your photo library to select prescription images for easy storage and reference.',
+          [
+            { 
+              text: 'Cancel', 
+              style: 'cancel',
+              onPress: () => resolve(false)
+            },
+            { 
+              text: 'Allow', 
+              onPress: async () => {
+                const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                resolve(status === 'granted');
+              }
+            }
+          ]
+        );
+      });
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      return status === 'granted';
+    }
+  };
+
   const captureImage = async (type: 'eyeglass' | 'contact', source: 'camera' | 'library') => {
     try {
       let result;
       if (source === 'camera') {
+        // Request camera permission
+        const granted = await requestCameraPermission();
+        if (!granted) {
+          Alert.alert(
+            'Permission Denied',
+            'Camera permission is required to take photos of prescriptions. Please enable it in your device settings.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+
         result = await ImagePicker.launchCameraAsync({
           mediaTypes: ['images'],
           allowsEditing: true,
@@ -134,6 +203,17 @@ export default function MemberDetailScreen() {
           base64: true,
         });
       } else {
+        // Request media library permission
+        const granted = await requestMediaLibraryPermission();
+        if (!granted) {
+          Alert.alert(
+            'Permission Denied',
+            'Photo library permission is required to select images. Please enable it in your device settings.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+
         result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ['images'],
           allowsEditing: true,
@@ -159,7 +239,13 @@ export default function MemberDetailScreen() {
       }
     } catch (error) {
       console.error('Error capturing image:', error);
-      Alert.alert('Error', 'Failed to capture image');
+      Alert.alert(
+        'Image Capture Error',
+        source === 'camera' 
+          ? 'Failed to access camera. Please try again or select an image from your gallery.'
+          : 'Failed to access photo library. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getStats } from "../services/localStorage";
+import * as Haptics from "expo-haptics";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -46,11 +47,24 @@ export default function WelcomeScreen() {
         title: "Optical Rx Now",
       });
     } catch (error) {
-      console.log("Error sharing:", error);
+      console.error("Error sharing:", error);
+      Alert.alert(
+        'Sharing Failed',
+        'Unable to share at this time. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
-  const handleAdminAccess = () => {
+  const handleAdminAccess = async () => {
+    // Provide haptic feedback
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error) {
+      console.error('Haptic feedback error:', error);
+      // Continue with admin access even if haptic fails
+    }
+    
     Alert.alert(
       "Admin Area",
       "Choose an option:",
