@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler, Platform, Alert } from "react-native";
+import { BackHandler, Platform, View, Text, StyleSheet } from "react-native";
 import {
   AgeVerificationModal,
   checkAgeVerification,
@@ -11,6 +11,7 @@ import {
 export default function RootLayout() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean | null>(null);
   const [showAgeModal, setShowAgeModal] = useState(false);
+  const [ageDeclined, setAgeDeclined] = useState(false);
 
   useEffect(() => {
     // Check age verification on app launch
@@ -25,6 +26,7 @@ export default function RootLayout() {
   const handleAgeVerified = () => {
     setIsAgeVerified(true);
     setShowAgeModal(false);
+    setAgeDeclined(false);
   };
 
   const handleAgeDeclined = () => {
@@ -32,22 +34,33 @@ export default function RootLayout() {
       // Exit the app on Android
       BackHandler.exitApp();
     } else {
-      // On iOS, apps cannot programmatically exit
-      // Show a persistent blocking modal instead
-      Alert.alert(
-        'Age Requirement Not Met',
-        'You must be 18 years or older to use this app. Please close the app.',
-        [{ text: 'OK', onPress: () => setShowAgeModal(true) }],
-        { cancelable: false }
-      );
-      // Keep the age modal visible
-      setShowAgeModal(true);
+      // On iOS, show a blocking screen since we can't exit
+      setAgeDeclined(true);
+      setShowAgeModal(false);
     }
   };
 
   // Don't render main app until age verification is checked
   if (isAgeVerified === null) {
     return null; // Or show a splash screen
+  }
+
+  // Show blocking screen on iOS if age verification was declined
+  if (ageDeclined && Platform.OS === 'ios') {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <View style={styles.blockingContainer}>
+          <Text style={styles.blockingTitle}>Age Requirement Not Met</Text>
+          <Text style={styles.blockingText}>
+            You must be 18 years or older to use this app.
+          </Text>
+          <Text style={styles.blockingSubtext}>
+            Please close this app by swiping up from the bottom of the screen.
+          </Text>
+        </View>
+      </SafeAreaProvider>
+    );
   }
 
   return (
@@ -81,3 +94,33 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  blockingContainer: {
+    flex: 1,
+    backgroundColor: '#0a1628',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  blockingTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  blockingText: {
+    fontSize: 16,
+    color: '#8899a6',
+    marginBottom: 12,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  blockingSubtext: {
+    fontSize: 14,
+    color: '#6b7c8f',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+});
