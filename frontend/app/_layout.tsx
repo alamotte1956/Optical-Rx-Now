@@ -3,6 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { BackHandler, Platform, Alert, View, Text, StyleSheet } from "react-native";
+import { BackHandler, Platform, View, Text, StyleSheet } from "react-native";
 import {
   AgeVerificationModal,
   checkAgeVerification,
@@ -52,6 +53,7 @@ export default function RootLayout() {
   const handleAgeVerified = () => {
     setIsAgeVerified(true);
     setShowAgeModal(false);
+    setAgeDeclined(false);
   };
 
   const handleAgeDeclined = () => {
@@ -60,6 +62,7 @@ export default function RootLayout() {
       BackHandler.exitApp();
     } else {
       // On iOS, show permanent block screen (apps cannot programmatically exit)
+      // On iOS, show a blocking screen since we can't exit
       setAgeDeclined(true);
       setShowAgeModal(false);
     }
@@ -71,6 +74,7 @@ export default function RootLayout() {
   }
 
   // Show permanent block screen for iOS users who declined
+  // Show blocking screen on iOS if age verification was declined
   if (ageDeclined && Platform.OS === 'ios') {
     return (
       <SafeAreaProvider>
@@ -92,6 +96,14 @@ export default function RootLayout() {
               Please close the app manually by swiping up from the bottom of the screen.
             </Text>
           </View>
+        <View style={styles.blockingContainer}>
+          <Text style={styles.blockingTitle}>Age Requirement Not Met</Text>
+          <Text style={styles.blockingText}>
+            You must be 18 years or older to use this app.
+          </Text>
+          <Text style={styles.blockingSubtext}>
+            Please close this app by swiping up from the bottom of the screen.
+          </Text>
         </View>
       </SafeAreaProvider>
     );
@@ -131,6 +143,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   blockScreen: {
+  blockingContainer: {
     flex: 1,
     backgroundColor: '#0a1628',
     justifyContent: 'center',
@@ -181,5 +194,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontStyle: 'italic',
     lineHeight: 20,
+    padding: 40,
+  },
+  blockingTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  blockingText: {
+    fontSize: 16,
+    color: '#8899a6',
+    marginBottom: 12,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  blockingSubtext: {
+    fontSize: 14,
+    color: '#6b7c8f',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });
