@@ -57,41 +57,46 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn((key: string) => mockSecureStore.deleteItemAsync(key)),
 }));
 
-jest.mock('expo-file-system', () => {
-  const { Paths } = jest.requireActual('expo-file-system');
-  
-  return {
-    Paths,
-    File: jest.fn().mockImplementation(function(dir: any, filename: string) {
-      const fullPath = `${dir}/${filename}`;
-      return {
-        uri: fullPath,
-        get exists() {
-          return mockFileSystem.exists(fullPath);
-        },
-        create: jest.fn(() => {
-          mockFileSystem.writeFile(fullPath, '');
-        }),
-        write: jest.fn((content: string) => {
-          mockFileSystem.writeFile(fullPath, content);
-        }),
-        text: jest.fn(async () => {
-          return mockFileSystem.readFile(fullPath);
-        }),
-        delete: jest.fn(() => {
-          mockFileSystem.deleteFile(fullPath);
-        }),
-      };
-    }),
-    Directory: jest.fn().mockImplementation(function(base: any, name: string) {
-      return {
-        uri: `${base}/${name}`,
-        exists: true,
-        create: jest.fn(),
-      };
-    }),
-  };
-});
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn((uri: string, options: any) => Promise.resolve()),
+}));
+
+jest.mock('expo-file-system', () => ({
+  Paths: { document: 'file://document', cache: 'file://cache' },
+  File: jest.fn().mockImplementation(function(dir: any, filename: string) {
+    const dirPath = typeof dir === 'string' ? dir : (dir?.uri || 'file://document');
+    const fullPath = `${dirPath}/${filename}`;
+    return {
+      uri: fullPath,
+      get exists() {
+        return mockFileSystem.exists(fullPath);
+      },
+      create: jest.fn(() => {
+        mockFileSystem.writeFile(fullPath, '');
+      }),
+      write: jest.fn((content: string) => {
+        mockFileSystem.writeFile(fullPath, content);
+      }),
+      text: jest.fn(async () => {
+        return mockFileSystem.readFile(fullPath);
+      }),
+      delete: jest.fn(() => {
+        mockFileSystem.deleteFile(fullPath);
+      }),
+    };
+  }),
+  Directory: jest.fn().mockImplementation(function(base: any, name: string) {
+    const basePath = typeof base === 'string' ? base : (base?.uri || 'file://document');
+    return {
+      uri: `${basePath}/${name}`,
+      exists: true,
+      create: jest.fn(),
+    };
+  }),
+}));
+
+
 
 describe('Memory Stress Tests', () => {
   beforeEach(async () => {
