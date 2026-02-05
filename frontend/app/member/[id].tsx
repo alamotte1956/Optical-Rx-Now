@@ -110,7 +110,7 @@ export default function MemberDetailScreen() {
         return;
       }
 
-      // Load prescriptions for this specific member
+      // Load prescriptions for this specific member (filtered by member ID)
       const allPrescriptions = await getPrescriptions(id);
       setPrescriptions(allPrescriptions);
     } catch (error) {
