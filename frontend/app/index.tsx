@@ -59,9 +59,7 @@ export default function WelcomeScreen() {
   const handleAdminAccess = async () => {
     // Provide haptic feedback
     try {
-      if (Platform.OS === 'ios') {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error) {
       console.error('Haptic feedback error:', error);
       // Continue with admin access even if haptic fails
