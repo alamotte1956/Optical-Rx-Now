@@ -141,9 +141,17 @@ export function AgeVerificationModal({
 // Export helper function to check verification status
 export async function checkAgeVerification(): Promise<boolean> {
   try {
-    const verified = await AsyncStorage.getItem(AGE_VERIFIED_KEY);
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise<string | null>((resolve) => {
+      setTimeout(() => resolve(null), 5000); // 5 second timeout
+    });
+    
+    const storagePromise = AsyncStorage.getItem(AGE_VERIFIED_KEY);
+    
+    const verified = await Promise.race([storagePromise, timeoutPromise]);
     return verified === 'true';
-  } catch {
+  } catch (error) {
+    console.error('Error checking age verification:', error);
     return false;
   }
 }
