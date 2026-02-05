@@ -89,55 +89,153 @@ export default function AddRxScreen() {
     }
   };
 
-  const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.7,  // Reduce file size to stay under 10MB limit
-      maxWidth: 1920,  // Limit dimensions to reduce memory usage
-      maxHeight: 1080,
-      base64: true,
-      exif: false,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = result.assets[0].base64;
-      
-      if (!validateImageSize(base64Data)) {
+  const requestCameraPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'android' && Platform.Version >= 31) {
+      // Show rationale first on Android 12+
+      return new Promise((resolve) => {
         Alert.alert(
-          "Image Too Large",
-          "The image is too large. Please try again with a smaller image or lower quality."
+          'Camera Permission',
+          'This app needs camera access to photograph your prescriptions for easy storage and reference.',
+          [
+            { 
+              text: 'Cancel', 
+              style: 'cancel',
+              onPress: () => resolve(false)
+            },
+            { 
+              text: 'Allow', 
+              onPress: async () => {
+                const { status } = await ImagePicker.requestCameraPermissionsAsync();
+                resolve(status === 'granted');
+              }
+            }
+          ]
+        );
+      });
+    } else {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      return status === 'granted';
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      // Request permission first
+      const granted = await requestCameraPermission();
+      if (!granted) {
+        Alert.alert(
+          'Permission Denied',
+          'Camera permission is required to take photos of prescriptions. Please enable it in your device settings.',
+          [{ text: 'OK' }]
         );
         return;
       }
-      
-      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,  // Reduce file size to stay under 10MB limit
+        maxWidth: 1920,  // Limit dimensions to reduce memory usage
+        maxHeight: 1080,
+        base64: true,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        const base64Data = result.assets[0].base64;
+        
+        if (!validateImageSize(base64Data)) {
+          Alert.alert(
+            "Image Too Large",
+            "The image is too large. Please try again with a smaller image or lower quality."
+          );
+          return;
+        }
+        
+        setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert(
+        'Camera Error',
+        'Failed to access camera. Please try again or select an image from your gallery.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  const requestMediaLibraryPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'android' && Platform.Version >= 31) {
+      // Show rationale first on Android 12+
+      return new Promise((resolve) => {
+        Alert.alert(
+          'Photo Library Permission',
+          'This app needs access to your photo library to select prescription images for easy storage and reference.',
+          [
+            { 
+              text: 'Cancel', 
+              style: 'cancel',
+              onPress: () => resolve(false)
+            },
+            { 
+              text: 'Allow', 
+              onPress: async () => {
+                const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                resolve(status === 'granted');
+              }
+            }
+          ]
+        );
+      });
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      return status === 'granted';
     }
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.7,  // Reduce file size to stay under 10MB limit
-      maxWidth: 1920,  // Limit dimensions to reduce memory usage
-      maxHeight: 1080,
-      base64: true,
-      exif: false,
-    });
-
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = result.assets[0].base64;
-      
-      if (!validateImageSize(base64Data)) {
+    try {
+      // Request media library permission first
+      const granted = await requestMediaLibraryPermission();
+      if (!granted) {
         Alert.alert(
-          "Image Too Large",
-          "The image is too large. Please try again with a smaller image or lower quality."
+          'Permission Denied',
+          'Photo library permission is required to select images. Please enable it in your device settings.',
+          [{ text: 'OK' }]
         );
         return;
       }
-      
-      setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,  // Reduce file size to stay under 10MB limit
+        maxWidth: 1920,  // Limit dimensions to reduce memory usage
+        maxHeight: 1080,
+        base64: true,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        const base64Data = result.assets[0].base64;
+        
+        if (!validateImageSize(base64Data)) {
+          Alert.alert(
+            "Image Too Large",
+            "The image is too large. Please try again with a smaller image or lower quality."
+          );
+          return;
+        }
+        
+        setImageBase64(`data:image/jpeg;base64,${base64Data}`);
+      }
+    } catch (error) {
+      console.error('Image picker error:', error);
+      Alert.alert(
+        'Photo Library Error',
+        'Failed to access photo library. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 

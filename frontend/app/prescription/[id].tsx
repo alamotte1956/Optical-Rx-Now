@@ -69,6 +69,12 @@ export default function PrescriptionDetailScreen() {
     };
 
     loadPrescriptionData();
+    
+    // Cleanup function to release memory when component unmounts
+    return () => {
+      setImageBase64('');
+      setPrescription(null);
+    };
   }, [id, router]);
 
   const shareImage = async () => {
