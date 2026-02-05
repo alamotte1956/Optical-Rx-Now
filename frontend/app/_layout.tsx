@@ -23,6 +23,15 @@ export default function RootLayout() {
   useEffect(() => {
     const checkAge = async () => {
       try {
+        // Bypass age verification in development
+        if (__DEV__) {
+          console.log('🔓 Development mode: Age verification bypassed');
+          setIsAgeVerified(true);
+          setAgeDeclined(false);
+          setShowAgeModal(false);
+          return;
+        }
+        
         const verified = await checkAgeVerification();
         const declined = await checkAgeDeclined();
 
