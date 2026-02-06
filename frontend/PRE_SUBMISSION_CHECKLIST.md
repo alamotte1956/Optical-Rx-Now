@@ -10,7 +10,7 @@
 These items **MUST** be completed before submission. App will be rejected without them.
 
 - [ ] **Privacy policy publicly accessible**
-  - URL: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+  - URL: https://opticalrxnow.com/privacy
   - Verify URL loads in browser (desktop and mobile)
   - GitHub Pages enabled in repository settings
   - Page displays correctly on all devices
@@ -107,7 +107,7 @@ These items **MUST** be completed before submission. App will be rejected withou
 
 - [ ] **Privacy policy URL in app.json**
   - "privacy" field present
-  - URL is https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+  - URL is https://opticalrxnow.com/privacy
 
 ---
 
@@ -286,7 +286,7 @@ Test all core app functionality on both iOS and Android:
 
 ### Privacy Policy
 - [ ] **Privacy policy URL accessible**
-  - https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+  - https://opticalrxnow.com/privacy
   - Page loads on desktop
   - Page loads on mobile
   - Content accurate and complete
@@ -342,7 +342,7 @@ Complete these steps in order before final submission:
 
 - [ ] **Verify privacy policy URL loads**
   - Wait 2-5 minutes for deployment
-  - Open https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+  - Open https://opticalrxnow.com/privacy
   - Verify page loads correctly
   - Test on desktop browser
   - Test on mobile browser

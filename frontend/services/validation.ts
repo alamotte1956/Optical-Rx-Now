@@ -1,6 +1,7 @@
 import DOMPurify from 'isomorphic-dompurify';
+import * as FileSystem from 'expo-file-system';
 
-/**npm install isomorphic-dompurify --legacy-peer-deps
+/**
 
  * Sanitize text inputs with comprehensive XSS prevention
  * Uses DOMPurify for production-grade sanitization
@@ -42,11 +43,43 @@ export const isValidUrl = (url: string): boolean => {
   }
 };
 
-// Validate image type
-export const isValidImageType = (uri: string): boolean => {
-  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-  const lowerUri = uri.toLowerCase();
-  return validExtensions.some(ext => lowerUri.endsWith(ext));
+/**
+ * Validates image MIME type (not just extension)
+ */
+export const isValidImageType = async (uri: string): Promise<boolean> => {
+  try {
+    const validMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    
+    // Check extension first
+    const hasValidExtension = validExtensions.some(ext => 
+      uri.toLowerCase().endsWith(ext)
+    );
+    
+    if (!hasValidExtension) return false;
+    
+    // Get file info
+    const fileInfo = await FileSystem.getInfoAsync(uri);
+    if (!fileInfo.exists) return false;
+    
+    // Check file size (max 10MB)
+    if (fileInfo.size && fileInfo.size > 10 * 1024 * 1024) {
+      throw new Error('Image file size exceeds 10MB limit');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Image validation error:', error);
+    return false;
+  }
+};
+
+/**
+ * Validates file size
+ */
+export const isValidFileSize = (sizeInBytes: number): boolean => {
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  return sizeInBytes <= MAX_SIZE;
 };
 
 // Validate date format (YYYY-MM-DD)

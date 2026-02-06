@@ -82,7 +82,7 @@ This app is ready for submission to Apple App Store and Google Play Store!
 - [Screenshot Guide](../docs/screenshot-guide.md) - How to create required screenshots
 - [Testing Checklist](../docs/final-testing-checklist.md) - Complete pre-submission testing
 - [Support Email Template](../docs/support-email-template.md) - Auto-response for support inquiries
-- [Privacy Policy](https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html) - Live privacy policy
+- [Privacy Policy](https://opticalrxnow.com/privacy) - Live privacy policy
 
 ### Quick Start for Submission
 
@@ -121,8 +121,8 @@ This app is ready for submission to Apple App Store and Google Play Store!
 
 ### Support
 - **Email:** support@opticalrxnow.com
-- **Privacy Policy:** https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
-- **Website:** https://alamotte1956.github.io/Optical-Rx-Now/
+- **Privacy Policy:** https://opticalrxnow.com/privacy
+- **Website:** https://opticalrxnow.com
 
 ### Compliance Status
 ✅ iOS 15.1+ deployment target  

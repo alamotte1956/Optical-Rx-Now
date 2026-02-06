@@ -109,7 +109,7 @@ A: No. We do not track or store your location. When you use the store finder, yo
 🔐 Privacy Policy
 
 Our complete privacy policy is available at:
-https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+https://opticalrxnow.com/privacy
 
 Key Points:
 ✅ 100% local storage - no cloud, no servers
@@ -137,8 +137,8 @@ Best regards,
 Optical Rx Now Support Team
 
 Email: support@opticalrxnow.com
-Privacy Policy: https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
-Website: https://alamotte1956.github.io/Optical-Rx-Now/
+Privacy Policy: https://opticalrxnow.com/privacy
+Website: https://opticalrxnow.com
 
 📱 Never lose your prescription again! 👓
 ```

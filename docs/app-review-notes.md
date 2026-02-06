@@ -206,7 +206,7 @@ Users are responsible for:
 
 ## Privacy Policy
 
-**URL:** https://alamotte1956.github.io/Optical-Rx-Now/privacy-policy.html
+**URL:** https://opticalrxnow.com/privacy
 
 The privacy policy is hosted on GitHub Pages and is publicly accessible. It details:
 - Local-only data storage
