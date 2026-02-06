@@ -16,7 +16,7 @@ module.exports = {
     '!**/node_modules/**',
     '!**/__tests__/**',
   ],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 70,
       functions: 75,

@@ -117,7 +117,7 @@ describe('Prescription Workflow Integration Tests', () => {
     });
 
     // Verify correct association
-    const alice Prescriptions = await localStorage.getPrescriptions(member1.id);
+    const alicePrescriptions = await localStorage.getPrescriptions(member1.id);
     const bobPrescriptions = await localStorage.getPrescriptions(member2.id);
 
     expect(alicePrescriptions.length).toBe(1);

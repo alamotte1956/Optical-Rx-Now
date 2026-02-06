@@ -126,7 +126,7 @@ describe('Offline Persistence Integration Tests', () => {
       exportDate: new Date().toISOString(),
     };
 
-    const encrypted Backup = await encryption.encryptData(backupData);
+    const encryptedBackup = await encryption.encryptData(backupData);
     expect(encryptedBackup).toBeDefined();
 
     // Clear data
