@@ -376,6 +376,12 @@ export default function AddRxScreen() {
         notes: notes.trim(),
         date_taken: dateTaken,
       });
+      
+      // Wait for AsyncStorage flush to complete before navigation
+      // AsyncStorage.setItem can resolve before data is fully persisted to disk
+      // This delay ensures the write completes before the list screen re-reads storage
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
       router.back();
     } catch (error) {
       console.error('Error saving prescription:', error);
