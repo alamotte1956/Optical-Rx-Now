@@ -110,28 +110,9 @@ export default function MemberDetailScreen() {
         return;
       }
 
-      // Load prescriptions for this specific member using proper service
-      const allPrescriptions = await getPrescriptions(id); // Pass family member ID to filter
-      
-      // Set prescriptions directly without loading images
+      // Load prescriptions for this specific member (filtered by member ID)
+      const allPrescriptions = await getPrescriptions(id);
       setPrescriptions(allPrescriptions);
-      // Don't preload images - just set prescriptions without image data
-      // Images will be loaded on-demand or shown as placeholders
-      setPrescriptions(allPrescriptions.map(rx => ({ ...rx, imageBase64: undefined })));
-      // Load images for each prescription
-      const prescriptionsWithImages = await Promise.all(
-        allPrescriptions.map(async (rx) => {
-          try {
-            const imageBase64 = await(rx.image_uri);
-            return { ...rx, imageBase64 };
-          } catch (error) {
-            console.error(`Failed to load image for prescription ${rx.id}:`, error);
-            return { ...rx, imageBase64: '' };
-          }
-        })
-      );
-      
-      setPrescriptions(prescriptionsWithImages);
     } catch (error) {
       console.error('Error loading data:', error);
       Alert.alert('Error', 'Failed to load prescriptions');
@@ -183,7 +164,7 @@ export default function MemberDetailScreen() {
     );
   };
 
-  const renderPrescription = ({ item }: { item: Prescription }) => (
+  const renderPrescription = ({ item }: { item: PrescriptionWithImage }) => (
     <PrescriptionCard
       item={item}
       onPress={() =>
@@ -194,58 +175,6 @@ export default function MemberDetailScreen() {
       }
       onDelete={() => handleDeletePrescription(item.id)}
     />
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const renderPrescription = ({ item }: { item: PrescriptionWithImage }) => (
-    <View style={styles.prescriptionCardWrapper}>
-      <TouchableOpacity
-        style={styles.prescriptionCard}
-        onPress={() =>
-          router.push({
-            pathname: '/prescription/[id]',
-            params: { id: item.id, memberId: id },
-          })
-        }
-        onLongPress={() => handleDeletePrescription(item.id)}
-      >
-        {item.imageBase64 ? (
-          <Image
-            source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
-            style={styles.prescriptionImage}
-          />
-        ) : (
-          <View style={[styles.prescriptionImage, styles.placeholderImage]}>
-            <Ionicons name="image-outline" size={40} color="#666" />
-          </View>
-        )}
-        <View style={styles.prescriptionOverlay}>
-          <View style={styles.prescriptionBadge}>
-            <Ionicons
-              name={item.rx_type === 'eyeglass' ? 'glasses-outline' : 'eye-outline'}
-              size={16}
-              color="#fff"
-            />
-            <Text style={styles.prescriptionType}>
-              {item.rx_type === 'eyeglass' ? 'Eyeglass' : 'Contact Lens'}
-            </Text>
-          </View>
-          <Text style={styles.prescriptionDate}>{formatDate(item.created_at)}</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDeletePrescription(item.id)}
-      >
-        <Ionicons name="trash-outline" size={20} color="#ff6b6b" />
-      </TouchableOpacity>
-    </View>
   );
 
   const EmptyState = () => (
@@ -360,7 +289,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardWrapper: {
-  prescriptionCardWrapper: {
     position: 'relative',
     width: '48%',
     marginBottom: 16,
@@ -469,18 +397,6 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 12,
     paddingBottom: 10,
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
   },
 });
 
