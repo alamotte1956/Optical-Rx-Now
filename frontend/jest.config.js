@@ -10,11 +10,21 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
     'services/**/*.{ts,tsx}',
+    'utils/**/*.{ts,tsx}',
     'app/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
+    '!**/__tests__/**',
   ],
-  testTimeout: 60000, // 60 seconds for torture tests
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 75,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  testTimeout: process.env.CI ? 120000 : 60000,
   testMatch: [
     '**/__tests__/**/*.(test|spec).(ts|tsx|js)',
   ],

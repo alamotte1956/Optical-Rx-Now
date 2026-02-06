@@ -10,10 +10,16 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
+    "test:unit": "jest __tests__/unit",
+    "test:integration": "jest __tests__/integration",
     "test:torture": "jest __tests__/torture --runInBand --verbose",
     "test:torture:watch": "jest __tests__/torture --watch",
     "test:torture:coverage": "jest __tests__/torture --coverage",
-    "test:stress": "npm run test:torture"
+    "test:stress": "npm run test:torture",
+    "test:all": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --maxWorkers=2"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
