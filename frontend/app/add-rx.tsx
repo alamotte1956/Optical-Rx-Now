@@ -376,6 +376,11 @@ export default function AddRxScreen() {
         notes: notes.trim(),
         date_taken: dateTaken,
       });
+      
+      // Wait for AsyncStorage write to complete before navigation
+      // This prevents race condition where navigation happens before storage completes
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
       router.back();
     } catch (error) {
       console.error('Error saving prescription:', error);

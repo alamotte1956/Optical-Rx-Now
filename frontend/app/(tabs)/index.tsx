@@ -24,7 +24,7 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   useFocusEffect(
