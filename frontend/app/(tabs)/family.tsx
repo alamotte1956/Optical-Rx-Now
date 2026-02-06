@@ -31,7 +31,7 @@ export default function FamilyScreen() {
   const [deleting, setDeleting] = useState(false);
 
   const goToHome = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   useFocusEffect(
