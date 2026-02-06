@@ -4,6 +4,7 @@
     "name": "Sam's Club Optical",
     "description": "In-store eye exams & quality eyewear",
     "url": "https://www.samsclub.com/optical",
+    "_comment": "To add affiliate tracking, update URLs to include your affiliate ID. Example: https://www.samsclub.com/optical?affId=YOUR_AFFILIATE_ID",
     "category": "both",
     "discount": "Members save up to 50%",
     "is_featured": true,

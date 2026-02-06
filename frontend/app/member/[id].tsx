@@ -64,6 +64,33 @@ export default function MemberDetailScreen() {
     }, [id])
   );
 
+  const handleDeletePrescription = async (prescriptionId: string) => {
+    Alert.alert(
+      'Delete Prescription',
+      'Are you sure you want to delete this prescription? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deletePrescriptionService(prescriptionId);
+              // Reload prescriptions after deletion
+              await loadData();
+            } catch (error) {
+              console.error('Error deleting prescription:', error);
+              Alert.alert('Error', 'Failed to delete prescription. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderItem = ({ item }: { item: Prescription }) => (
     <PrescriptionCard
       item={item}
@@ -73,6 +100,7 @@ export default function MemberDetailScreen() {
           params: { id: item.id, memberId: id },
         })
       }
+      onDelete={() => handleDeletePrescription(item.id)}
     />
   );
 
