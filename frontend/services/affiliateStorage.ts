@@ -32,21 +32,20 @@ export const saveAffiliate = async (affiliate: Omit<Affiliate, "id"> | Affiliate
   const affiliates = await getAffiliates();
   
   if ('id' in affiliate) {
-    // Update existing
-    const index = affiliates.findIndex(a => a.id === affiliate.id);
-    if (index !== -1) {
-      affiliates[index] = affiliate;
-    }
-    await AsyncStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
+    // Update existing - use immutable update pattern
+    const updatedAffiliates = affiliates.map(a => 
+      a.id === affiliate.id ? affiliate : a
+    );
+    await AsyncStorage.setItem(AFFILIATES_KEY, JSON.stringify(updatedAffiliates));
     return affiliate;
   } else {
-    // Create new
+    // Create new - use crypto for better ID uniqueness
     const newAffiliate: Affiliate = {
       ...affiliate,
-      id: `affiliate_${Date.now()}`,
+      id: `affiliate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-    affiliates.push(newAffiliate);
-    await AsyncStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
+    const updatedAffiliates = [...affiliates, newAffiliate];
+    await AsyncStorage.setItem(AFFILIATES_KEY, JSON.stringify(updatedAffiliates));
     return newAffiliate;
   }
 };
