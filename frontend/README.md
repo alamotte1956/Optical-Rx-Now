@@ -17,6 +17,8 @@ A React Native mobile app built with Expo for managing family eyeglass and conta
 
 ## Get started
 
+**📱 Want to test on your phone? See the [Expo Development Guide](../EXPO_DEV_GUIDE.md) for step-by-step instructions on getting a QR code!**
+
 1. Install dependencies
 
    ```bash
@@ -28,6 +30,14 @@ A React Native mobile app built with Expo for managing family eyeglass and conta
    ```bash
    npx expo start
    ```
+
+   This will start the Metro bundler and display a QR code.
+
+3. Scan the QR code
+   - **iPhone**: Use the Camera app (opens in Expo Go)
+   - **Android**: Use the Expo Go app
+   
+   For detailed instructions, troubleshooting, and more, see the [Expo Development Guide](../EXPO_DEV_GUIDE.md).
 
 In the output, you'll find options to open the app in a
 
