@@ -19,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { getFamilyMembers, createPrescription, type FamilyMember } from "../services/localStorage";
+import { schedulePrescriptionNotification } from "../services/notifications";
 
 const MAX_IMAGE_SIZE_MB = 10;
 
@@ -369,13 +370,20 @@ export default function AddRxScreen() {
 
     setSaving(true);
     try {
-      await createPrescription({
+      const newPrescription = await createPrescription({
         family_member_id: selectedMember,
         rx_type: rxTypeState,
         imageBase64: imageBase64,
         notes: notes.trim(),
         date_taken: dateTaken,
+        pd: pdData.pd,
+        pd_type: pdData.pd_type,
+        left_pd: pdData.left_pd,
+        right_pd: pdData.right_pd,
       });
+      
+      // Schedule expiration notifications
+      await schedulePrescriptionNotification(newPrescription);
       
       // Wait for AsyncStorage flush to complete before navigation
       // AsyncStorage.setItem can resolve before data is fully persisted to disk

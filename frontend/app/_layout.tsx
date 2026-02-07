@@ -3,12 +3,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { BackHandler, Platform, View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import * as Notifications from "expo-notifications";
 import {
   AgeVerificationModal,
   checkAgeVerification,
   checkAgeDeclined,
 } from "../components/AgeVerificationModal";
 import { setupGlobalErrorHandlers } from "../utils/errorHandler";
+import { requestNotificationPermissions, scheduleAllPrescriptionNotifications } from "../services/notifications";
 
 export default function RootLayout() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean | null>(null);
@@ -18,6 +20,21 @@ export default function RootLayout() {
   useEffect(() => {
     const cleanup = setupGlobalErrorHandlers();
     return cleanup;
+  }, []);
+
+  // Initialize notifications
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        const hasPermission = await requestNotificationPermissions();
+        if (hasPermission) {
+          await scheduleAllPrescriptionNotifications();
+        }
+      } catch (error) {
+        console.error('Error initializing notifications:', error);
+      }
+    };
+    initNotifications();
   }, []);
 
   useEffect(() => {
@@ -138,6 +155,7 @@ export default function RootLayout() {
         <Stack.Screen name="shop" options={{ presentation: "card" }} />
         <Stack.Screen name="admin" options={{ presentation: "card" }} />
         <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
+        <Stack.Screen name="find-optometrist" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );

@@ -14,6 +14,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFamilyMembers, getPrescriptions, deletePrescription, type FamilyMember, type Prescription } from "../../services/localStorage";
+import { cancelPrescriptionNotifications } from "../../services/notifications";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export default function PrescriptionsScreen() {
           onPress: async () => {
             try {
               await deletePrescription(id);
+              await cancelPrescriptionNotifications(id);
               setPrescriptions((prev) => prev.filter((rx) => rx.id !== id));
               Alert.alert("Success", "Prescription deleted successfully");
             } catch (error) {

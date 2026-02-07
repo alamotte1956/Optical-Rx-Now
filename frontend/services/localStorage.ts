@@ -35,6 +35,10 @@ export interface Prescription {
   date_taken: string;
   expiry_date: string;
   created_at: string;
+  pd?: number;
+  pd_type?: "monocular" | "binocular";
+  left_pd?: number;
+  right_pd?: number;
 }
 
 //
@@ -116,6 +120,10 @@ export const createPrescription = async (
       date_taken: data.date_taken,
       expiry_date: expiry.toISOString().split("T")[0],
       created_at: today.toISOString(),
+      pd: data.pd,
+      pd_type: data.pd_type,
+      left_pd: data.left_pd,
+      right_pd: data.right_pd,
     };
 
     list.push(rx);
