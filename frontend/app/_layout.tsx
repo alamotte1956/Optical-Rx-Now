@@ -7,12 +7,28 @@ import {
   AgeVerificationModal,
   checkAgeVerification,
 } from "./components/AgeVerificationModal";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { setupGlobalErrorHandlers } from "../utils/errorHandler";
+import { HealthCheck } from "../utils/healthCheck";
 
 export default function RootLayout() {
   const [isAgeVerified, setIsAgeVerified] = useState<boolean | null>(null);
   const [showAgeModal, setShowAgeModal] = useState(false);
 
   useEffect(() => {
+    // Setup global error handlers
+    setupGlobalErrorHandlers();
+    
+    // Run health check on app launch
+    HealthCheck.runHealthCheck().then((result) => {
+      console.log('[App] Health check result:', result.overall);
+      if (result.overall === 'critical') {
+        console.warn('[App] Critical health issues detected:', result.recommendations);
+      }
+    }).catch((error) => {
+      console.error('[App] Health check failed:', error);
+    });
+    
     // Check age verification on app launch
     checkAgeVerification().then((verified) => {
       setIsAgeVerified(verified);
@@ -38,33 +54,35 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="light" />
-      
-      {/* Age Verification Modal */}
-      <AgeVerificationModal
-        visible={showAgeModal}
-        onVerified={handleAgeVerified}
-        onDeclined={handleAgeDeclined}
-      />
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        
+        {/* Age Verification Modal */}
+        <AgeVerificationModal
+          visible={showAgeModal}
+          onVerified={handleAgeVerified}
+          onDeclined={handleAgeDeclined}
+        />
 
-      {/* Main App Stack */}
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#0a1628" },
-          animation: "slide_from_right",
-        }}
-      >
-        <Stack.Screen name="index" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
-        <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
-        <Stack.Screen name="add-member" options={{ presentation: "modal" }} />
-        <Stack.Screen name="shop" options={{ presentation: "card" }} />
-        <Stack.Screen name="admin" options={{ presentation: "card" }} />
-        <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
-      </Stack>
-    </SafeAreaProvider>
+        {/* Main App Stack */}
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#0a1628" },
+            animation: "slide_from_right",
+          }}
+        >
+          <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
+          <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
+          <Stack.Screen name="add-member" options={{ presentation: "modal" }} />
+          <Stack.Screen name="shop" options={{ presentation: "card" }} />
+          <Stack.Screen name="admin" options={{ presentation: "card" }} />
+          <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
+        </Stack>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

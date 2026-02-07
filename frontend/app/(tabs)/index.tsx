@@ -14,6 +14,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
+import { networkStateManager } from "../../utils/networkStateManager";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -22,10 +23,23 @@ export default function PrescriptionsScreen() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
 
   const goToHome = () => {
     router.replace("/");
   };
+
+  useEffect(() => {
+    // Listen to network changes
+    const unsubscribe = networkStateManager.addListener((online) => {
+      setIsOnline(online);
+    });
+    
+    // Get initial network state
+    setIsOnline(networkStateManager.getIsOnline());
+    
+    return unsubscribe;
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,6 +101,16 @@ export default function PrescriptionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Offline Banner */}
+      {!isOnline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={16} color="#fff" />
+          <Text style={styles.offlineBannerText}>
+            You are offline. Some features may be limited.
+          </Text>
+        </View>
+      )}
+      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -243,6 +267,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0a1628",
+  },
+  offlineBanner: {
+    backgroundColor: "#ff6b35",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  offlineBannerText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "500",
   },
   loadingContainer: {
     flex: 1,
