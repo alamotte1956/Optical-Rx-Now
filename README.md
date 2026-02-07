@@ -42,6 +42,8 @@ See [SECURITY.md](SECURITY.md) for full security policy and vulnerability report
 
 ### Development Setup
 
+**📱 Want to test on your phone? See the [Expo Development Guide](EXPO_DEV_GUIDE.md) for step-by-step instructions on getting a QR code!**
+
 1. **Install dependencies**
    ```bash
    cd frontend
@@ -52,6 +54,14 @@ See [SECURITY.md](SECURITY.md) for full security policy and vulnerability report
    ```bash
    npx expo start
    ```
+
+   This will start the Metro bundler and display a QR code that you can scan with your phone.
+
+3. **Scan the QR code**
+   - **iPhone**: Use the Camera app
+   - **Android**: Use the Expo Go app
+   
+   See the [Expo Development Guide](EXPO_DEV_GUIDE.md) for detailed instructions and troubleshooting.
 
 In the output, you'll find options to open the app in a:
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
