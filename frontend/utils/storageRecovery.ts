@@ -4,12 +4,6 @@ const BACKUP_SUFFIX = '_backup';
 const VERSION_KEY = '@storage_version';
 const CURRENT_VERSION = '1.0';
 
-interface StorageRecoveryOptions {
-  key: string;
-  maxBackups?: number;
-  validateData?: (data: any) => boolean;
-}
-
 /**
  * Storage Recovery System
  * Provides automatic backup, versioning, and recovery for AsyncStorage data

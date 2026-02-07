@@ -3,7 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NOTIFICATION_RETRY_KEY = '@notification_retry_state';
 const MAX_PERMISSION_RETRIES = 3;
-const RETRY_DELAYS = [0, 60000, 300000, 86400000]; // 0s, 1min, 5min, 24hrs
+
+// Time constants for retry delays
+const IMMEDIATE = 0;
+const ONE_MINUTE_MS = 60000;
+const FIVE_MINUTES_MS = 300000;
+const ONE_DAY_MS = 86400000;
+
+const RETRY_DELAYS = [IMMEDIATE, ONE_MINUTE_MS, FIVE_MINUTES_MS, ONE_DAY_MS];
 
 interface RetryState {
   permissionAttempts: number;
