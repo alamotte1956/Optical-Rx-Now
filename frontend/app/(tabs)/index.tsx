@@ -13,7 +13,7 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
+import { getFamilyMembers, getPrescriptions, deletePrescription, type FamilyMember, type Prescription } from "../../services/localStorage";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function PrescriptionsScreen() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const goToHome = () => {
-    router.replace("/");
+    router.push("/");
   };
 
   useFocusEffect(
@@ -49,6 +49,30 @@ export default function PrescriptionsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  const handleDeletePrescription = async (id: string, imageUri: string) => {
+    Alert.alert(
+      "Delete Prescription",
+      "Are you sure you want to delete this prescription?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePrescription(id);
+              setPrescriptions((prev) => prev.filter((rx) => rx.id !== id));
+              Alert.alert("Success", "Prescription deleted successfully");
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete prescription");
+              console.error("Error deleting prescription:", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const onRefresh = () => {
@@ -228,6 +252,12 @@ export default function PrescriptionsScreen() {
                       </View>
                       <Text style={styles.rxDate}>{rx.date_taken}</Text>
                     </View>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeletePrescription(rx.id, rx.image_uri)}
+                    >
+                      <Ionicons name="trash" size={16} color="#ff6b6b" />
+                    </TouchableOpacity>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -415,6 +445,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#8899a6",
     marginTop: 4,
+  },
+  deleteButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 107, 107, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

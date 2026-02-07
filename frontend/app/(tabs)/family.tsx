@@ -31,7 +31,7 @@ export default function FamilyScreen() {
   const [deleting, setDeleting] = useState(false);
 
   const goToHome = () => {
-    router.replace("/");
+    router.push("/");
   };
 
   useFocusEffect(
@@ -191,7 +191,12 @@ export default function FamilyScreen() {
                   </Text>
                 </View>
 
-                <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeleteMember(member.id, member.name)}
+                >
+                  <Ionicons name="trash" size={20} color="#ff6b6b" />
+                </TouchableOpacity>
               </TouchableOpacity>
             );
           })
@@ -313,5 +318,13 @@ const styles = StyleSheet.create({
   memberStats: {
     fontSize: 12,
     color: "#8899a6",
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 107, 107, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
