@@ -16,16 +16,16 @@ import {
 } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-// ✅ TRIPLE-STEP RELATIVE PATHS (Confirmed for your structure)
+// ✅ FIXED: TWO-STEP RELATIVE PATHS (frontend/app/member → frontend/services)
 import { 
   getFamilyMembers, 
   getPrescriptions, 
   deletePrescription as deletePrescriptionService 
-} from '../../../services/localStorage';
+} from '../../services/localStorage';
 
-import { FamilyMember, Prescription } from '../../../types';
+import { FamilyMember, Prescription } from '../../types';
 
-import PrescriptionCard from '../../../components/PrescriptionCard';
+import PrescriptionCard from '../../components/PrescriptionCard';
 
 export default function MemberDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
