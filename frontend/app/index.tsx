@@ -5,6 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getStats } from "../services/localStorage";
 import * as Haptics from "expo-haptics";
+<<<<<<< HEAD
+=======
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "../components/LanguageSelector";
+import AffiliateCard from "../components/AffiliateCard";
+import affiliateData from "../data/affiliates.json";
+>>>>>>> 06da9d7 (feat: Add affiliate links to welcome page and admin dashboard)
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -137,6 +144,36 @@ export default function WelcomeScreen() {
               </View>
             </View>
           )}
+
+          {/* Find Optometrist Button */}
+          <TouchableOpacity style={styles.findOptometristButton} onPress={() => router.push('/find-optometrist')}>
+            <View style={styles.findOptometristIcon}>
+              <Ionicons name="location" size={28} color="#4a9eff" />
+            </View>
+            <View style={styles.findOptometristText}>
+              <Text style={styles.findOptometristTitle}>Find Eye Care Near You</Text>
+              <Text style={styles.findOptometristSubtitle}>Locate optometrists and eye doctors</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+
+          {/* Featured Affiliates */}
+          <View style={styles.affiliatesSection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Featured Optical Partners</Text>
+              <TouchableOpacity onPress={() => router.push('/shop')} style={styles.viewAllButton}>
+                <Text style={styles.viewAllText}>View All</Text>
+                <Ionicons name="chevron-forward" size={16} color="#4a9eff" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.affiliatesScroll}>
+              {affiliateData.filter(affiliate => affiliate.is_featured && affiliate.is_active).slice(0, 3).map(partner => (
+                <View key={partner.id} style={styles.affiliateCardMini}>
+                  <AffiliateCard partner={partner} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -248,5 +285,68 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#8899a6",
     marginTop: 4,
+  },
+  affiliatesSection: {
+    marginTop: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: '#4a9eff',
+    marginRight: 4,
+  },
+  affiliatesScroll: {
+    paddingHorizontal: 20,
+  },
+  affiliateCardMini: {
+    width: 280,
+    marginRight: 12,
+  },
+  findOptometristButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a2d45',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#2a4d6f',
+  },
+  findOptometristIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#4a9eff20',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  findOptometristText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  findOptometristTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  findOptometristSubtitle: {
+    fontSize: 13,
+    color: '#8899a6',
   },
 });

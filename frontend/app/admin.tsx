@@ -13,6 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFamilyMembers, getPrescriptions } from "../services/localStorage";
 import { getLocalStats } from "../services/analytics";
+import AffiliateCard from "../components/AffiliateCard";
+import affiliateData from "../data/affiliates.json";
 
 interface AnalyticsData {
   summary: {
@@ -206,6 +208,16 @@ export default function AdminDashboard() {
             <Text style={styles.noActivityText}>No activity recorded yet</Text>
           )}
         </View>
+
+        {/* Active Affiliate Partners */}
+        <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Active Affiliate Partners</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.affiliatesScroll}>
+          {affiliateData.filter(affiliate => affiliate.is_active).slice(0, 4).map(partner => (
+            <View key={partner.id} style={styles.affiliateCardMini}>
+              <AffiliateCard partner={partner} />
+            </View>
+          ))}
+        </ScrollView>
 
         {/* Last Updated */}
         <Text style={styles.timestamp}>
@@ -506,5 +518,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#6b7c8f",
     textAlign: "center",
+  },
+  affiliatesScroll: {
+    paddingHorizontal: 0,
+  },
+  affiliateCardMini: {
+    width: 280,
+    marginRight: 12,
   },
 });
