@@ -73,7 +73,7 @@ export class HealthCheck {
     } catch (error) {
       return {
         status: 'fail',
-        message: `Storage check failed: ${error.message}`,
+        message: `Storage check failed: ${(error as Error).message}`,
       };
     }
   }
@@ -100,7 +100,7 @@ export class HealthCheck {
     } catch (error) {
       return {
         status: 'fail',
-        message: `Encryption check failed: ${error.message}`,
+        message: `Encryption check failed: ${(error as Error).message}`,
       };
     }
   }
@@ -139,7 +139,7 @@ export class HealthCheck {
     } catch (error) {
       return {
         status: 'warn',
-        message: `Error rate check failed: ${error.message}`,
+        message: `Error rate check failed: ${(error as Error).message}`,
       };
     }
   }
@@ -210,7 +210,7 @@ export class HealthCheck {
       await EncryptionRecovery.backupEncryptionKey();
       repaired.push('Created encryption key backup');
     } catch (error) {
-      failed.push(`Encryption backup failed: ${error.message}`);
+      failed.push(`Encryption backup failed: ${(error as Error).message}`);
     }
 
     try {
@@ -220,7 +220,7 @@ export class HealthCheck {
         repaired.push('Storage system verified');
       }
     } catch (error) {
-      failed.push(`Storage verification failed: ${error.message}`);
+      failed.push(`Storage verification failed: ${(error as Error).message}`);
     }
 
     return { repaired, failed };

@@ -197,7 +197,7 @@ export class StorageRecovery {
         issues,
       };
     } catch (error) {
-      issues.push(`Storage health check failed: ${error.message}`);
+      issues.push(`Storage health check failed: ${(error as Error).message}`);
       return {
         healthy: false,
         issues,

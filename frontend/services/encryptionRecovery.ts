@@ -52,7 +52,7 @@ export class EncryptionRecovery {
       return false;
     } catch (error) {
       console.error('[Encryption Recovery] Recovery failed:', error);
-      await this.updateRecoveryState(error.message);
+      await this.updateRecoveryState((error as Error).message);
       return false;
     }
   }
@@ -101,7 +101,7 @@ export class EncryptionRecovery {
       return true;
     } catch (error) {
       console.error('[Encryption Recovery] Key rotation failed:', error);
-      await this.updateRecoveryState(error.message);
+      await this.updateRecoveryState((error as Error).message);
       return false;
     }
   }
@@ -120,7 +120,7 @@ export class EncryptionRecovery {
       try {
         await getEncryptionKey();
       } catch (error) {
-        issues.push(`Encryption key access failed: ${error.message}`);
+        issues.push(`Encryption key access failed: ${(error as Error).message}`);
       }
 
       // Check if backup exists
@@ -140,7 +140,7 @@ export class EncryptionRecovery {
         issues,
       };
     } catch (error) {
-      issues.push(`Health check failed: ${error.message}`);
+      issues.push(`Health check failed: ${(error as Error).message}`);
       return {
         healthy: false,
         issues,
@@ -170,7 +170,7 @@ export class EncryptionRecovery {
     } catch (error) {
       return {
         success: false,
-        message: `Export failed: ${error.message}`,
+        message: `Export failed: ${(error as Error).message}`,
       };
     }
   }

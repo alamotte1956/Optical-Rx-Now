@@ -50,8 +50,8 @@ export const handleGlobalError = (error: Error, isFatal: boolean = false): void 
  */
 export const setupGlobalErrorHandlers = (): void => {
   // Handle unhandled promise rejections
-  const originalHandler = global.onunhandledrejection;
-  global.onunhandledrejection = (event: any) => {
+  const originalHandler = (global as any).onunhandledrejection;
+  (global as any).onunhandledrejection = (event: any) => {
     const error = event.reason instanceof Error 
       ? event.reason 
       : new Error(String(event.reason));
@@ -60,7 +60,7 @@ export const setupGlobalErrorHandlers = (): void => {
     
     // Call original handler if it exists
     if (originalHandler) {
-      originalHandler(event);
+      originalHandler.call(global, event);
     }
   };
 
