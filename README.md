@@ -2,6 +2,13 @@
 
 A React Native mobile app built with Expo for managing family eyeglass and contact lens prescriptions.
 
+## 📚 Quick Links
+
+- **🚀 [Quick Start Guide](QUICK_START.md)** - Get the QR code in 3 steps
+- **📱 [Full Development Guide](EXPO_DEV_GUIDE.md)** - Complete setup & troubleshooting
+- **🔒 [Security Policy](SECURITY.md)** - Security audit and vulnerability reporting
+- **📦 [App Store Submission](docs/submission-quick-start.md)** - Ready to publish
+
 ## Privacy & Compliance
 
 ✅ **100% Local Storage** - Your prescription data NEVER leaves your device  
