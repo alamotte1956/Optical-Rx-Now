@@ -78,12 +78,17 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Share Button in Header */}
+      {/* Share and Shop Buttons in Header */}
       <View style={styles.header}>
         <View style={styles.headerPlaceholder} />
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Ionicons name="share-outline" size={24} color="#4a9eff" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.shopButton} onPress={() => router.push('/shop')}>
+            <Ionicons name="cart" size={24} color="#4a9eff" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Ionicons name="share-outline" size={24} color="#4a9eff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -157,6 +162,19 @@ const styles = StyleSheet.create({
   },
   headerPlaceholder: {
     width: 44,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  shopButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(74, 158, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   shareButton: {
     width: 44,
