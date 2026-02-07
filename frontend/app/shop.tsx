@@ -13,17 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import * as WebBrowser from "expo-web-browser";
-import AffiliateCard from "../components/AffiliateCard"; // ✅ fixed path
-import affiliateData from "../data/affiliates.json";
-
-interface AffiliatePartner {
-  id: string;
-  name: string;
-  description: string;
-  url: string;
-  category: string;
-  discount: string;
-}
+import AffiliateCard from "../components/AffiliateCard";
+import { getAffiliates, type Affiliate } from "../services/affiliateStorage";
 
 interface LocationCoords {
   latitude: number;
@@ -34,7 +25,7 @@ export default function ShopScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [partners, setPartners] = useState<AffiliatePartner[]>([]);
+  const [partners, setPartners] = useState<Affiliate[]>([]);
   const [filter, setFilter] = useState<"all" | "eyeglasses" | "contacts">("all");
   const [location, setLocation] = useState<LocationCoords | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -61,7 +52,10 @@ export default function ShopScreen() {
 
   const fetchPartners = async () => {
     try {
-      setPartners(affiliateData);
+      const data = await getAffiliates();
+      // Only show active affiliates
+      const activeAffiliates = data.filter(a => a.is_active);
+      setPartners(activeAffiliates);
     } catch (error) {
       console.error("Error loading affiliates:", error);
     } finally {

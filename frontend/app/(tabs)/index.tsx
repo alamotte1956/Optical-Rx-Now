@@ -14,6 +14,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFamilyMembers, getPrescriptions, type FamilyMember, type Prescription } from "../../services/localStorage";
+import AffiliateBanner from "../../components/AffiliateBanner";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -159,6 +160,9 @@ export default function PrescriptionsScreen() {
         </ScrollView>
       )}
 
+      {/* Affiliate Banner */}
+      <AffiliateBanner />
+
       {/* Prescriptions List */}
       <ScrollView
         style={styles.scrollView}
@@ -207,7 +211,7 @@ export default function PrescriptionsScreen() {
                     key={rx.id}
                     style={styles.rxCard}
                     onPress={() =>
-                      router.push({ pathname: "/rx-detail", params: { id: rx.id } })
+                      router.push({ pathname: "/prescription/[id]", params: { id: rx.id } })
                     }
                   >
                     <Image

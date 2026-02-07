@@ -18,6 +18,7 @@ import {
   deleteFamilyMember,
   type FamilyMember,
 } from "../../services/localStorage";
+import AffiliateBanner from "../../components/AffiliateBanner";
 
 type MemberWithCount = FamilyMember & {
   prescription_count?: number;
@@ -31,7 +32,7 @@ export default function FamilyScreen() {
   const [deleting, setDeleting] = useState(false);
 
   const goToHome = () => {
-    router.replace("/");
+    router.push("/");
   };
 
   useFocusEffect(
@@ -132,6 +133,9 @@ export default function FamilyScreen() {
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Affiliate Banner */}
+      <AffiliateBanner />
 
       {/* List */}
       <ScrollView

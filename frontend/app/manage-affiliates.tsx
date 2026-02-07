@@ -16,21 +16,13 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface Affiliate {
-  id: string;
-  name: string;
-  description: string;
-  url: string;
-  category: string;
-  discount: string;
-  commission?: string;
-  is_featured: boolean;
-  is_active: boolean;
-  order: number;
-}
+import {
+  getAffiliates,
+  saveAffiliate,
+  deleteAffiliate as deleteAffiliateStorage,
+  toggleAffiliateActive as toggleAffiliateActiveStorage,
+  type Affiliate,
+} from "../services/affiliateStorage";
 
 const EMPTY_AFFILIATE: Omit<Affiliate, "id"> = {
   name: "",
@@ -59,11 +51,8 @@ export default function ManageAffiliatesScreen() {
 
   const fetchAffiliates = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/affiliates/all`);
-      if (response.ok) {
-        const data = await response.json();
-        setAffiliates(data.partners);
-      }
+      const data = await getAffiliates();
+      setAffiliates(data);
     } catch (error) {
       console.error("Error fetching affiliates:", error);
       Alert.alert("Error", "Failed to load affiliates");
@@ -102,25 +91,15 @@ export default function ManageAffiliatesScreen() {
 
     setSaving(true);
     try {
-      const url = editingAffiliate
-        ? `${BACKEND_URL}/api/affiliates/${editingAffiliate.id}`
-        : `${BACKEND_URL}/api/affiliates`;
-      
-      const method = editingAffiliate ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setModalVisible(false);
-        fetchAffiliates();
-        Alert.alert("Success", editingAffiliate ? "Affiliate updated!" : "Affiliate added!");
+      if (editingAffiliate) {
+        await saveAffiliate({ ...formData, id: editingAffiliate.id });
       } else {
-        Alert.alert("Error", "Failed to save affiliate");
+        await saveAffiliate(formData);
       }
+      
+      setModalVisible(false);
+      fetchAffiliates();
+      Alert.alert("Success", editingAffiliate ? "Affiliate updated!" : "Affiliate added!");
     } catch (error) {
       Alert.alert("Error", "Failed to save affiliate");
     } finally {
@@ -139,15 +118,8 @@ export default function ManageAffiliatesScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              const response = await fetch(
-                `${BACKEND_URL}/api/affiliates/${affiliate.id}`,
-                { method: "DELETE" }
-              );
-              if (response.ok) {
-                fetchAffiliates();
-              } else {
-                Alert.alert("Error", "Failed to delete affiliate");
-              }
+              await deleteAffiliateStorage(affiliate.id);
+              fetchAffiliates();
             } catch (error) {
               Alert.alert("Error", "Failed to delete affiliate");
             }
@@ -159,20 +131,8 @@ export default function ManageAffiliatesScreen() {
 
   const toggleActive = async (affiliate: Affiliate) => {
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/affiliates/${affiliate.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...affiliate,
-            is_active: !affiliate.is_active,
-          }),
-        }
-      );
-      if (response.ok) {
-        fetchAffiliates();
-      }
+      await toggleAffiliateActiveStorage(affiliate.id);
+      fetchAffiliates();
     } catch (error) {
       Alert.alert("Error", "Failed to update affiliate");
     }

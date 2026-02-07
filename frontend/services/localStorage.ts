@@ -66,9 +66,17 @@ export const createFamilyMember = async (
 
 export const deleteFamilyMember = async (id: string) =>
   queueWrite(async () => {
+    // Delete the family member
     const list = await getFamilyMembers();
     const filtered = list.filter((m) => m.id !== id);
     await AsyncStorage.setItem(FAMILY_KEY, JSON.stringify(filtered));
+    
+    // CASCADE DELETE: Also delete all prescriptions for this member
+    const prescriptionList = await getPrescriptions();
+    const filteredPrescriptions = prescriptionList.filter(
+      (p) => p.family_member_id !== id
+    );
+    await AsyncStorage.setItem(RX_KEY, JSON.stringify(filteredPrescriptions));
   });
 
 //
