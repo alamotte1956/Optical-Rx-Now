@@ -94,6 +94,15 @@ export default function WelcomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Banner Ad Placeholder */}
+        <View style={styles.bannerAdPlaceholder}>
+          <Text style={styles.adPlaceholderText}>Advertisement</Text>
+          <View style={styles.adPlaceholderInner}>
+            <Text style={styles.adPlaceholderInner}>Banner Ad Space</Text>
+            <Text style={styles.adPlaceholderSubtext}>320x50 Mobile Banner</Text>
+          </View>
+        </View>
+
         <View style={styles.content}>
           {/* Logo - Long press for admin access */}
           <TouchableOpacity 
@@ -184,6 +193,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0a1628",
+  },
+  bannerAdPlaceholder: {
+    backgroundColor: "#1a2d45",
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 20,
+    borderRadius: 8,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#2a4d6f",
+  },
+  adPlaceholderText: {
+    fontSize: 10,
+    color: "#6b7c8f",
+    textAlign: "center",
+    paddingVertical: 4,
+  },
+  adPlaceholderInner: {
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0f1d30",
+  },
+  adPlaceholderSubtext: {
+    fontSize: 10,
+    color: "#6b7c8f",
+    marginTop: 2,
   },
   header: {
     flexDirection: "row",
