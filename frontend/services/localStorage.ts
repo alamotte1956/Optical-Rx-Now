@@ -257,7 +257,8 @@ export const scheduleExpiryNotifications = async (
   if (!hasPermission) return;
 
   const expiryDate = new Date(prescription.expiryDate);
-  const alertDays = [30, 14, 7, 1, 0]; // Days before expiry
+  // Notification schedule: 30 days, 14 days, 7 days, 2 days, and morning of expiration
+  const alertDays = [30, 14, 7, 2, 0];
   const member = await getFamilyMemberById(prescription.familyMemberId);
   const memberName = member?.name || "Family member";
 
@@ -266,23 +267,31 @@ export const scheduleExpiryNotifications = async (
   for (const daysBefore of alertDays) {
     const triggerDate = new Date(expiryDate);
     triggerDate.setDate(triggerDate.getDate() - daysBefore);
-    triggerDate.setHours(9, 0, 0, 0); // Send at 9 AM
+    // Send at 8 AM in the morning
+    triggerDate.setHours(8, 0, 0, 0);
 
     // Skip if the trigger date is in the past
     if (triggerDate <= new Date()) continue;
 
-    const title =
-      daysBefore === 0
-        ? "Prescription Expires Today!"
-        : `Prescription Expires in ${daysBefore} ${daysBefore === 1 ? "Day" : "Days"}`;
-
-    const body = `${memberName}'s ${prescription.rxType} prescription expires ${
-      daysBefore === 0
-        ? "today"
-        : daysBefore === 1
-          ? "tomorrow"
-          : `on ${expiryDate.toLocaleDateString()}`
-    }. Time to schedule an eye exam!`;
+    let title: string;
+    let body: string;
+    
+    if (daysBefore === 0) {
+      title = "⚠️ Prescription Expires TODAY!";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires TODAY! Schedule an eye exam immediately to renew your prescription.`;
+    } else if (daysBefore === 2) {
+      title = "⏰ Prescription Expires in 2 Days!";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 2 days on ${expiryDate.toLocaleDateString()}. Don't forget to schedule your eye exam!`;
+    } else if (daysBefore === 7) {
+      title = "📅 Prescription Expires in 1 Week";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 7 days on ${expiryDate.toLocaleDateString()}. Time to book your eye appointment!`;
+    } else if (daysBefore === 14) {
+      title = "📋 Prescription Expires in 2 Weeks";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 14 days on ${expiryDate.toLocaleDateString()}. Consider scheduling an eye exam soon.`;
+    } else {
+      title = "🔔 Prescription Expires in 30 Days";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription will expire on ${expiryDate.toLocaleDateString()}. Start planning your next eye exam!`;
+    }
 
     try {
       const notificationId = await Notifications.scheduleNotificationAsync({
