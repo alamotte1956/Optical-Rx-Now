@@ -430,7 +430,7 @@ export default function RxDetailScreen() {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Date Taken</Text>
-            <Text style={styles.infoValue}>{formatDate(prescription.dateTaken)}</Text>
+            <Text style={styles.infoValue}>{formatDateForDisplay(prescription.dateTaken)}</Text>
           </View>
           {prescription.expiryDate && (
             <View style={styles.infoRow}>
@@ -439,18 +439,18 @@ export default function RxDetailScreen() {
                 <Text
                   style={[
                     styles.infoValue,
-                    isExpired(prescription.expiryDate) && styles.expiredText,
-                    isExpiringSoon(prescription.expiryDate) && !isExpired(prescription.expiryDate) && styles.expiringSoonText,
+                    isDateExpired(prescription.expiryDate) && styles.expiredText,
+                    isDateExpiringSoon(prescription.expiryDate) && !isDateExpired(prescription.expiryDate) && styles.expiringSoonText,
                   ]}
                 >
-                  {formatDate(prescription.expiryDate)}
+                  {formatDateForDisplay(prescription.expiryDate)}
                 </Text>
-                {isExpired(prescription.expiryDate) && (
+                {isDateExpired(prescription.expiryDate) && (
                   <View style={styles.expiredBadge}>
                     <Text style={styles.expiredBadgeText}>EXPIRED</Text>
                   </View>
                 )}
-                {isExpiringSoon(prescription.expiryDate) && !isExpired(prescription.expiryDate) && (
+                {isDateExpiringSoon(prescription.expiryDate) && !isDateExpired(prescription.expiryDate) && (
                   <View style={styles.expiringSoonBadge}>
                     <Text style={styles.expiringSoonBadgeText}>EXPIRING SOON</Text>
                   </View>
