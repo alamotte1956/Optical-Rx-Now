@@ -55,11 +55,7 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchHealthgrades = async () => {
-    if (!zipCode || zipCode.length < 5) {
-      return;
-    }
-    
-    const url = `https://www.healthgrades.com/optometrists/search?search.location=${zipCode}`;
+    const url = `https://www.healthgrades.com/optometry-directory`;
     
     try {
       await Linking.openURL(url);
