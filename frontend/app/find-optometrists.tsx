@@ -97,6 +97,14 @@ export default function FindOptometristsScreen() {
           {/* Search Buttons */}
           <View style={styles.searchButtons}>
             <TouchableOpacity
+              style={[styles.searchButton, styles.healthButton]}
+              onPress={handleSearchHealthgrades}
+            >
+              <Ionicons name="medkit" size={22} color="#fff" />
+              <Text style={styles.searchButtonText}>Search Healthgrades</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={[styles.searchButton, styles.primaryButton]}
               onPress={handleSearch}
             >
@@ -111,14 +119,6 @@ export default function FindOptometristsScreen() {
             >
               <Ionicons name="star" size={22} color="#fff" />
               <Text style={styles.searchButtonText}>Search on Yelp</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.searchButton, styles.healthButton]}
-              onPress={handleSearchHealthgrades}
-            >
-              <Ionicons name="medkit" size={22} color="#fff" />
-              <Text style={styles.searchButtonText}>Search Healthgrades</Text>
             </TouchableOpacity>
           </View>
 
