@@ -62,11 +62,11 @@ export default function RxDetailScreen() {
   const generatePdfHtml = (): string => {
     if (!prescription || !member) return "";
     
-    const formattedDateTaken = formatDate(prescription.dateTaken);
-    const formattedExpiryDate = prescription.expiryDate ? formatDate(prescription.expiryDate) : null;
-    const formattedCreatedAt = formatDate(prescription.createdAt);
-    const expired = isExpired(prescription.expiryDate);
-    const expiringSoon = isExpiringSoon(prescription.expiryDate);
+    const formattedDateTaken = formatDateForDisplay(prescription.dateTaken);
+    const formattedExpiryDate = prescription.expiryDate ? formatDateForDisplay(prescription.expiryDate) : null;
+    const formattedCreatedAt = formatDateForDisplay(prescription.createdAt);
+    const expired = isDateExpired(prescription.expiryDate);
+    const expiringSoon = isDateExpiringSoon(prescription.expiryDate);
     
     return `
       <!DOCTYPE html>
