@@ -133,7 +133,6 @@ export default function FindOptometristsScreen() {
             <TouchableOpacity
               style={[styles.searchButton, styles.healthButton]}
               onPress={handleSearchHealthgrades}
-              disabled={!zipCode || zipCode.length < 5}
             >
               <Ionicons name="medkit" size={22} color="#fff" />
               <Text style={styles.searchButtonText}>Search Healthgrades</Text>
