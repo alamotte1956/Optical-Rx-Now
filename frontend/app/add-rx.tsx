@@ -156,7 +156,12 @@ export default function AddRxScreen() {
     setSaving(true);
     try {
       // Normalize dates to YYYY-MM-DD for storage
-      const normalizedDateTaken = normalizeDate(dateTaken) || getTodayFormatted();
+      let normalizedDateTaken = normalizeDate(dateTaken);
+      if (!normalizedDateTaken) {
+        // Fallback: create today's date in YYYY-MM-DD format
+        const today = new Date();
+        normalizedDateTaken = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      }
       const normalizedExpiryDate = expiryDate ? normalizeDate(expiryDate) : null;
       
       await savePrescription({
