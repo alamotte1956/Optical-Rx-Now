@@ -14,8 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { saveFamilyMember } from "../services/localStorage";
 
 const RELATIONSHIP_OPTIONS = [
   "Self",
@@ -30,6 +29,7 @@ export default function AddMemberScreen() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [customRelationship, setCustomRelationship] = useState("");
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -37,24 +37,19 @@ export default function AddMemberScreen() {
       Alert.alert("Error", "Please enter a name");
       return;
     }
-    if (!relationship) {
-      Alert.alert("Error", "Please select a relationship");
+
+    const finalRelationship =
+      relationship === "Other" ? customRelationship.trim() : relationship;
+
+    if (!finalRelationship) {
+      Alert.alert("Error", "Please select or enter a relationship");
       return;
     }
 
     setSaving(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/family-members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), relationship }),
-      });
-
-      if (response.ok) {
-        router.back();
-      } else {
-        Alert.alert("Error", "Failed to add family member");
-      }
+      await saveFamilyMember(name.trim(), finalRelationship);
+      router.back();
     } catch (error) {
       Alert.alert("Error", "Failed to add family member");
     } finally {
@@ -71,13 +66,23 @@ export default function AddMemberScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="close" size={28} color="#fff" />
+            <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Family Member</Text>
-          <View style={styles.placeholder} />
+          <TouchableOpacity
+            onPress={handleSave}
+            disabled={saving || !name.trim()}
+            style={[styles.saveButton, (!name.trim() || saving) && styles.saveButtonDisabled]}
+          >
+            {saving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.form} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           {/* Name Input */}
           <Text style={styles.label}>Name</Text>
           <TextInput
@@ -87,24 +92,25 @@ export default function AddMemberScreen() {
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
+            autoFocus
           />
 
           {/* Relationship Selection */}
           <Text style={styles.label}>Relationship</Text>
-          <View style={styles.relationshipContainer}>
+          <View style={styles.relationshipGrid}>
             {RELATIONSHIP_OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[
-                  styles.relationshipOption,
-                  relationship === option && styles.relationshipOptionActive,
+                  styles.relationshipButton,
+                  relationship === option && styles.relationshipButtonActive,
                 ]}
                 onPress={() => setRelationship(option)}
               >
                 <Text
                   style={[
-                    styles.relationshipText,
-                    relationship === option && styles.relationshipTextActive,
+                    styles.relationshipButtonText,
+                    relationship === option && styles.relationshipButtonTextActive,
                   ]}
                 >
                   {option}
@@ -112,28 +118,30 @@ export default function AddMemberScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </ScrollView>
 
-        {/* Save Button */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              (!name.trim() || !relationship) && styles.saveButtonDisabled,
-            ]}
-            onPress={handleSave}
-            disabled={saving || !name.trim() || !relationship}
-          >
-            {saving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="checkmark" size={22} color="#fff" />
-                <Text style={styles.saveButtonText}>Add Member</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+          {/* Custom Relationship Input */}
+          {relationship === "Other" && (
+            <>
+              <Text style={styles.label}>Specify Relationship</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g., Grandparent, Friend"
+                placeholderTextColor="#6b7c8f"
+                value={customRelationship}
+                onChangeText={setCustomRelationship}
+                autoCapitalize="words"
+              />
+            </>
+          )}
+
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <Ionicons name="information-circle" size={24} color="#4a9eff" />
+            <Text style={styles.infoText}>
+              Add family members to organize prescriptions. You can add prescriptions for each member separately.
+            </Text>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -157,8 +165,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#1a2d45",
   },
   backButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -167,73 +175,75 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  placeholder: {
-    width: 44,
+  saveButton: {
+    backgroundColor: "#4a9eff",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
-  form: {
+  saveButtonDisabled: {
+    backgroundColor: "#3a4d63",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 24,
+  },
+  scrollContent: {
+    padding: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
     color: "#8899a6",
     marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 1,
+    marginTop: 16,
   },
   input: {
     backgroundColor: "#1a2d45",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 14,
     fontSize: 16,
     color: "#fff",
-    marginBottom: 24,
   },
-  relationshipContainer: {
+  relationshipGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
-  },
-  relationshipOption: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    backgroundColor: "#1a2d45",
-  },
-  relationshipOptionActive: {
-    backgroundColor: "#4a9eff",
-  },
-  relationshipText: {
-    fontSize: 14,
-    color: "#8899a6",
-    fontWeight: "500",
-  },
-  relationshipTextActive: {
-    color: "#fff",
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    paddingBottom: Platform.OS === "ios" ? 24 : 16,
-  },
-  saveButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#4a9eff",
-    paddingVertical: 16,
-    borderRadius: 30,
     gap: 8,
   },
-  saveButtonDisabled: {
-    backgroundColor: "#3a4d63",
+  relationshipButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    backgroundColor: "#1a2d45",
   },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+  relationshipButtonActive: {
+    backgroundColor: "#4a9eff",
+  },
+  relationshipButtonText: {
+    fontSize: 14,
+    color: "#8899a6",
+  },
+  relationshipButtonTextActive: {
     color: "#fff",
+    fontWeight: "600",
+  },
+  infoCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "rgba(74, 158, 255, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+    marginTop: 32,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#8899a6",
+    lineHeight: 20,
   },
 });
