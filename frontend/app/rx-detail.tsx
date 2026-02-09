@@ -7,13 +7,15 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
-  Share,
   Alert,
+  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system";
 import {
   getPrescriptionById,
   getFamilyMemberById,
@@ -26,9 +28,9 @@ export default function RxDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
+  const [sharing, setSharing] = useState(false);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [member, setMember] = useState<FamilyMember | null>(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -51,16 +53,253 @@ export default function RxDetailScreen() {
     }
   };
 
+  const generatePdfHtml = () => {
+    if (!prescription || !member) return "";
+    
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Prescription - ${member.name}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 3px solid #4a9eff;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              color: #4a9eff;
+              margin: 0 0 10px 0;
+              font-size: 28px;
+            }
+            .header .subtitle {
+              color: #666;
+              font-size: 14px;
+            }
+            .patient-info {
+              background: #f8f9fa;
+              border-radius: 12px;
+              padding: 20px;
+              margin-bottom: 30px;
+            }
+            .patient-name {
+              font-size: 24px;
+              font-weight: bold;
+              color: #333;
+              margin-bottom: 15px;
+            }
+            .info-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+            }
+            .info-item {
+              padding: 10px 0;
+            }
+            .info-label {
+              font-size: 12px;
+              color: #666;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 4px;
+            }
+            .info-value {
+              font-size: 16px;
+              color: #333;
+              font-weight: 500;
+            }
+            .type-badge {
+              display: inline-block;
+              background: ${prescription.rxType === "eyeglass" ? "#e3f2fd" : "#e8f5e9"};
+              color: ${prescription.rxType === "eyeglass" ? "#1976d2" : "#388e3c"};
+              padding: 6px 12px;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 600;
+            }
+            .expiry-warning {
+              color: #f57c00;
+              font-weight: 600;
+            }
+            .expiry-expired {
+              color: #d32f2f;
+              font-weight: 600;
+            }
+            .notes-section {
+              background: #fff3e0;
+              border-radius: 12px;
+              padding: 15px 20px;
+              margin-bottom: 30px;
+            }
+            .notes-title {
+              font-size: 12px;
+              color: #e65100;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+            }
+            .notes-text {
+              font-size: 14px;
+              color: #333;
+              line-height: 1.5;
+            }
+            .prescription-image {
+              text-align: center;
+              margin: 30px 0;
+            }
+            .prescription-image img {
+              max-width: 100%;
+              max-height: 500px;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            .image-caption {
+              font-size: 12px;
+              color: #666;
+              margin-top: 10px;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 30px;
+              border-top: 1px solid #eee;
+              margin-top: 30px;
+            }
+            .footer p {
+              font-size: 12px;
+              color: #999;
+              margin: 5px 0;
+            }
+            .footer .app-name {
+              color: #4a9eff;
+              font-weight: 600;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>📋 Prescription Record</h1>
+            <p class="subtitle">Generated by Optical Rx Now</p>
+          </div>
+
+          <div class="patient-info">
+            <div class="patient-name">${member.name}</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Prescription Type</div>
+                <div class="info-value">
+                  <span class="type-badge">
+                    ${prescription.rxType === "eyeglass" ? "👓 Eyeglasses" : "👁️ Contact Lenses"}
+                  </span>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Date Taken</div>
+                <div class="info-value">${formatDate(prescription.dateTaken)}</div>
+              </div>
+              ${prescription.expiryDate ? `
+              <div class="info-item">
+                <div class="info-label">Expiration Date</div>
+                <div class="info-value ${isExpired(prescription.expiryDate) ? 'expiry-expired' : isExpiringSoon(prescription.expiryDate) ? 'expiry-warning' : ''}">
+                  ${formatDate(prescription.expiryDate)}
+                  ${isExpired(prescription.expiryDate) ? ' (EXPIRED)' : isExpiringSoon(prescription.expiryDate) ? ' (Expiring Soon)' : ''}
+                </div>
+              </div>
+              ` : ''}
+              <div class="info-item">
+                <div class="info-label">Record Created</div>
+                <div class="info-value">${formatDate(prescription.createdAt)}</div>
+              </div>
+            </div>
+          </div>
+
+          ${prescription.notes ? `
+          <div class="notes-section">
+            <div class="notes-title">📝 Notes</div>
+            <div class="notes-text">${prescription.notes}</div>
+          </div>
+          ` : ''}
+
+          <div class="prescription-image">
+            <img src="${prescription.imageBase64}" alt="Prescription Image" />
+            <p class="image-caption">Original prescription image</p>
+          </div>
+
+          <div class="footer">
+            <p>This document was generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p>Created with <span class="app-name">Optical Rx Now</span></p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
   const handleShare = async () => {
     if (!prescription || !member) return;
 
+    setSharing(true);
     try {
-      await Share.share({
-        message: `Prescription for ${member.name}\nType: ${prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}\nDate: ${formatDate(prescription.dateTaken)}${prescription.expiryDate ? `\nExpires: ${formatDate(prescription.expiryDate)}` : ""}${prescription.notes ? `\nNotes: ${prescription.notes}` : ""}`,
-        title: `${member.name}'s Prescription`,
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+      
+      if (!isAvailable) {
+        Alert.alert(
+          "Sharing Not Available",
+          "Sharing is not available on this device. Would you like to print instead?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Print", onPress: handlePrint },
+          ]
+        );
+        return;
+      }
+
+      // Generate PDF
+      const html = generatePdfHtml();
+      const { uri } = await Print.printToFileAsync({
+        html,
+        base64: false,
       });
+
+      // Create a more descriptive filename
+      const filename = `Prescription_${member.name.replace(/\s+/g, '_')}_${prescription.rxType}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const newUri = `${FileSystem.cacheDirectory}${filename}`;
+      
+      // Move file to cache with proper name
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      // Share the PDF
+      await Sharing.shareAsync(newUri, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Share ${member.name}'s Prescription`,
+        UTI: 'com.adobe.pdf',
+      });
+
     } catch (error) {
-      console.log("Error sharing:", error);
+      console.log("Error sharing PDF:", error);
+      Alert.alert(
+        "Error",
+        "Failed to create PDF. Would you like to try printing instead?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Print", onPress: handlePrint },
+        ]
+      );
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -68,27 +307,7 @@ export default function RxDetailScreen() {
     if (!prescription || !member) return;
 
     try {
-      const html = `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              h1 { color: #333; }
-              .info { margin: 10px 0; }
-              .label { font-weight: bold; color: #666; }
-              img { max-width: 100%; height: auto; margin: 20px 0; }
-            </style>
-          </head>
-          <body>
-            <h1>Prescription - ${member.name}</h1>
-            <div class="info"><span class="label">Type:</span> ${prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}</div>
-            <div class="info"><span class="label">Date:</span> ${formatDate(prescription.dateTaken)}</div>
-            ${prescription.expiryDate ? `<div class="info"><span class="label">Expires:</span> ${formatDate(prescription.expiryDate)}</div>` : ""}
-            ${prescription.notes ? `<div class="info"><span class="label">Notes:</span> ${prescription.notes}</div>` : ""}
-            <img src="${prescription.imageBase64}" />
-          </body>
-        </html>
-      `;
+      const html = generatePdfHtml();
       await Print.printAsync({ html });
     } catch (error) {
       console.log("Error printing:", error);
@@ -120,7 +339,11 @@ export default function RxDetailScreen() {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     } catch {
       return dateString;
     }
@@ -250,9 +473,19 @@ export default function RxDetailScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-            <Ionicons name="share-outline" size={24} color="#4a9eff" />
-            <Text style={styles.actionButtonText}>Share</Text>
+          <TouchableOpacity 
+            style={[styles.actionButton, sharing && styles.actionButtonDisabled]} 
+            onPress={handleShare}
+            disabled={sharing}
+          >
+            {sharing ? (
+              <ActivityIndicator size="small" color="#4a9eff" />
+            ) : (
+              <>
+                <Ionicons name="share-outline" size={24} color="#4a9eff" />
+                <Text style={styles.actionButtonText}>Share PDF</Text>
+              </>
+            )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton} onPress={handlePrint}>
             <Ionicons name="print-outline" size={24} color="#4a9eff" />
@@ -423,6 +656,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#1a2d45",
     paddingVertical: 16,
     borderRadius: 12,
+  },
+  actionButtonDisabled: {
+    opacity: 0.7,
   },
   actionButtonText: {
     fontSize: 16,
