@@ -3,37 +3,25 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Ale
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { getStats, requestNotificationPermissions } from "../services/localStorage";
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ family_members: 0, total_prescriptions: 0 });
+  const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
 
   useEffect(() => {
-    // Track app open for analytics (async, non-blocking)
-    const trackOpen = async () => {
-      try {
-        const { trackAppOpen } = await import("../services/analytics");
-        trackAppOpen();
-      } catch (e) {
-        console.log("Analytics not available");
-      }
-    };
-    trackOpen();
-    fetchStats();
+    loadStats();
+    // Request notification permissions on first load
+    requestNotificationPermissions();
   }, []);
 
-  const fetchStats = async () => {
+  const loadStats = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/stats`);
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const data = await getStats();
+      setStats(data);
     } catch (error) {
-      console.log("Error fetching stats:", error);
+      console.log("Error loading stats:", error);
     } finally {
       setLoading(false);
     }
@@ -54,18 +42,6 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleAdminAccess = () => {
-    Alert.alert(
-      "Admin Area",
-      "Choose an option:",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Analytics Dashboard", onPress: () => router.push("/admin") },
-        { text: "Manage Affiliates", onPress: () => router.push("/manage-affiliates") },
-      ]
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Share Button in Header */}
@@ -78,19 +54,14 @@ export default function WelcomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Logo - Long press for admin access */}
-          <TouchableOpacity 
-            style={styles.logoContainer}
-            onLongPress={handleAdminAccess}
-            delayLongPress={500}
-            activeOpacity={0.8}
-          >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
             <Image
               source={require("../assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
-          </TouchableOpacity>
+          </View>
 
           {/* Title */}
           <Text style={styles.subtitle}>
@@ -104,7 +75,7 @@ export default function WelcomeScreen() {
             ) : (
               <>
                 <Text style={styles.buttonText}>
-                  {stats.family_members > 0 ? "Open My Vault" : "Get Started"}
+                  {stats.familyMembers > 0 ? "Open My Vault" : "Get Started"}
                 </Text>
                 <Ionicons name="arrow-forward" size={20} color="#fff" />
               </>
@@ -129,13 +100,13 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Optometrists Near Me</Text>
           </TouchableOpacity>
 
-          {/* Email Alerts Button */}
+          {/* Notification Settings Button */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
-            onPress={() => router.push("/email-alerts")}
+            onPress={() => router.push("/notification-settings")}
           >
             <Ionicons name="notifications" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>Set Up Expiry Alerts</Text>
+            <Text style={styles.secondaryButtonText}>Expiry Alert Settings</Text>
           </TouchableOpacity>
 
           {/* Ad Banner Placeholder */}
@@ -195,23 +166,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 8,
-    textAlign: "center",
-  },
   subtitle: {
     fontSize: 15,
     color: "#8899a6",
     textAlign: "center",
     marginBottom: 16,
     lineHeight: 22,
-  },
-  adContainer: {
-    width: "100%",
-    marginBottom: 12,
   },
   button: {
     flexDirection: "row",
@@ -248,39 +208,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#4a9eff",
-  },
-  statsContainer: {
-    width: "100%",
-    backgroundColor: "rgba(74, 158, 255, 0.1)",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    marginTop: 4,
-  },
-  statsTitle: {
-    fontSize: 14,
-    color: "#8899a6",
-    textAlign: "center",
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  statItem: {
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#4a9eff",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#8899a6",
-    marginTop: 4,
   },
   adPlaceholder: {
     width: "100%",
