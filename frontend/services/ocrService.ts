@@ -1,182 +1,259 @@
-// OCR Service using GPT-4 Vision via Emergent LLM Key
-// Extracts expiration dates from prescription images
+// OCR Service using expo-text-extractor (client-side, on-device)
+// Extracts expiration dates from prescription images using ML Kit (Android) and Vision (iOS)
 
+import { isSupported, extractTextFromImage } from "expo-text-extractor";
+import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
-
-const EMERGENT_LLM_KEY = "sk-emergent-fC67aCd396b6502B05";
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
 interface OCRResult {
   success: boolean;
   expiryDate: string | null;
   message: string;
-  rawResponse?: string;
+  rawText?: string;
 }
 
+// Date patterns to look for in extracted text
+const DATE_PATTERNS = [
+  // MM/DD/YYYY or M/D/YYYY
+  /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
+  // MM-DD-YYYY or M-D-YYYY
+  /(\d{1,2})-(\d{1,2})-(\d{4})/,
+  // YYYY-MM-DD
+  /(\d{4})-(\d{2})-(\d{2})/,
+  // Month DD, YYYY or Month DD YYYY
+  /(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i,
+];
+
+// Keywords that indicate expiration date
+const EXPIRY_KEYWORDS = [
+  /exp(?:iration)?(?:\s+date)?/i,
+  /expires?/i,
+  /valid\s+(?:until|thru|through)/i,
+  /good\s+(?:until|thru|through)/i,
+  /rx\s+exp/i,
+  /prescription\s+exp/i,
+];
+
+const monthNameToNumber: { [key: string]: string } = {
+  january: "01", jan: "01",
+  february: "02", feb: "02",
+  march: "03", mar: "03",
+  april: "04", apr: "04",
+  may: "05",
+  june: "06", jun: "06",
+  july: "07", jul: "07",
+  august: "08", aug: "08",
+  september: "09", sep: "09",
+  october: "10", oct: "10",
+  november: "11", nov: "11",
+  december: "12", dec: "12",
+};
+
+/**
+ * Parse date string to YYYY-MM-DD format
+ */
+const parseDateToISO = (match: RegExpMatchArray, patternIndex: number): string | null => {
+  try {
+    let year: string, month: string, day: string;
+
+    if (patternIndex === 0 || patternIndex === 1) {
+      // MM/DD/YYYY or MM-DD-YYYY format (US)
+      month = match[1].padStart(2, "0");
+      day = match[2].padStart(2, "0");
+      year = match[3];
+    } else if (patternIndex === 2) {
+      // YYYY-MM-DD format
+      year = match[1];
+      month = match[2];
+      day = match[3];
+    } else if (patternIndex === 3) {
+      // Month DD, YYYY format
+      const monthName = match[1].toLowerCase();
+      month = monthNameToNumber[monthName] || monthNameToNumber[monthName.substring(0, 3)] || "01";
+      day = match[2].padStart(2, "0");
+      year = match[3];
+    } else {
+      return null;
+    }
+
+    // Validate the date
+    const yearNum = parseInt(year);
+    const monthNum = parseInt(month);
+    const dayNum = parseInt(day);
+
+    if (yearNum < 2020 || yearNum > 2035) return null;
+    if (monthNum < 1 || monthNum > 12) return null;
+    if (dayNum < 1 || dayNum > 31) return null;
+
+    // Check if date is reasonable (within 3 years from now)
+    const date = new Date(yearNum, monthNum - 1, dayNum);
+    const now = new Date();
+    const threeYearsFromNow = new Date(now.getFullYear() + 3, now.getMonth(), now.getDate());
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+
+    if (date < oneYearAgo || date > threeYearsFromNow) return null;
+
+    return `${year}-${month}-${day}`;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Find the most likely expiration date from extracted text
+ */
+const findExpirationDate = (textLines: string[]): string | null => {
+  const fullText = textLines.join(" ").replace(/\s+/g, " ");
+  
+  console.log("OCR extracted text:", fullText);
+
+  // First, look for dates near expiry keywords
+  for (const keyword of EXPIRY_KEYWORDS) {
+    const keywordMatch = fullText.match(keyword);
+    if (keywordMatch) {
+      // Look for a date within 50 characters after the keyword
+      const startIndex = keywordMatch.index || 0;
+      const textAfterKeyword = fullText.substring(startIndex, startIndex + 50);
+      
+      for (let i = 0; i < DATE_PATTERNS.length; i++) {
+        const dateMatch = textAfterKeyword.match(DATE_PATTERNS[i]);
+        if (dateMatch) {
+          const isoDate = parseDateToISO(dateMatch, i);
+          if (isoDate) {
+            console.log(`Found expiry date near keyword "${keywordMatch[0]}": ${isoDate}`);
+            return isoDate;
+          }
+        }
+      }
+    }
+  }
+
+  // If no keyword-associated date found, look for any date that looks like an expiration
+  // (typically 1-2 years in the future)
+  const allDates: { date: string; score: number }[] = [];
+  
+  for (let i = 0; i < DATE_PATTERNS.length; i++) {
+    const regex = new RegExp(DATE_PATTERNS[i], "gi");
+    let match;
+    
+    while ((match = regex.exec(fullText)) !== null) {
+      const isoDate = parseDateToISO(match, i);
+      if (isoDate) {
+        const date = new Date(isoDate);
+        const now = new Date();
+        const monthsFromNow = (date.getFullYear() - now.getFullYear()) * 12 + (date.getMonth() - now.getMonth());
+        
+        // Score based on how likely this is to be an expiry date
+        // Dates 6-24 months from now are most likely expiry dates
+        let score = 0;
+        if (monthsFromNow >= 6 && monthsFromNow <= 24) {
+          score = 100;
+        } else if (monthsFromNow > 0 && monthsFromNow < 36) {
+          score = 50;
+        } else if (monthsFromNow >= 0) {
+          score = 10;
+        }
+        
+        if (score > 0) {
+          allDates.push({ date: isoDate, score });
+        }
+      }
+    }
+  }
+
+  // Return the highest scored date
+  if (allDates.length > 0) {
+    allDates.sort((a, b) => b.score - a.score);
+    console.log("Found potential expiry dates:", allDates);
+    return allDates[0].date;
+  }
+
+  return null;
+};
+
+/**
+ * Save base64 image to a temporary file and return the URI
+ */
+const saveBase64ToTempFile = async (base64Data: string): Promise<string> => {
+  // Clean up base64 string
+  let cleanBase64 = base64Data;
+  if (cleanBase64.includes(",")) {
+    cleanBase64 = cleanBase64.split(",")[1];
+  }
+
+  const fileName = `prescription_${Date.now()}.jpg`;
+  const filePath = `${FileSystem.cacheDirectory}${fileName}`;
+
+  await FileSystem.writeAsStringAsync(filePath, cleanBase64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  return filePath;
+};
+
+/**
+ * Extract expiration date from a prescription image using on-device OCR
+ */
 export const extractExpiryDateFromImage = async (
   imageBase64: string
 ): Promise<OCRResult> => {
   try {
-    // Clean up base64 string - remove data URL prefix if present
-    let base64Data = imageBase64;
-    if (base64Data.includes(",")) {
-      base64Data = base64Data.split(",")[1];
-    }
-
-    // Determine image type
-    let mediaType = "image/jpeg";
-    if (imageBase64.includes("data:image/png")) {
-      mediaType = "image/png";
-    } else if (imageBase64.includes("data:image/webp")) {
-      mediaType = "image/webp";
-    }
-
-    const response = await fetch(OPENAI_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${EMERGENT_LLM_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: `You are an OCR assistant specialized in reading eyeglass and contact lens prescriptions.
-Your task is to find and extract ONLY the expiration date from the prescription image.
-Look for terms like: "Expiration Date", "Expires", "Exp", "Exp Date", "Valid Until", "Good Through", "Rx Expires", "Prescription Expires", "Valid Thru".
-The expiration date is typically 1-2 years from the exam date.
-
-IMPORTANT RULES:
-1. Return ONLY the date in YYYY-MM-DD format
-2. If the date shows MM/DD/YYYY, convert it to YYYY-MM-DD
-3. If the date shows DD/MM/YYYY (European), convert it to YYYY-MM-DD
-4. If you see "Exp: 01/15/2025" respond with "2025-01-15"
-5. If you cannot find any expiration date, respond with exactly "NOT_FOUND"
-6. Do not include any other text, just the date or "NOT_FOUND"`,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: "Find the expiration date on this prescription. Return ONLY the date in YYYY-MM-DD format, or NOT_FOUND if you cannot find it.",
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mediaType};base64,${base64Data}`,
-                  detail: "high",
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 100,
-        temperature: 0,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log("OCR API error:", errorText);
+    // Check if OCR is supported on this device
+    if (!isSupported) {
+      console.log("OCR not supported on this device/platform");
       return {
         success: false,
         expiryDate: null,
-        message: "Failed to analyze image. Please enter the expiration date manually.",
-        rawResponse: errorText,
+        message: Platform.OS === "web" 
+          ? "OCR is not available in web preview. Please use the mobile app to scan prescriptions."
+          : "OCR is not supported on this device. Please enter the expiration date manually.",
       };
     }
 
-    const data = await response.json();
-    const responseText = data.choices?.[0]?.message?.content?.trim() || "";
+    // Save base64 to temporary file
+    const tempFilePath = await saveBase64ToTempFile(imageBase64);
+    
+    console.log("Running OCR on image:", tempFilePath);
 
-    console.log("OCR Response:", responseText);
+    // Extract text from image
+    const extractedLines = await extractTextFromImage(tempFilePath);
 
-    // Check if no date found
-    if (
-      responseText === "NOT_FOUND" ||
-      responseText.toLowerCase().includes("not found") ||
-      responseText.toLowerCase().includes("cannot find") ||
-      responseText.toLowerCase().includes("unable to")
-    ) {
+    // Clean up temp file
+    try {
+      await FileSystem.deleteAsync(tempFilePath, { idempotent: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+
+    if (!extractedLines || extractedLines.length === 0) {
       return {
         success: false,
         expiryDate: null,
-        message: "No expiration date found in the image. Please enter it manually.",
-        rawResponse: responseText,
+        message: "No text found in the image. Please enter the expiration date manually.",
+        rawText: "",
       };
     }
 
-    // Try to parse and validate the date
-    const dateMatch = responseText.match(/(\d{4}-\d{2}-\d{2})/);
-    if (dateMatch) {
-      const extractedDate = dateMatch[1];
-      // Validate it's a real date
-      const parsedDate = new Date(extractedDate);
-      if (!isNaN(parsedDate.getTime())) {
-        return {
-          success: true,
-          expiryDate: extractedDate,
-          message: "Expiration date detected successfully!",
-          rawResponse: responseText,
-        };
-      }
+    const rawText = extractedLines.join("\n");
+    console.log("OCR extracted lines:", extractedLines);
+
+    // Find expiration date in extracted text
+    const expiryDate = findExpirationDate(extractedLines);
+
+    if (expiryDate) {
+      return {
+        success: true,
+        expiryDate,
+        message: "Expiration date detected successfully!",
+        rawText,
+      };
     }
 
-    // Try other date formats in the response
-    const altFormats = [
-      /(\d{1,2})\/(\d{1,2})\/(\d{4})/, // MM/DD/YYYY or DD/MM/YYYY
-      /(\d{1,2})-(\d{1,2})-(\d{4})/, // MM-DD-YYYY
-      /(\w+)\s+(\d{1,2}),?\s+(\d{4})/, // Month DD, YYYY
-    ];
-
-    for (const format of altFormats) {
-      const match = responseText.match(format);
-      if (match) {
-        try {
-          let year, month, day;
-          if (format === altFormats[0] || format === altFormats[1]) {
-            // Assume MM/DD/YYYY (US format)
-            month = match[1].padStart(2, "0");
-            day = match[2].padStart(2, "0");
-            year = match[3];
-          } else {
-            // Month name format
-            const monthNames: { [key: string]: string } = {
-              january: "01", february: "02", march: "03", april: "04",
-              may: "05", june: "06", july: "07", august: "08",
-              september: "09", october: "10", november: "11", december: "12",
-              jan: "01", feb: "02", mar: "03", apr: "04",
-              jun: "06", jul: "07", aug: "08", sep: "09",
-              oct: "10", nov: "11", dec: "12",
-            };
-            month = monthNames[match[1].toLowerCase()] || "01";
-            day = match[2].padStart(2, "0");
-            year = match[3];
-          }
-          const formattedDate = `${year}-${month}-${day}`;
-          const parsedDate = new Date(formattedDate);
-          if (!isNaN(parsedDate.getTime())) {
-            return {
-              success: true,
-              expiryDate: formattedDate,
-              message: "Expiration date detected successfully!",
-              rawResponse: responseText,
-            };
-          }
-        } catch (e) {
-          continue;
-        }
-      }
-    }
-
-    // If we got a response but couldn't parse it
     return {
       success: false,
       expiryDate: null,
-      message: "Could not parse the expiration date. Please enter it manually.",
-      rawResponse: responseText,
+      message: "No expiration date found in the image. Please enter it manually.",
+      rawText,
     };
   } catch (error) {
     console.log("OCR extraction error:", error);
