@@ -1,138 +1,140 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
+  TouchableOpacity,
   Linking,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TouchableOpacity } from "react-native";
-import * as Location from "expo-location";
-import * as WebBrowser from "expo-web-browser";
-import AffiliateCard from "./components/AffiliateCard";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+// Static affiliate data - no backend needed
+const AFFILIATES = [
+  {
+    id: "1",
+    name: "Sam's Club Optical",
+    description: "Quality eyewear at warehouse club prices. Members save on frames, lenses, and contacts.",
+    url: "https://www.samsclub.com/b/optical/1990005",
+    logo_url: null,
+    category: "retail",
+    is_featured: true,
+  },
+  {
+    id: "2",
+    name: "Costco Optical",
+    description: "Premium eyewear and eye exams at Costco locations.",
+    url: "https://www.costco.com/optical.html",
+    logo_url: null,
+    category: "retail",
+    is_featured: true,
+  },
+  {
+    id: "3",
+    name: "Zenni Optical",
+    description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
+    url: "https://www.zennioptical.com",
+    logo_url: null,
+    category: "online",
+    is_featured: true,
+  },
+  {
+    id: "4",
+    name: "Warby Parker",
+    description: "Designer eyewear at revolutionary prices. Free home try-on program.",
+    url: "https://www.warbyparker.com",
+    logo_url: null,
+    category: "online",
+    is_featured: false,
+  },
+  {
+    id: "5",
+    name: "EyeBuyDirect",
+    description: "Quality glasses starting at $6. 2-year warranty included.",
+    url: "https://www.eyebuydirect.com",
+    logo_url: null,
+    category: "online",
+    is_featured: false,
+  },
+  {
+    id: "6",
+    name: "LensCrafters",
+    description: "Expert eye care and designer eyewear. Same-day glasses available.",
+    url: "https://www.lenscrafters.com",
+    logo_url: null,
+    category: "retail",
+    is_featured: false,
+  },
+  {
+    id: "7",
+    name: "1-800 Contacts",
+    description: "America's #1 contact lens store. Price match guarantee.",
+    url: "https://www.1800contacts.com",
+    logo_url: null,
+    category: "contacts",
+    is_featured: true,
+  },
+  {
+    id: "8",
+    name: "AC Lens",
+    description: "Discount contact lenses with fast, free shipping.",
+    url: "https://www.aclens.com",
+    logo_url: null,
+    category: "contacts",
+    is_featured: false,
+  },
+];
 
-interface AffiliatePartner {
+interface Affiliate {
   id: string;
   name: string;
   description: string;
   url: string;
+  logo_url: string | null;
   category: string;
-  discount: string;
-}
-
-interface LocationCoords {
-  latitude: number;
-  longitude: number;
+  is_featured: boolean;
 }
 
 export default function ShopScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [partners, setPartners] = useState<AffiliatePartner[]>([]);
-  const [filter, setFilter] = useState<"all" | "eyeglasses" | "contacts">("all");
-  const [location, setLocation] = useState<LocationCoords | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchPartners();
-    requestLocationPermission();
-  }, []);
-
-  const requestLocationPermission = async () => {
+  const handleOpenLink = async (url: string) => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        const loc = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        });
-      }
+      await Linking.openURL(url);
     } catch (error) {
-      console.log("Location error:", error);
+      console.log("Error opening URL:", error);
     }
   };
 
-  const fetchPartners = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/affiliates`);
-      if (response.ok) {
-        const data = await response.json();
-        setPartners(data.partners);
-      }
-    } catch (error) {
-      console.error("Error fetching partners:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const filteredAffiliates = selectedCategory
+    ? AFFILIATES.filter((a) => a.category === selectedCategory)
+    : AFFILIATES;
+
+  const featuredAffiliates = AFFILIATES.filter((a) => a.is_featured);
+
+  const categories = [
+    { key: null, label: "All" },
+    { key: "retail", label: "Retail" },
+    { key: "online", label: "Online" },
+    { key: "contacts", label: "Contacts" },
+  ];
+
+  const getCategoryIcon = (category: string): string => {
+    switch (category) {
+      case "retail":
+        return "storefront";
+      case "online":
+        return "globe";
+      case "contacts":
+        return "eye";
+      default:
+        return "pricetag";
     }
   };
-
-  const handleSamsClubPress = async () => {
-    setLocationLoading(true);
-    
-    // Track affiliate click (non-blocking)
-    try {
-      const { trackAffiliateClick } = await import("../services/analytics");
-      trackAffiliateClick("samsclub");
-    } catch (e) {}
-    
-    try {
-      let url = "https://www.samsclub.com/locator";
-      
-      // If we have location, add it to the URL for store finder
-      if (location) {
-        // Sam's Club store locator URL with coordinates
-        url = `https://www.samsclub.com/locator?latitude=${location.latitude}&longitude=${location.longitude}&radius=50`;
-      } else {
-        // Try to get location one more time
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === "granted") {
-          const loc = await Location.getCurrentPositionAsync({});
-          url = `https://www.samsclub.com/locator?latitude=${loc.coords.latitude}&longitude=${loc.coords.longitude}&radius=50`;
-          setLocation({
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          });
-        }
-      }
-      
-      await WebBrowser.openBrowserAsync(url);
-    } catch (error) {
-      // Fallback to basic URL
-      await WebBrowser.openBrowserAsync("https://www.samsclub.com/locator");
-    } finally {
-      setLocationLoading(false);
-    }
-  };
-
-  const filteredPartners = partners.filter((p) => {
-    // Exclude Sam's Club since it's shown as featured
-    if (p.name.toLowerCase().includes("sam's club")) return false;
-    if (filter === "all") return true;
-    if (filter === "eyeglasses") return p.category === "eyeglasses" || p.category === "both";
-    if (filter === "contacts") return p.category === "contacts" || p.category === "both";
-    return true;
-  });
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4a9eff" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -141,89 +143,101 @@ export default function ShopScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Find an Eyewear Retailer</Text>
+        <Text style={styles.headerTitle}>Shop Eyewear</Text>
         <View style={styles.placeholder} />
       </View>
 
-      {/* Info Banner */}
-      <View style={styles.infoBanner}>
-        <Ionicons name="information-circle" size={20} color="#4a9eff" />
-        <Text style={styles.infoText}>
-          Order from our trusted partners. We may earn a commission at no extra cost to you.
-        </Text>
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.filterContainer}>
-        {(["all", "eyeglasses", "contacts"] as const).map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterTab, filter === f && styles.filterTabActive]}
-            onPress={() => setFilter(f)}
-          >
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-              {f === "all" ? "All" : f === "eyeglasses" ? "Eyeglasses" : "Contacts"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Partners List */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              fetchPartners();
-            }}
-            tintColor="#4a9eff"
-          />
-        }
-      >
-        {/* Sam's Club - Featured at Top */}
-        <Text style={styles.sectionTitle}>Featured Partner</Text>
-        <TouchableOpacity style={styles.samsClubCard} onPress={handleSamsClubPress}>
-          <View style={styles.samsClubIcon}>
-            <Ionicons name="location" size={28} color="#0066cc" />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Featured Section */}
+        {featuredAffiliates.length > 0 && !selectedCategory && (
+          <View style={styles.featuredSection}>
+            <Text style={styles.sectionTitle}>Featured Partners</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.featuredScroll}
+            >
+              {featuredAffiliates.map((affiliate) => (
+                <TouchableOpacity
+                  key={affiliate.id}
+                  style={styles.featuredCard}
+                  onPress={() => handleOpenLink(affiliate.url)}
+                >
+                  <View style={styles.featuredIcon}>
+                    <Ionicons
+                      name={getCategoryIcon(affiliate.category) as any}
+                      size={28}
+                      color="#4a9eff"
+                    />
+                  </View>
+                  <Text style={styles.featuredName} numberOfLines={1}>
+                    {affiliate.name}
+                  </Text>
+                  <Text style={styles.featuredDesc} numberOfLines={2}>
+                    {affiliate.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-          <View style={styles.samsClubContent}>
-            <View style={styles.samsClubHeader}>
-              <Text style={styles.samsClubName}>Sam's Club Optical</Text>
-              <View style={styles.featuredBadge}>
-                <Ionicons name="star" size={10} color="#fff" />
-                <Text style={styles.featuredText}>FEATURED</Text>
-              </View>
+        )}
+
+        {/* Category Filter */}
+        <View style={styles.filterContainer}>
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat.key || "all"}
+              style={[
+                styles.filterChip,
+                selectedCategory === cat.key && styles.filterChipActive,
+              ]}
+              onPress={() => setSelectedCategory(cat.key)}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  selectedCategory === cat.key && styles.filterChipTextActive,
+                ]}
+              >
+                {cat.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* All Affiliates */}
+        <Text style={styles.sectionTitle}>All Partners</Text>
+        {filteredAffiliates.map((affiliate) => (
+          <TouchableOpacity
+            key={affiliate.id}
+            style={styles.affiliateCard}
+            onPress={() => handleOpenLink(affiliate.url)}
+          >
+            <View style={styles.affiliateIcon}>
+              <Ionicons
+                name={getCategoryIcon(affiliate.category) as any}
+                size={24}
+                color="#4a9eff"
+              />
             </View>
-            <Text style={styles.samsClubDescription}>
-              {location ? "Find your nearest Sam's Club Optical" : "In-store eye exams & quality eyewear"}
-            </Text>
-            <View style={styles.samsClubLocation}>
-              <Ionicons name="navigate" size={14} color="#4CAF50" />
-              <Text style={styles.samsClubLocationText}>
-                {location ? "Using your location" : "Tap to find nearby stores"}
+            <View style={styles.affiliateInfo}>
+              <Text style={styles.affiliateName}>{affiliate.name}</Text>
+              <Text style={styles.affiliateDesc} numberOfLines={2}>
+                {affiliate.description}
               </Text>
             </View>
-          </View>
-          {locationLoading ? (
-            <ActivityIndicator size="small" color="#4a9eff" />
-          ) : (
-            <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
-          )}
-        </TouchableOpacity>
-
-        {/* Online Partners */}
-        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Online Partners</Text>
-        {filteredPartners.map((partner) => (
-          <AffiliateCard key={partner.id} partner={partner} />
+            <Ionicons name="open-outline" size={20} color="#6b7c8f" />
+          </TouchableOpacity>
         ))}
 
-        {/* Disclaimer */}
-        <Text style={styles.disclaimer}>
-          Prices and availability subject to change. Please verify details on the partner website before purchasing.
-        </Text>
+        {/* Ad Placeholder */}
+        <TouchableOpacity
+          style={styles.adPlaceholder}
+          onPress={() => Linking.openURL("https://opticalrxnow.com")}
+        >
+          <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
+          <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -233,11 +247,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0a1628",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   header: {
     flexDirection: "row",
@@ -249,8 +258,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#1a2d45",
   },
   backButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -260,127 +269,126 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   placeholder: {
-    width: 44,
-  },
-  infoBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(74, 158, 255, 0.1)",
-    marginHorizontal: 16,
-    marginTop: 12,
-    padding: 12,
-    borderRadius: 12,
-    gap: 10,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    color: "#8899a6",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#1a2d45",
-  },
-  filterTabActive: {
-    backgroundColor: "#4a9eff",
-  },
-  filterText: {
-    fontSize: 14,
-    color: "#8899a6",
-    fontWeight: "500",
-  },
-  filterTextActive: {
-    color: "#fff",
+    width: 40,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
+    padding: 16,
+  },
+  featuredSection: {
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
     color: "#8899a6",
-    marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
+    marginBottom: 12,
   },
-  samsClubCard: {
-    flexDirection: "row",
-    alignItems: "center",
+  featuredScroll: {
+    gap: 12,
+  },
+  featuredCard: {
+    width: 160,
     backgroundColor: "#1a2d45",
     borderRadius: 16,
     padding: 16,
-    borderWidth: 2,
-    borderColor: "#0066cc",
   },
-  samsClubIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(0, 102, 204, 0.15)",
+  featuredIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginBottom: 12,
   },
-  samsClubContent: {
-    flex: 1,
+  featuredName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 4,
   },
-  samsClubHeader: {
+  featuredDesc: {
+    fontSize: 12,
+    color: "#8899a6",
+    lineHeight: 16,
+  },
+  filterContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     gap: 8,
+    marginBottom: 20,
   },
-  samsClubName: {
-    fontSize: 17,
-    fontWeight: "700",
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#1a2d45",
+  },
+  filterChipActive: {
+    backgroundColor: "#4a9eff",
+  },
+  filterChipText: {
+    fontSize: 14,
+    color: "#8899a6",
+  },
+  filterChipTextActive: {
     color: "#fff",
+    fontWeight: "600",
   },
-  featuredBadge: {
+  affiliateCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ff5c5c",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-    gap: 3,
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
   },
-  featuredText: {
-    fontSize: 9,
-    fontWeight: "bold",
+  affiliateIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  affiliateInfo: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 8,
+  },
+  affiliateName: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "#fff",
   },
-  samsClubDescription: {
+  affiliateDesc: {
     fontSize: 13,
     color: "#8899a6",
-    marginTop: 4,
+    marginTop: 2,
+    lineHeight: 18,
   },
-  samsClubLocation: {
-    flexDirection: "row",
+  adPlaceholder: {
+    width: "100%",
+    height: 80,
+    backgroundColor: "rgba(74, 158, 255, 0.05)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(74, 158, 255, 0.2)",
+    borderStyle: "dashed",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 6,
-    gap: 4,
+    marginTop: 12,
+    gap: 8,
   },
-  samsClubLocationText: {
-    fontSize: 12,
-    color: "#4CAF50",
-    fontWeight: "500",
-  },
-  disclaimer: {
-    fontSize: 11,
+  adPlaceholderText: {
+    fontSize: 14,
     color: "#6b7c8f",
-    textAlign: "center",
-    marginTop: 16,
-    lineHeight: 16,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });
