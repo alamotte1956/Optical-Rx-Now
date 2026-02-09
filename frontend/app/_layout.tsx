@@ -26,6 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="optical-stores" options={{ presentation: "card" }} />
         <Stack.Screen name="find-optometrists" options={{ presentation: "card" }} />
         <Stack.Screen name="email-alerts" options={{ presentation: "card" }} />
+        <Stack.Screen name="notification-settings" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );
