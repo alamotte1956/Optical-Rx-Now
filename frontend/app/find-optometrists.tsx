@@ -21,7 +21,7 @@ export default function FindOptometristsScreen() {
   const [searching, setSearching] = useState(false);
 
   const handleSearch = async () => {
-    const url = `https://www.google.com/search?q=optometrists+near+me`;
+    const url = `https://www.google.com/search?q=optometrists%20near%20me`;
     
     try {
       await Linking.openURL(url);
