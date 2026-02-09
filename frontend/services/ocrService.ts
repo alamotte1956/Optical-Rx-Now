@@ -1,7 +1,7 @@
-// OCR Service using expo-text-extractor (client-side, on-device)
-// Extracts expiration dates from prescription images using ML Kit (Android) and Vision (iOS)
+// OCR Service - Client-side text extraction from prescription images
+// Uses expo-text-extractor on iOS/Android (ML Kit and Vision)
+// Gracefully handles web platform where OCR is not available
 
-import { isSupported, extractTextFromImage } from "expo-text-extractor";
 import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
 
@@ -197,16 +197,41 @@ const saveBase64ToTempFile = async (base64Data: string): Promise<string> => {
 export const extractExpiryDateFromImage = async (
   imageBase64: string
 ): Promise<OCRResult> => {
+  // On web, OCR is not available
+  if (Platform.OS === "web") {
+    console.log("OCR not available on web platform");
+    return {
+      success: false,
+      expiryDate: null,
+      message: "OCR scanning is only available on mobile devices. Please enter the expiration date manually.",
+    };
+  }
+
   try {
-    // Check if OCR is supported on this device
-    if (!isSupported) {
-      console.log("OCR not supported on this device/platform");
+    // Dynamically import expo-text-extractor (only works on native platforms)
+    let isSupported: boolean;
+    let extractTextFromImage: (uri: string) => Promise<string[]>;
+    
+    try {
+      const textExtractor = await import("expo-text-extractor");
+      isSupported = textExtractor.isSupported;
+      extractTextFromImage = textExtractor.extractTextFromImage;
+    } catch (importError) {
+      console.log("expo-text-extractor not available:", importError);
       return {
         success: false,
         expiryDate: null,
-        message: Platform.OS === "web" 
-          ? "OCR is not available in web preview. Please use the mobile app to scan prescriptions."
-          : "OCR is not supported on this device. Please enter the expiration date manually.",
+        message: "OCR scanning is not available on this device. Please enter the expiration date manually.",
+      };
+    }
+
+    // Check if OCR is supported on this device
+    if (!isSupported) {
+      console.log("OCR not supported on this device");
+      return {
+        success: false,
+        expiryDate: null,
+        message: "OCR is not supported on this device. Please enter the expiration date manually.",
       };
     }
 
