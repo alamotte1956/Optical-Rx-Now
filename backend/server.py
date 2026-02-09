@@ -597,6 +597,283 @@ app.include_router(api_router)
 async def root_health_check():
     return {"status": "healthy", "service": "Optical Rx Now API"}
 
+
+# ==================== OCR & Expiration Alert Endpoints ====================
+
+class OCRRequest(BaseModel):
+    image_base64: str
+
+class OCRResponse(BaseModel):
+    expiry_date: Optional[str] = None
+    raw_text: Optional[str] = None
+    success: bool = False
+    message: str = ""
+
+class UserEmailCreate(BaseModel):
+    email: str
+    family_member_id: Optional[str] = None  # Optional: associate with a family member
+
+class UserEmail(BaseModel):
+    id: str
+    email: str
+    family_member_id: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ExpiryAlert(BaseModel):
+    id: str
+    prescription_id: str
+    user_email: str
+    alert_date: datetime
+    days_before: int  # 30, 14, 7, 1, 0
+    sent: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+@api_router.post("/ocr/extract-expiry", response_model=OCRResponse)
+async def extract_expiry_date(request: OCRRequest):
+    """
+    Use GPT-4 Vision to extract the expiration date from a prescription image.
+    Returns the expiry date in YYYY-MM-DD format if found.
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        
+        api_key = os.getenv("EMERGENT_LLM_KEY")
+        if not api_key:
+            return OCRResponse(
+                success=False,
+                message="OCR service not configured. Please contact support."
+            )
+        
+        # Initialize chat with GPT-4 Vision
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"ocr-{uuid.uuid4()}",
+            system_message="""You are an OCR assistant specialized in reading prescription documents.
+Your task is to extract ONLY the expiration date from eyeglass or contact lens prescriptions.
+Look for terms like: "Expiration Date", "Expires", "Exp", "Valid Until", "Good Through", "Rx Expiration".
+Return the date in YYYY-MM-DD format.
+If you cannot find an expiration date, respond with "NOT_FOUND".
+If the date format is ambiguous, make your best interpretation assuming US date formats (MM/DD/YYYY)."""
+        ).with_model("openai", "gpt-4o")
+        
+        # Clean up base64 string (remove data URL prefix if present)
+        image_data = request.image_base64
+        if "," in image_data:
+            image_data = image_data.split(",")[1]
+        
+        # Create image content
+        image_content = ImageContent(image_base64=image_data)
+        
+        # Send message with image
+        user_message = UserMessage(
+            text="Please extract the prescription expiration date from this image. Return ONLY the date in YYYY-MM-DD format, or 'NOT_FOUND' if you cannot find it.",
+            image_contents=[image_content]
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse response
+        response_text = response.strip()
+        
+        if response_text == "NOT_FOUND" or "not found" in response_text.lower():
+            return OCRResponse(
+                success=False,
+                message="Could not find expiration date in the image. Please enter it manually.",
+                raw_text=response_text
+            )
+        
+        # Try to parse as date to validate
+        try:
+            # Clean up any extra text
+            date_str = response_text.replace("The expiration date is ", "").replace(".", "").strip()
+            # Handle various formats
+            for fmt in ["%Y-%m-%d", "%m/%d/%Y", "%d/%m/%Y", "%B %d, %Y", "%b %d, %Y"]:
+                try:
+                    parsed_date = datetime.strptime(date_str, fmt)
+                    formatted_date = parsed_date.strftime("%Y-%m-%d")
+                    return OCRResponse(
+                        success=True,
+                        expiry_date=formatted_date,
+                        message="Expiration date extracted successfully",
+                        raw_text=response_text
+                    )
+                except ValueError:
+                    continue
+            
+            # If we couldn't parse but got a date-like response, return it anyway
+            if any(char.isdigit() for char in date_str):
+                return OCRResponse(
+                    success=True,
+                    expiry_date=date_str[:10] if len(date_str) >= 10 else date_str,
+                    message="Date extracted - please verify format",
+                    raw_text=response_text
+                )
+                
+        except Exception as parse_error:
+            logger.warning(f"Date parsing error: {parse_error}")
+        
+        return OCRResponse(
+            success=False,
+            message="Could not parse expiration date. Please enter it manually.",
+            raw_text=response_text
+        )
+        
+    except Exception as e:
+        logger.error(f"OCR extraction error: {e}")
+        return OCRResponse(
+            success=False,
+            message=f"Error processing image: {str(e)}"
+        )
+
+
+# ==================== User Email Management ====================
+
+@api_router.post("/user-emails", response_model=UserEmail)
+async def create_user_email(email_data: UserEmailCreate):
+    """Register an email for expiration alerts"""
+    try:
+        # Check if email already exists
+        existing = await db.user_emails.find_one({"email": email_data.email.lower()})
+        if existing:
+            # Update to active if it was deactivated
+            await db.user_emails.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"is_active": True, "family_member_id": email_data.family_member_id}}
+            )
+            updated = await db.user_emails.find_one({"_id": existing["_id"]})
+            return UserEmail(**convert_mongo_doc(updated))
+        
+        # Create new email record
+        email_doc = {
+            "email": email_data.email.lower(),
+            "family_member_id": email_data.family_member_id,
+            "is_active": True,
+            "created_at": datetime.utcnow()
+        }
+        result = await db.user_emails.insert_one(email_doc)
+        email_doc["_id"] = result.inserted_id
+        
+        return UserEmail(**convert_mongo_doc(email_doc))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.get("/user-emails")
+async def get_user_emails():
+    """Get all registered emails"""
+    emails = await db.user_emails.find({"is_active": True}).to_list(100)
+    return [UserEmail(**convert_mongo_doc(e)) for e in emails]
+
+
+@api_router.delete("/user-emails/{email_id}")
+async def delete_user_email(email_id: str):
+    """Deactivate an email (soft delete)"""
+    try:
+        result = await db.user_emails.update_one(
+            {"_id": ObjectId(email_id)},
+            {"$set": {"is_active": False}}
+        )
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Email not found")
+        return {"message": "Email removed from alerts"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ==================== Expiration Alert Scheduling ====================
+
+@api_router.post("/alerts/schedule/{prescription_id}")
+async def schedule_expiry_alerts(prescription_id: str, background_tasks: BackgroundTasks):
+    """
+    Schedule expiration alerts for a prescription.
+    Alerts will be created for: 30 days, 14 days, 7 days, 1 day, and day of expiration.
+    """
+    try:
+        # Get the prescription
+        rx = await db.prescriptions.find_one({"_id": ObjectId(prescription_id)})
+        if not rx:
+            raise HTTPException(status_code=404, detail="Prescription not found")
+        
+        if not rx.get("expiry_date"):
+            raise HTTPException(status_code=400, detail="Prescription has no expiration date set")
+        
+        # Parse expiry date
+        try:
+            expiry_date = datetime.strptime(rx["expiry_date"], "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid expiry date format")
+        
+        # Get all active user emails
+        user_emails = await db.user_emails.find({"is_active": True}).to_list(100)
+        if not user_emails:
+            raise HTTPException(status_code=400, detail="No email addresses registered for alerts")
+        
+        # Define alert intervals (days before expiry)
+        alert_intervals = [30, 14, 7, 1, 0]
+        alerts_created = 0
+        
+        for email_doc in user_emails:
+            for days_before in alert_intervals:
+                alert_date = expiry_date - timedelta(days=days_before)
+                
+                # Skip if alert date is in the past
+                if alert_date < datetime.utcnow():
+                    continue
+                
+                # Check if alert already exists
+                existing_alert = await db.expiry_alerts.find_one({
+                    "prescription_id": prescription_id,
+                    "user_email": email_doc["email"],
+                    "days_before": days_before
+                })
+                
+                if not existing_alert:
+                    alert_doc = {
+                        "prescription_id": prescription_id,
+                        "user_email": email_doc["email"],
+                        "alert_date": alert_date,
+                        "days_before": days_before,
+                        "sent": False,
+                        "created_at": datetime.utcnow()
+                    }
+                    await db.expiry_alerts.insert_one(alert_doc)
+                    alerts_created += 1
+        
+        return {
+            "message": f"Scheduled {alerts_created} expiration alerts",
+            "expiry_date": rx["expiry_date"],
+            "alerts_at": [f"{d} days before" if d > 0 else "On expiration day" for d in alert_intervals]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@api_router.get("/alerts/pending")
+async def get_pending_alerts():
+    """Get all pending (unsent) alerts"""
+    now = datetime.utcnow()
+    alerts = await db.expiry_alerts.find({
+        "sent": False,
+        "alert_date": {"$lte": now}
+    }).to_list(100)
+    
+    return [{"id": str(a["_id"]), **{k: v for k, v in a.items() if k != "_id"}} for a in alerts]
+
+
+@api_router.get("/alerts/prescription/{prescription_id}")
+async def get_prescription_alerts(prescription_id: str):
+    """Get all alerts for a specific prescription"""
+    alerts = await db.expiry_alerts.find({
+        "prescription_id": prescription_id
+    }).sort("alert_date", 1).to_list(100)
+    
+    return [{"id": str(a["_id"]), **{k: v for k, v in a.items() if k != "_id"}} for a in alerts]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
