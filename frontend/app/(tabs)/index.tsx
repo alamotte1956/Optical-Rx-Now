@@ -13,25 +13,13 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AdBanner from "../components/AdBanner";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-}
-
-interface Prescription {
-  id: string;
-  family_member_id: string;
-  rx_type: string;
-  image_base64: string;
-  notes: string;
-  date_taken: string;
-  created_at: string;
-}
+import {
+  getPrescriptions,
+  getFamilyMembers,
+  deletePrescription,
+  Prescription,
+  FamilyMember,
+} from "../../services/localStorage";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -41,7 +29,7 @@ export default function PrescriptionsScreen() {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
-  // Navigate back to welcome screen - uses dismissAll to close tab navigator then navigate to root
+  // Navigate back to welcome screen
   const goToHome = () => {
     router.dismissAll();
     router.replace("/welcome");
@@ -49,29 +37,20 @@ export default function PrescriptionsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      loadData();
     }, [])
   );
 
-  const fetchData = async () => {
+  const loadData = async () => {
     try {
-      const [membersRes, rxRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/family-members`),
-        fetch(`${BACKEND_URL}/api/prescriptions`),
+      const [membersData, rxData] = await Promise.all([
+        getFamilyMembers(),
+        getPrescriptions(),
       ]);
-
-      if (membersRes.ok) {
-        const membersData = await membersRes.json();
-        setFamilyMembers(membersData);
-      }
-
-      if (rxRes.ok) {
-        const rxData = await rxRes.json();
-        setPrescriptions(rxData);
-      }
+      setFamilyMembers(membersData);
+      setPrescriptions(rxData);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to load prescriptions");
+      console.log("Error loading data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -80,7 +59,25 @@ export default function PrescriptionsScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchData();
+    loadData();
+  };
+
+  const handleDeletePrescription = (rx: Prescription) => {
+    Alert.alert(
+      "Delete Prescription",
+      "Are you sure you want to delete this prescription?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deletePrescription(rx.id);
+            loadData();
+          },
+        },
+      ]
+    );
   };
 
   const getMemberName = (memberId: string) => {
@@ -89,31 +86,43 @@ export default function PrescriptionsScreen() {
   };
 
   const filteredPrescriptions = selectedMember
-    ? prescriptions.filter((p) => p.family_member_id === selectedMember)
+    ? prescriptions.filter((rx) => rx.familyMemberId === selectedMember)
     : prescriptions;
 
-  const groupedPrescriptions = filteredPrescriptions.reduce((acc, rx) => {
-    const memberName = getMemberName(rx.family_member_id);
-    if (!acc[memberName]) {
-      acc[memberName] = [];
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
     }
-    acc[memberName].push(rx);
-    return acc;
-  }, {} as Record<string, Prescription[]>);
+  };
+
+  const isExpiringSoon = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    const expiry = new Date(expiryDate);
+    const daysUntilExpiry = Math.ceil(
+      (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+    return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
+  };
+
+  const isExpired = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    return new Date(expiryDate) < new Date();
+  };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4a9eff" />
-          <Text style={styles.loadingText}>Loading prescriptions...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -124,26 +133,15 @@ export default function PrescriptionsScreen() {
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.shopButton}
-            onPress={() => router.push("/shop")}
-          >
-            <Ionicons name="cart" size={20} color="#4a9eff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => router.push("/add-rx")}
-          >
-            <Ionicons name="add" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push("/add-rx")}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
 
-      {/* Ad Banner */}
-      <AdBanner />
-
-      {/* Filter Chips */}
+      {/* Member Filter */}
       {familyMembers.length > 0 && (
         <ScrollView
           horizontal
@@ -154,14 +152,14 @@ export default function PrescriptionsScreen() {
           <TouchableOpacity
             style={[
               styles.filterChip,
-              selectedMember === null && styles.filterChipActive,
+              !selectedMember && styles.filterChipActive,
             ]}
             onPress={() => setSelectedMember(null)}
           >
             <Text
               style={[
                 styles.filterChipText,
-                selectedMember === null && styles.filterChipTextActive,
+                !selectedMember && styles.filterChipTextActive,
               ]}
             >
               All
@@ -194,21 +192,17 @@ export default function PrescriptionsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#4a9eff"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4a9eff" />
         }
       >
-        {prescriptions.length === 0 ? (
-          <View style={styles.emptyState}>
+        {filteredPrescriptions.length === 0 ? (
+          <View style={styles.emptyContainer}>
             <Ionicons name="document-text-outline" size={64} color="#3a4d63" />
-            <Text style={styles.emptyTitle}>No Prescriptions Yet</Text>
-            <Text style={styles.emptyText}>
+            <Text style={styles.emptyText}>No prescriptions yet</Text>
+            <Text style={styles.emptySubtext}>
               {familyMembers.length === 0
-                ? "Add a family member first, then capture their Rx"
-                : "Tap the + button to add your first prescription"}
+                ? "Add a family member first, then add prescriptions"
+                : "Tap the + button to add a prescription"}
             </Text>
             {familyMembers.length === 0 && (
               <TouchableOpacity
@@ -219,49 +213,64 @@ export default function PrescriptionsScreen() {
               </TouchableOpacity>
             )}
           </View>
-        ) : filteredPrescriptions.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="search-outline" size={64} color="#3a4d63" />
-            <Text style={styles.emptyTitle}>No Results</Text>
-            <Text style={styles.emptyText}>
-              No prescriptions found for the selected filter
-            </Text>
-          </View>
         ) : (
-          Object.entries(groupedPrescriptions).map(([memberName, rxList]) => (
-            <View key={memberName} style={styles.memberSection}>
-              <Text style={styles.memberSectionTitle}>{memberName}</Text>
-              <View style={styles.rxGrid}>
-                {rxList.map((rx) => (
-                  <TouchableOpacity
-                    key={rx.id}
-                    style={styles.rxCard}
-                    onPress={() =>
-                      router.push({ pathname: "/rx-detail", params: { id: rx.id } })
-                    }
+          filteredPrescriptions.map((rx) => (
+            <TouchableOpacity
+              key={rx.id}
+              style={[
+                styles.rxCard,
+                isExpired(rx.expiryDate) && styles.rxCardExpired,
+                isExpiringSoon(rx.expiryDate) && !isExpired(rx.expiryDate) && styles.rxCardExpiringSoon,
+              ]}
+              onPress={() => router.push(`/rx-detail?id=${rx.id}`)}
+              onLongPress={() => handleDeletePrescription(rx)}
+            >
+              <Image
+                source={{ uri: rx.imageBase64 }}
+                style={styles.rxImage}
+                resizeMode="cover"
+              />
+              <View style={styles.rxInfo}>
+                <View style={styles.rxHeader}>
+                  <Text style={styles.rxMember}>{getMemberName(rx.familyMemberId)}</Text>
+                  <View
+                    style={[
+                      styles.rxTypeBadge,
+                      rx.rxType === "contact" && styles.rxTypeBadgeContact,
+                    ]}
                   >
-                    <Image
-                      source={{ uri: rx.image_base64 }}
-                      style={styles.rxImage}
-                      resizeMode="cover"
+                    <Text style={styles.rxTypeText}>
+                      {rx.rxType === "eyeglass" ? "Glasses" : "Contacts"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.rxDate}>Taken: {formatDate(rx.dateTaken)}</Text>
+                {rx.expiryDate && (
+                  <View style={styles.expiryRow}>
+                    <Ionicons
+                      name={isExpired(rx.expiryDate) ? "warning" : "calendar-outline"}
+                      size={14}
+                      color={isExpired(rx.expiryDate) ? "#ff5c5c" : isExpiringSoon(rx.expiryDate) ? "#ff9500" : "#8899a6"}
                     />
-                    <View style={styles.rxInfo}>
-                      <View style={styles.rxTypeContainer}>
-                        <Ionicons
-                          name={rx.rx_type === "eyeglass" ? "glasses" : "eye"}
-                          size={14}
-                          color="#4a9eff"
-                        />
-                        <Text style={styles.rxType}>
-                          {rx.rx_type === "eyeglass" ? "Eyeglass" : "Contact"}
-                        </Text>
-                      </View>
-                      <Text style={styles.rxDate}>{rx.date_taken}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                    <Text
+                      style={[
+                        styles.expiryText,
+                        isExpired(rx.expiryDate) && styles.expiryTextExpired,
+                        isExpiringSoon(rx.expiryDate) && !isExpired(rx.expiryDate) && styles.expiryTextSoon,
+                      ]}
+                    >
+                      {isExpired(rx.expiryDate) ? "Expired" : "Expires"}: {formatDate(rx.expiryDate)}
+                    </Text>
+                  </View>
+                )}
+                {rx.notes && (
+                  <Text style={styles.rxNotes} numberOfLines={1}>
+                    {rx.notes}
+                  </Text>
+                )}
               </View>
-            </View>
+              <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
@@ -279,52 +288,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingText: {
-    color: "#8899a6",
-    marginTop: 16,
-    fontSize: 16,
-  },
   header: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-  },
-  homeButtonRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  homeButtonText: {
-    color: "#4a9eff",
-    fontSize: 14,
-    fontWeight: "500",
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a2d45",
   },
   homeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    flex: 1,
-    marginLeft: 12,
-  },
-  headerButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  shopButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -332,25 +305,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
   addButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#4a9eff",
     justifyContent: "center",
     alignItems: "center",
   },
   filterContainer: {
     maxHeight: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a2d45",
   },
   filterContent: {
     paddingHorizontal: 16,
+    paddingVertical: 8,
     gap: 8,
   },
   filterChip: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 6,
+    borderRadius: 16,
     backgroundColor: "#1a2d45",
     marginRight: 8,
   },
@@ -358,92 +339,122 @@ const styles = StyleSheet.create({
     backgroundColor: "#4a9eff",
   },
   filterChipText: {
-    color: "#8899a6",
     fontSize: 14,
-    fontWeight: "500",
+    color: "#8899a6",
   },
   filterChipTextActive: {
     color: "#fff",
+    fontWeight: "600",
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
+    padding: 16,
   },
-  emptyState: {
-    flex: 1,
+  emptyContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 100,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#fff",
-    marginTop: 16,
+    paddingVertical: 60,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 18,
     color: "#8899a6",
-    textAlign: "center",
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#6b7c8f",
     marginTop: 8,
-    paddingHorizontal: 40,
+    textAlign: "center",
+    paddingHorizontal: 32,
   },
   emptyButton: {
     marginTop: 24,
     backgroundColor: "#4a9eff",
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 8,
   },
   emptyButtonText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 14,
-  },
-  memberSection: {
-    marginTop: 24,
-  },
-  memberSectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-    marginBottom: 12,
-  },
-  rxGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
   },
   rxCard: {
-    width: "47%",
-    backgroundColor: "#1a2d45",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  rxImage: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#0f1d30",
-  },
-  rxInfo: {
-    padding: 12,
-  },
-  rxTypeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
   },
-  rxType: {
-    fontSize: 13,
+  rxCardExpired: {
+    borderWidth: 1,
+    borderColor: "rgba(255, 92, 92, 0.5)",
+  },
+  rxCardExpiringSoon: {
+    borderWidth: 1,
+    borderColor: "rgba(255, 149, 0, 0.5)",
+  },
+  rxImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    backgroundColor: "#0a1628",
+  },
+  rxInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  rxHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  rxMember: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  rxTypeBadge: {
+    backgroundColor: "rgba(74, 158, 255, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  rxTypeBadgeContact: {
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+  },
+  rxTypeText: {
+    fontSize: 11,
     color: "#4a9eff",
     fontWeight: "500",
   },
   rxDate: {
+    fontSize: 13,
+    color: "#8899a6",
+    marginBottom: 2,
+  },
+  expiryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  expiryText: {
     fontSize: 12,
     color: "#8899a6",
+  },
+  expiryTextExpired: {
+    color: "#ff5c5c",
+  },
+  expiryTextSoon: {
+    color: "#ff9500",
+  },
+  rxNotes: {
+    fontSize: 12,
+    color: "#6b7c8f",
     marginTop: 4,
+    fontStyle: "italic",
   },
 });
