@@ -392,7 +392,7 @@ export default function AddRxScreen() {
           </View>
           {expiryDate ? (
             <Text style={styles.expiryHint}>
-              ✓ You'll receive notifications at 30 days, 2 weeks, 1 week, and 1 day before expiration
+              ✓ You'll receive notifications at 30 days, 14 days, 7 days, 2 days, and the morning of expiration
             </Text>
           ) : (
             <Text style={styles.expiryHintEmpty}>
