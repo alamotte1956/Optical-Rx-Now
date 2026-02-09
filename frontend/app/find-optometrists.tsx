@@ -122,12 +122,10 @@ export default function FindOptometristsScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Info Card */}
-          <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={24} color="#4a9eff" />
-            <Text style={styles.infoText}>
-              We'll open your preferred service to show optometrists near your location. You can compare ratings, read reviews, and find contact information.
-            </Text>
+          {/* Ad Banner Placeholder */}
+          <View style={styles.adPlaceholder}>
+            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
+            <Text style={styles.adPlaceholderText}>Ad Space</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
