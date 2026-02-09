@@ -240,18 +240,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  infoCard: {
-    flexDirection: "row",
-    backgroundColor: "rgba(74, 158, 255, 0.1)",
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
+  adPlaceholder: {
     width: "100%",
+    height: 80,
+    backgroundColor: "rgba(74, 158, 255, 0.05)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(74, 158, 255, 0.2)",
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
   },
-  infoText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#8899a6",
-    lineHeight: 20,
+  adPlaceholderText: {
+    fontSize: 14,
+    color: "#6b7c8f",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
 });
