@@ -129,6 +129,15 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Optometrists Near Me</Text>
           </TouchableOpacity>
 
+          {/* Email Alerts Button */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => router.push("/email-alerts")}
+          >
+            <Ionicons name="notifications" size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>Set Up Expiry Alerts</Text>
+          </TouchableOpacity>
+
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
             style={styles.adPlaceholder}
