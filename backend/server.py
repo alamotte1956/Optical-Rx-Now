@@ -871,6 +871,9 @@ async def get_prescription_alerts(prescription_id: str):
     
     return [{"id": str(a["_id"]), **{k: v for k, v in a.items() if k != "_id"}} for a in alerts]
 
+# Include the router in the main app - MUST be after all routes are defined
+app.include_router(api_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
