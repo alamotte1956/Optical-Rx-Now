@@ -256,7 +256,38 @@ export const scheduleExpiryNotifications = async (
   const hasPermission = await requestNotificationPermissions();
   if (!hasPermission) return;
 
-  const expiryDate = new Date(prescription.expiryDate);
+  // Parse the expiry date properly (handles YYYY-MM-DD format)
+  let expiryDate: Date;
+  const dateStr = prescription.expiryDate;
+  
+  // Try YYYY-MM-DD format first
+  const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    expiryDate = new Date(
+      parseInt(isoMatch[1]),
+      parseInt(isoMatch[2]) - 1,
+      parseInt(isoMatch[3])
+    );
+  } else {
+    // Try MM/DD/YYYY format
+    const usMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (usMatch) {
+      expiryDate = new Date(
+        parseInt(usMatch[3]),
+        parseInt(usMatch[1]) - 1,
+        parseInt(usMatch[2])
+      );
+    } else {
+      // Fallback to Date constructor
+      expiryDate = new Date(dateStr);
+    }
+  }
+
+  // Validate the date
+  if (isNaN(expiryDate.getTime())) {
+    console.log("Invalid expiry date, skipping notification scheduling");
+    return;
+  }
   // Notification schedule: 30 days, 14 days, 7 days, 2 days, and morning of expiration
   const alertDays = [30, 14, 7, 2, 0];
   const member = await getFamilyMemberById(prescription.familyMemberId);
