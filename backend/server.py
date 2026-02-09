@@ -19,3 +19,8 @@ async def health_check():
 @app.get("/api/")
 async def api_root():
     return {"message": "Optical Rx Now API - Frontend Only Mode", "note": "All data is stored locally on device"}
+
+@app.get("/api/health")
+async def api_health():
+    return {"status": "healthy", "service": "optical-rx-now", "version": "1.0.0"}
+
