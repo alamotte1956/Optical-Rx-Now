@@ -123,10 +123,13 @@ export default function FindOptometristsScreen() {
           </View>
 
           {/* Ad Banner Placeholder */}
-          <View style={styles.adPlaceholder}>
-            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
-            <Text style={styles.adPlaceholderText}>Ad Space</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.adPlaceholder}
+            onPress={() => Linking.openURL("https://opticalrxnow.com")}
+          >
+            <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
+            <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
