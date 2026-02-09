@@ -325,6 +325,14 @@ export const scheduleExpiryNotifications = async (
     }
 
     try {
+      // Calculate seconds until the trigger date
+      const secondsUntilTrigger = Math.floor(
+        (triggerDate.getTime() - Date.now()) / 1000
+      );
+
+      // Skip if less than 60 seconds (notification won't work properly)
+      if (secondsUntilTrigger < 60) continue;
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title,
@@ -333,7 +341,7 @@ export const scheduleExpiryNotifications = async (
           sound: true,
         },
         trigger: {
-          date: triggerDate,
+          seconds: secondsUntilTrigger,
         },
       });
 
