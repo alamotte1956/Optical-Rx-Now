@@ -22,6 +22,12 @@ import {
   FamilyMember,
 } from "../services/localStorage";
 import { extractExpiryDateFromImage } from "../services/ocrService";
+import {
+  getTodayFormatted,
+  formatDateForInput,
+  normalizeDate,
+  isValidDate,
+} from "../services/dateUtils";
 
 export default function AddRxScreen() {
   const router = useRouter();
@@ -30,9 +36,7 @@ export default function AddRxScreen() {
   const [rxType, setRxType] = useState<"eyeglass" | "contact">("eyeglass");
   const [imageBase64, setImageBase64] = useState<string>("");
   const [notes, setNotes] = useState("");
-  const [dateTaken, setDateTaken] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [dateTaken, setDateTaken] = useState(getTodayFormatted());
   const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -73,33 +77,21 @@ export default function AddRxScreen() {
       const result = await extractExpiryDateFromImage(base64Image);
       
       if (result.success && result.expiryDate) {
-        setExpiryDate(result.expiryDate);
+        // Convert to MM/DD/YYYY for display
+        const displayDate = formatDateForInput(result.expiryDate);
+        setExpiryDate(displayDate);
         Alert.alert(
           "✓ Expiration Date Found!",
-          `Detected: ${formatDateForDisplay(result.expiryDate)}\n\nPlease verify this is correct.`,
+          `Detected: ${displayDate}\n\nPlease verify this is correct.`,
           [{ text: "OK" }]
         );
       } else {
-        // Don't show alert for not found - just let user enter manually
         console.log("OCR result:", result.message);
       }
     } catch (error) {
       console.log("OCR scan error:", error);
     } finally {
       setScanningExpiry(false);
-    }
-  };
-
-  const formatDateForDisplay = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
     }
   };
 
@@ -115,7 +107,6 @@ export default function AddRxScreen() {
     if (!result.canceled && result.assets[0].base64) {
       const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setImageBase64(base64Data);
-      // Automatically scan for expiry date
       scanForExpiryDate(base64Data);
     }
   };
@@ -132,7 +123,6 @@ export default function AddRxScreen() {
     if (!result.canceled && result.assets[0].base64) {
       const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setImageBase64(base64Data);
-      // Automatically scan for expiry date
       scanForExpiryDate(base64Data);
     }
   };
@@ -152,19 +142,33 @@ export default function AddRxScreen() {
       Alert.alert("Error", "Please capture or select an image of the prescription");
       return;
     }
+    
+    // Validate dates
+    if (dateTaken && !isValidDate(dateTaken)) {
+      Alert.alert("Invalid Date", "Please enter the prescription date in MM/DD/YYYY format");
+      return;
+    }
+    if (expiryDate && !isValidDate(expiryDate)) {
+      Alert.alert("Invalid Date", "Please enter the expiration date in MM/DD/YYYY format");
+      return;
+    }
 
     setSaving(true);
     try {
+      // Normalize dates to YYYY-MM-DD for storage
+      const normalizedDateTaken = normalizeDate(dateTaken) || getTodayFormatted();
+      const normalizedExpiryDate = expiryDate ? normalizeDate(expiryDate) : null;
+      
       await savePrescription({
         familyMemberId: selectedMember,
         rxType,
         imageBase64,
         notes: notes.trim(),
-        dateTaken,
-        expiryDate: expiryDate || null,
+        dateTaken: normalizedDateTaken,
+        expiryDate: normalizedExpiryDate,
       });
 
-      if (expiryDate) {
+      if (normalizedExpiryDate) {
         Alert.alert(
           "Prescription Saved",
           "Expiry alerts have been scheduled. You'll receive notifications before the prescription expires.",
@@ -368,10 +372,11 @@ export default function AddRxScreen() {
           <Text style={styles.label}>Prescription Date</Text>
           <TextInput
             style={styles.input}
-            placeholder="YYYY-MM-DD"
+            placeholder="MM/DD/YYYY"
             placeholderTextColor="#6b7c8f"
             value={dateTaken}
             onChangeText={setDateTaken}
+            keyboardType="numbers-and-punctuation"
           />
 
           {/* Expiry Date */}
@@ -379,10 +384,11 @@ export default function AddRxScreen() {
           <View style={styles.expiryInputContainer}>
             <TextInput
               style={[styles.input, styles.expiryInput]}
-              placeholder="YYYY-MM-DD (optional)"
+              placeholder="MM/DD/YYYY (optional)"
               placeholderTextColor="#6b7c8f"
               value={expiryDate}
               onChangeText={setExpiryDate}
+              keyboardType="numbers-and-punctuation"
             />
             {scanningExpiry && (
               <View style={styles.expiryScanning}>
