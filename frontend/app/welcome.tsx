@@ -129,28 +129,14 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Optometrists Near Me</Text>
           </TouchableOpacity>
 
-          {/* Your Vault Stats (if returning user) */}
-          {!loading && (stats.family_members > 0 || stats.total_prescriptions > 0) && (
-            <View style={styles.statsContainer}>
-              <Text style={styles.statsTitle}>Your Vault</Text>
-              <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{stats.family_members}</Text>
-                  <Text style={styles.statLabel}>Family Members</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>{stats.total_prescriptions}</Text>
-                  <Text style={styles.statLabel}>Prescriptions</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Future Ad Banner Placeholder */}
-          <View style={styles.adPlaceholder}>
-            <Ionicons name="megaphone-outline" size={24} color="#6b7c8f" />
-            <Text style={styles.adPlaceholderText}>Ad Space</Text>
-          </View>
+          {/* Ad Banner Placeholder */}
+          <TouchableOpacity 
+            style={styles.adPlaceholder}
+            onPress={() => Linking.openURL("https://opticalrxnow.com")}
+          >
+            <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
+            <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
