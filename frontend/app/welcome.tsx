@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Ale
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AdBanner from "./components/AdBanner";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -98,11 +97,6 @@ export default function WelcomeScreen() {
             Store and manage your family's eyeglass and contact lens prescriptions
           </Text>
 
-          {/* Need New Eyewear Button (Ad Banner) */}
-          <View style={styles.adContainer}>
-            <AdBanner />
-          </View>
-
           {/* Open My Vault / Get Started Button */}
           <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
             {loading ? (
@@ -117,10 +111,10 @@ export default function WelcomeScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Find Optical Stores Button */}
+          {/* Find Optical Stores Button - Links to shop */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
-            onPress={() => router.push("/optical-stores")}
+            onPress={() => router.push("/shop")}
           >
             <Ionicons name="storefront" size={22} color="#4a9eff" />
             <Text style={styles.secondaryButtonText}>Find Retail Optical Stores</Text>
