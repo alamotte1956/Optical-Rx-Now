@@ -25,6 +25,34 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## 📱 Running on Your Device with QR Code
+
+After starting the development server with `npx expo start`, a QR code will appear in your terminal.
+
+### On iOS:
+1. Install [Expo Go](https://apps.apple.com/app/expo-go/id982107779) from the App Store
+2. Open your **Camera** app and point it at the QR code
+3. Tap the notification to open in Expo Go
+
+### On Android:
+1. Install [Expo Go](https://play.google.com/store/apps/details?id=host.exp.exponent) from Google Play
+2. Open the **Expo Go** app
+3. Tap **Scan QR Code** and point your camera at the QR code
+
+### Network Issues?
+
+If the QR code doesn't work (firewall, different networks, etc.), use tunnel mode:
+
+```bash
+npx expo start --tunnel
+```
+
+This routes traffic through Expo's servers and works in most network configurations.
+
+For more detailed instructions and troubleshooting, see:
+- [Quick Start Guide](../QUICK_START.md) - Simple 3-step setup
+- [Expo Development Guide](../EXPO_DEV_GUIDE.md) - Comprehensive reference
+
 ## Get a fresh project
 
 When you're ready, run:
