@@ -106,27 +106,27 @@ export default function NotificationSettingsScreen() {
         {/* Alert Schedule */}
         <View style={styles.scheduleCard}>
           <Text style={styles.scheduleTitle}>Alert Schedule</Text>
-          <Text style={styles.scheduleText}>You'll receive notifications:</Text>
+          <Text style={styles.scheduleText}>You'll receive notifications at 8 AM:</Text>
           <View style={styles.scheduleList}>
             <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={18} color="#4a9eff" />
+              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
               <Text style={styles.scheduleItemText}>30 days before expiration</Text>
             </View>
             <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>2 weeks before expiration</Text>
+              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
+              <Text style={styles.scheduleItemText}>14 days before expiration</Text>
             </View>
             <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>1 week before expiration</Text>
+              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
+              <Text style={styles.scheduleItemText}>7 days before expiration</Text>
             </View>
             <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>1 day before expiration</Text>
+              <Ionicons name="time-outline" size={18} color="#ff9500" />
+              <Text style={styles.scheduleItemText}>2 days before expiration</Text>
             </View>
             <View style={styles.scheduleItem}>
-              <Ionicons name="alert-circle-outline" size={18} color="#ff9500" />
-              <Text style={styles.scheduleItemText}>On expiration day</Text>
+              <Ionicons name="alert-circle-outline" size={18} color="#ff5c5c" />
+              <Text style={styles.scheduleItemText}>Morning of expiration day</Text>
             </View>
           </View>
         </View>
