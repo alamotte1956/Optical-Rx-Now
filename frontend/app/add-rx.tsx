@@ -35,8 +35,10 @@ export default function AddRxScreen() {
   const [dateTaken, setDateTaken] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [extractingExpiry, setExtractingExpiry] = useState(false);
 
   useEffect(() => {
     fetchFamilyMembers();
@@ -70,6 +72,39 @@ export default function AddRxScreen() {
     }
   };
 
+  const extractExpiryDate = async (base64Image: string) => {
+    setExtractingExpiry(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/ocr/extract-expiry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_base64: base64Image }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.expiry_date) {
+          setExpiryDate(data.expiry_date);
+          Alert.alert(
+            "Expiration Date Found",
+            `Detected expiration date: ${data.expiry_date}\n\nPlease verify this is correct.`,
+            [{ text: "OK" }]
+          );
+        } else {
+          Alert.alert(
+            "No Expiration Date Found",
+            data.message || "Please enter the expiration date manually.",
+            [{ text: "OK" }]
+          );
+        }
+      }
+    } catch (error) {
+      console.log("OCR extraction error:", error);
+    } finally {
+      setExtractingExpiry(false);
+    }
+  };
+
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
@@ -80,7 +115,10 @@ export default function AddRxScreen() {
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      setImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setImageBase64(base64Data);
+      // Auto-extract expiry date
+      extractExpiryDate(base64Data);
     }
   };
 
@@ -94,7 +132,10 @@ export default function AddRxScreen() {
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      setImageBase64(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setImageBase64(base64Data);
+      // Auto-extract expiry date
+      extractExpiryDate(base64Data);
     }
   };
 
@@ -119,10 +160,24 @@ export default function AddRxScreen() {
           image_base64: imageBase64,
           notes: notes.trim(),
           date_taken: dateTaken,
+          expiry_date: expiryDate || null,
         }),
       });
 
       if (response.ok) {
+        const savedRx = await response.json();
+        
+        // Schedule expiry alerts if we have an expiry date
+        if (expiryDate && savedRx.id) {
+          try {
+            await fetch(`${BACKEND_URL}/api/alerts/schedule/${savedRx.id}`, {
+              method: "POST",
+            });
+          } catch (alertError) {
+            console.log("Could not schedule alerts:", alertError);
+          }
+        }
+        
         router.back();
       } else {
         const errorData = await response.json();
