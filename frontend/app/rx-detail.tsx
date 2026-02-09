@@ -59,64 +59,6 @@ export default function RxDetailScreen() {
     }
   };
 
-  // Format date properly - handles YYYY-MM-DD format
-  const formatDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return "N/A";
-    try {
-      // Handle YYYY-MM-DD format
-      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const [year, month, day] = dateString.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-      }
-      // Handle ISO date string
-      const date = new Date(dateString);
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-      }
-      return dateString;
-    } catch {
-      return dateString;
-    }
-  };
-
-  const isExpired = (expiryDate: string | null): boolean => {
-    if (!expiryDate) return false;
-    try {
-      const [year, month, day] = expiryDate.split('-');
-      const expiry = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return expiry < today;
-    } catch {
-      return false;
-    }
-  };
-
-  const isExpiringSoon = (expiryDate: string | null): boolean => {
-    if (!expiryDate) return false;
-    try {
-      const [year, month, day] = expiryDate.split('-');
-      const expiry = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const daysUntilExpiry = Math.ceil(
-        (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
-    } catch {
-      return false;
-    }
-  };
-
   const generatePdfHtml = (): string => {
     if (!prescription || !member) return "";
     
