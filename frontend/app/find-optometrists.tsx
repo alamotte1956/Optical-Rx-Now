@@ -99,16 +99,9 @@ export default function FindOptometristsScreen() {
             <TouchableOpacity
               style={[styles.searchButton, styles.primaryButton]}
               onPress={handleSearch}
-              disabled={!zipCode || zipCode.length < 5 || searching}
             >
-              {searching ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="map" size={22} color="#fff" />
-                  <Text style={styles.searchButtonText}>Search on Google Maps</Text>
-                </>
-              )}
+              <Ionicons name="search" size={22} color="#fff" />
+              <Text style={styles.searchButtonText}>Search on Google</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
