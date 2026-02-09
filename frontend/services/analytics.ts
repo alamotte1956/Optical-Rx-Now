@@ -1,15 +1,16 @@
+// Analytics service - no-op implementation (frontend-only app)
+// All analytics methods are kept for API compatibility but don't send data anywhere
+
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const DEVICE_ID_KEY = "@optical_rx_device_id";
 
-// Generate or retrieve a persistent device ID
+// Generate or retrieve a persistent device ID (kept for potential future use)
 export const getDeviceId = async (): Promise<string> => {
   try {
     let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
     if (!deviceId) {
-      // Generate a unique ID for this device
       deviceId = `${Platform.OS}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
@@ -19,33 +20,16 @@ export const getDeviceId = async (): Promise<string> => {
   }
 };
 
-// Track analytics event
+// Track analytics event - no-op (no backend)
 export const trackEvent = async (
   eventType: "app_open" | "ad_click" | "affiliate_click",
   metadata?: Record<string, any>
 ) => {
-  try {
-    const deviceId = await getDeviceId();
-    const platform = Platform.OS; // 'ios', 'android', or 'web'
-    
-    await fetch(`${BACKEND_URL}/api/analytics/track`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        device_id: deviceId,
-        event_type: eventType,
-        platform: platform,
-        app_version: "1.0.0",
-        metadata: metadata,
-      }),
-    });
-  } catch (error) {
-    // Silently fail - don't interrupt user experience
-    console.log("Analytics error:", error);
-  }
+  // No-op - frontend only app, no analytics backend
+  console.log(`Analytics event (not sent): ${eventType}`, metadata);
 };
 
-// Track app open (call on app launch)
+// Track app open
 export const trackAppOpen = () => trackEvent("app_open");
 
 // Track ad click
