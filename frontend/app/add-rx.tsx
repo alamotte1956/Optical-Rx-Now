@@ -21,6 +21,7 @@ import {
   savePrescription,
   FamilyMember,
 } from "../services/localStorage";
+import { extractExpiryDateFromImage } from "../services/ocrService";
 
 export default function AddRxScreen() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function AddRxScreen() {
   const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [scanningExpiry, setScanningExpiry] = useState(false);
 
   useEffect(() => {
     loadFamilyMembers();
@@ -65,6 +67,42 @@ export default function AddRxScreen() {
     }
   };
 
+  const scanForExpiryDate = async (base64Image: string) => {
+    setScanningExpiry(true);
+    try {
+      const result = await extractExpiryDateFromImage(base64Image);
+      
+      if (result.success && result.expiryDate) {
+        setExpiryDate(result.expiryDate);
+        Alert.alert(
+          "✓ Expiration Date Found!",
+          `Detected: ${formatDateForDisplay(result.expiryDate)}\n\nPlease verify this is correct.`,
+          [{ text: "OK" }]
+        );
+      } else {
+        // Don't show alert for not found - just let user enter manually
+        console.log("OCR result:", result.message);
+      }
+    } catch (error) {
+      console.log("OCR scan error:", error);
+    } finally {
+      setScanningExpiry(false);
+    }
+  };
+
+  const formatDateForDisplay = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
@@ -77,6 +115,8 @@ export default function AddRxScreen() {
     if (!result.canceled && result.assets[0].base64) {
       const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setImageBase64(base64Data);
+      // Automatically scan for expiry date
+      scanForExpiryDate(base64Data);
     }
   };
 
@@ -92,6 +132,14 @@ export default function AddRxScreen() {
     if (!result.canceled && result.assets[0].base64) {
       const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
       setImageBase64(base64Data);
+      // Automatically scan for expiry date
+      scanForExpiryDate(base64Data);
+    }
+  };
+
+  const handleRescan = () => {
+    if (imageBase64) {
+      scanForExpiryDate(imageBase64);
     }
   };
 
@@ -274,10 +322,19 @@ export default function AddRxScreen() {
               <Image source={{ uri: imageBase64 }} style={styles.imagePreview} resizeMode="contain" />
               <TouchableOpacity
                 style={styles.removeImageButton}
-                onPress={() => setImageBase64("")}
+                onPress={() => {
+                  setImageBase64("");
+                  setExpiryDate("");
+                }}
               >
                 <Ionicons name="close-circle" size={28} color="#ff5c5c" />
               </TouchableOpacity>
+              {scanningExpiry && (
+                <View style={styles.scanningOverlay}>
+                  <ActivityIndicator size="large" color="#4a9eff" />
+                  <Text style={styles.scanningText}>Scanning for expiration date...</Text>
+                </View>
+              )}
             </View>
           ) : (
             <View style={styles.imageButtons}>
@@ -288,6 +345,21 @@ export default function AddRxScreen() {
               <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
                 <Ionicons name="images" size={32} color="#4a9eff" />
                 <Text style={styles.imageButtonText}>Choose Photo</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* OCR Info Banner */}
+          {imageBase64 && !scanningExpiry && (
+            <View style={styles.ocrBanner}>
+              <Ionicons name="scan" size={20} color="#4a9eff" />
+              <Text style={styles.ocrBannerText}>
+                {expiryDate 
+                  ? "Expiration date detected automatically" 
+                  : "No expiration date detected"}
+              </Text>
+              <TouchableOpacity onPress={handleRescan} style={styles.rescanButton}>
+                <Ionicons name="refresh" size={18} color="#4a9eff" />
               </TouchableOpacity>
             </View>
           )}
@@ -304,13 +376,20 @@ export default function AddRxScreen() {
 
           {/* Expiry Date */}
           <Text style={styles.label}>Expiration Date</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="YYYY-MM-DD (optional)"
-            placeholderTextColor="#6b7c8f"
-            value={expiryDate}
-            onChangeText={setExpiryDate}
-          />
+          <View style={styles.expiryInputContainer}>
+            <TextInput
+              style={[styles.input, styles.expiryInput]}
+              placeholder="YYYY-MM-DD (optional)"
+              placeholderTextColor="#6b7c8f"
+              value={expiryDate}
+              onChangeText={setExpiryDate}
+            />
+            {scanningExpiry && (
+              <View style={styles.expiryScanning}>
+                <ActivityIndicator size="small" color="#4a9eff" />
+              </View>
+            )}
+          </View>
           {expiryDate ? (
             <Text style={styles.expiryHint}>
               ✓ You'll receive notifications at 30 days, 2 weeks, 1 week, and 1 day before expiration
@@ -486,6 +565,39 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 14,
   },
+  scanningOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(10, 22, 40, 0.85)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+  },
+  scanningText: {
+    color: "#fff",
+    marginTop: 12,
+    fontSize: 14,
+  },
+  ocrBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(74, 158, 255, 0.1)",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    gap: 8,
+  },
+  ocrBannerText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#8899a6",
+  },
+  rescanButton: {
+    padding: 4,
+  },
   input: {
     backgroundColor: "#1a2d45",
     borderRadius: 12,
@@ -493,6 +605,17 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: "#fff",
+  },
+  expiryInputContainer: {
+    position: "relative",
+  },
+  expiryInput: {
+    paddingRight: 50,
+  },
+  expiryScanning: {
+    position: "absolute",
+    right: 16,
+    top: 14,
   },
   notesInput: {
     height: 100,
