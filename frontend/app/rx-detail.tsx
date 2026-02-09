@@ -3,204 +3,141 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
   Image,
   ActivityIndicator,
+  Share,
   Alert,
-  Platform,
-  Modal,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as Sharing from "expo-sharing";
 import * as Print from "expo-print";
-import * as MailComposer from "expo-mail-composer";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-interface FamilyMember {
-  id: string;
-  name: string;
-  relationship: string;
-}
-
-interface Prescription {
-  id: string;
-  family_member_id: string;
-  rx_type: string;
-  image_base64: string;
-  notes: string;
-  date_taken: string;
-  created_at: string;
-}
+import {
+  getPrescriptionById,
+  getFamilyMemberById,
+  deletePrescription,
+  Prescription,
+  FamilyMember,
+} from "../services/localStorage";
 
 export default function RxDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
-  const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
+  const [member, setMember] = useState<FamilyMember | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetchPrescription();
+    if (id) {
+      loadData();
+    }
   }, [id]);
 
-  const fetchPrescription = async () => {
+  const loadData = async () => {
     try {
-      const rxRes = await fetch(`${BACKEND_URL}/api/prescriptions/${id}`);
-      if (rxRes.ok) {
-        const rxData = await rxRes.json();
-        setPrescription(rxData);
-
-        // Fetch family member info
-        const memberRes = await fetch(
-          `${BACKEND_URL}/api/family-members/${rxData.family_member_id}`
-        );
-        if (memberRes.ok) {
-          const memberData = await memberRes.json();
-          setFamilyMember(memberData);
-        }
-      } else {
-        Alert.alert("Error", "Prescription not found");
-        router.back();
+      const rx = await getPrescriptionById(id as string);
+      if (rx) {
+        setPrescription(rx);
+        const memberData = await getFamilyMemberById(rx.familyMemberId);
+        setMember(memberData);
       }
     } catch (error) {
-      console.error("Error fetching prescription:", error);
-      Alert.alert("Error", "Failed to load prescription");
+      console.log("Error loading prescription:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleShare = async () => {
-    if (!prescription) return;
-
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert("Error", "Sharing is not available on this device");
-      return;
-    }
+    if (!prescription || !member) return;
 
     try {
-      // Create HTML for sharing
-      const html = `
-        <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
-          </body>
-        </html>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html });
-      await Sharing.shareAsync(uri);
-    } catch (error) {
-      console.error("Error sharing:", error);
-      Alert.alert("Error", "Failed to share prescription");
-    }
-  };
-
-  const handleEmail = async () => {
-    if (!prescription) return;
-
-    const isAvailable = await MailComposer.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert("Error", "Email is not available on this device");
-      return;
-    }
-
-    try {
-      const subject = `${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription`;
-      const body = `
-Prescription Details:
-
-Patient: ${familyMember?.name || "N/A"}
-Type: ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"}
-Date: ${prescription.date_taken}
-${prescription.notes ? `Notes: ${prescription.notes}` : ""}
-
-Please see attached prescription image.
-      `;
-
-      // Create PDF to attach
-      const html = `
-        <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
-          </body>
-        </html>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html });
-
-      await MailComposer.composeAsync({
-        subject,
-        body,
-        attachments: [uri],
+      await Share.share({
+        message: `Prescription for ${member.name}\nType: ${prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}\nDate: ${formatDate(prescription.dateTaken)}${prescription.expiryDate ? `\nExpires: ${formatDate(prescription.expiryDate)}` : ""}${prescription.notes ? `\nNotes: ${prescription.notes}` : ""}`,
+        title: `${member.name}'s Prescription`,
       });
     } catch (error) {
-      console.error("Error emailing:", error);
-      Alert.alert("Error", "Failed to compose email");
+      console.log("Error sharing:", error);
     }
   };
 
   const handlePrint = async () => {
-    if (!prescription) return;
+    if (!prescription || !member) return;
 
     try {
       const html = `
         <html>
-          <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1>${familyMember?.name || ""}'s ${prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"} Prescription</h1>
-            <p><strong>Date:</strong> ${prescription.date_taken}</p>
-            ${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ""}
-            <img src="${prescription.image_base64}" style="max-width: 100%; margin-top: 20px;" />
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #333; }
+              .info { margin: 10px 0; }
+              .label { font-weight: bold; color: #666; }
+              img { max-width: 100%; height: auto; margin: 20px 0; }
+            </style>
+          </head>
+          <body>
+            <h1>Prescription - ${member.name}</h1>
+            <div class="info"><span class="label">Type:</span> ${prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}</div>
+            <div class="info"><span class="label">Date:</span> ${formatDate(prescription.dateTaken)}</div>
+            ${prescription.expiryDate ? `<div class="info"><span class="label">Expires:</span> ${formatDate(prescription.expiryDate)}</div>` : ""}
+            ${prescription.notes ? `<div class="info"><span class="label">Notes:</span> ${prescription.notes}</div>` : ""}
+            <img src="${prescription.imageBase64}" />
           </body>
         </html>
       `;
-
       await Print.printAsync({ html });
     } catch (error) {
-      console.error("Error printing:", error);
+      console.log("Error printing:", error);
       Alert.alert("Error", "Failed to print prescription");
     }
   };
 
   const handleDelete = () => {
-    setDeleteModalVisible(true);
+    Alert.alert(
+      "Delete Prescription",
+      "Are you sure you want to delete this prescription? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePrescription(id as string);
+              router.back();
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete prescription");
+            }
+          },
+        },
+      ]
+    );
   };
 
-  const confirmDelete = async () => {
-    setDeleting(true);
+  const formatDate = (dateString: string) => {
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/api/prescriptions/${id}`,
-        { method: "DELETE" }
-      );
-      if (response.ok) {
-        setDeleteModalVisible(false);
-        router.back();
-      } else {
-        Alert.alert("Error", "Failed to delete prescription");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to delete prescription");
-    } finally {
-      setDeleting(false);
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
     }
   };
 
-  const cancelDelete = () => {
-    setDeleteModalVisible(false);
+  const isExpired = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    return new Date(expiryDate) < new Date();
+  };
+
+  const isExpiringSoon = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    const expiry = new Date(expiryDate);
+    const daysUntilExpiry = Math.ceil(
+      (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+    return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
   };
 
   if (loading) {
@@ -223,7 +160,8 @@ Please see attached prescription image.
           <Text style={styles.headerTitle}>Prescription</Text>
           <View style={styles.placeholder} />
         </View>
-        <View style={styles.emptyState}>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ff5c5c" />
           <Text style={styles.emptyText}>Prescription not found</Text>
         </View>
       </SafeAreaView>
@@ -243,141 +181,85 @@ Please see attached prescription image.
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Prescription Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: prescription.image_base64 }}
+            source={{ uri: prescription.imageBase64 }}
             style={styles.image}
             resizeMode="contain"
           />
         </View>
 
-        {/* Details */}
-        <View style={styles.detailsCard}>
-          <View style={styles.detailRow}>
-            <View style={styles.detailIcon}>
-              <Ionicons name="person" size={20} color="#4a9eff" />
-            </View>
-            <View>
-              <Text style={styles.detailLabel}>Patient</Text>
-              <Text style={styles.detailValue}>
-                {familyMember?.name || "Unknown"}
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Patient</Text>
+            <Text style={styles.infoValue}>{member?.name || "Unknown"}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Type</Text>
+            <View
+              style={[
+                styles.typeBadge,
+                prescription.rxType === "contact" && styles.typeBadgeContact,
+              ]}
+            >
+              <Text style={styles.typeText}>
+                {prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}
               </Text>
             </View>
           </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.detailRow}>
-            <View style={styles.detailIcon}>
-              <Ionicons
-                name={prescription.rx_type === "eyeglass" ? "glasses" : "eye"}
-                size={20}
-                color="#4a9eff"
-              />
-            </View>
-            <View>
-              <Text style={styles.detailLabel}>Type</Text>
-              <Text style={styles.detailValue}>
-                {prescription.rx_type === "eyeglass" ? "Eyeglass" : "Contact Lens"}
-              </Text>
-            </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Date Taken</Text>
+            <Text style={styles.infoValue}>{formatDate(prescription.dateTaken)}</Text>
           </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.detailRow}>
-            <View style={styles.detailIcon}>
-              <Ionicons name="calendar" size={20} color="#4a9eff" />
-            </View>
-            <View>
-              <Text style={styles.detailLabel}>Date</Text>
-              <Text style={styles.detailValue}>{prescription.date_taken}</Text>
-            </View>
-          </View>
-
-          {prescription.notes && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.detailRow}>
-                <View style={styles.detailIcon}>
-                  <Ionicons name="document-text" size={20} color="#4a9eff" />
-                </View>
-                <View style={styles.notesContainer}>
-                  <Text style={styles.detailLabel}>Notes</Text>
-                  <Text style={styles.detailValue}>{prescription.notes}</Text>
-                </View>
+          {prescription.expiryDate && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Expires</Text>
+              <View style={styles.expiryContainer}>
+                <Text
+                  style={[
+                    styles.infoValue,
+                    isExpired(prescription.expiryDate) && styles.expiredText,
+                    isExpiringSoon(prescription.expiryDate) && !isExpired(prescription.expiryDate) && styles.expiringSoonText,
+                  ]}
+                >
+                  {formatDate(prescription.expiryDate)}
+                </Text>
+                {isExpired(prescription.expiryDate) && (
+                  <View style={styles.expiredBadge}>
+                    <Text style={styles.expiredBadgeText}>EXPIRED</Text>
+                  </View>
+                )}
+                {isExpiringSoon(prescription.expiryDate) && !isExpired(prescription.expiryDate) && (
+                  <View style={styles.expiringSoonBadge}>
+                    <Text style={styles.expiringSoonBadgeText}>EXPIRING SOON</Text>
+                  </View>
+                )}
               </View>
-            </>
+            </View>
+          )}
+          {prescription.notes && (
+            <View style={[styles.infoRow, styles.notesRow]}>
+              <Text style={styles.infoLabel}>Notes</Text>
+              <Text style={styles.notesText}>{prescription.notes}</Text>
+            </View>
           )}
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionsContainer}>
-          <Text style={styles.actionsTitle}>Share & Export</Text>
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-              <View style={styles.actionIconContainer}>
-                <Ionicons name="share-outline" size={24} color="#4a9eff" />
-              </View>
-              <Text style={styles.actionText}>Share</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton} onPress={handleEmail}>
-              <View style={styles.actionIconContainer}>
-                <Ionicons name="mail-outline" size={24} color="#4a9eff" />
-              </View>
-              <Text style={styles.actionText}>Email</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton} onPress={handlePrint}>
-              <View style={styles.actionIconContainer}>
-                <Ionicons name="print-outline" size={24} color="#4a9eff" />
-              </View>
-              <Text style={styles.actionText}>Print</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+            <Ionicons name="share-outline" size={24} color="#4a9eff" />
+            <Text style={styles.actionButtonText}>Share</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={handlePrint}>
+            <Ionicons name="print-outline" size={24} color="#4a9eff" />
+            <Text style={styles.actionButtonText}>Print</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={deleteModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={cancelDelete}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Ionicons name="warning" size={48} color="#ff5c5c" />
-            <Text style={styles.modalTitle}>Delete Prescription?</Text>
-            <Text style={styles.modalMessage}>
-              Are you sure you want to delete this prescription? This cannot be undone.
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={cancelDelete}
-                disabled={deleting}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.confirmDeleteButton}
-                onPress={confirmDelete}
-                disabled={deleting}
-              >
-                {deleting ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Text style={styles.confirmDeleteText}>Delete</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -402,8 +284,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#1a2d45",
   },
   backButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -413,167 +295,138 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   deleteButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
   placeholder: {
-    width: 44,
-  },
-  content: {
-    flex: 1,
-  },
-  imageContainer: {
-    backgroundColor: "#0f1d30",
-    padding: 16,
-  },
-  image: {
-    width: "100%",
-    height: 280,
-    borderRadius: 12,
-  },
-  detailsCard: {
-    backgroundColor: "#1a2d45",
-    margin: 16,
-    borderRadius: 16,
-    padding: 16,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  detailIcon: {
     width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
   },
-  detailLabel: {
-    fontSize: 12,
-    color: "#8899a6",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: "#fff",
-    marginTop: 2,
-  },
-  notesContainer: {
-    flex: 1,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#0f1d30",
-    marginVertical: 16,
-  },
-  actionsContainer: {
-    marginHorizontal: 16,
-    marginBottom: 32,
-  },
-  actionsTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#8899a6",
-    marginBottom: 16,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#1a2d45",
-    borderRadius: 16,
-    padding: 16,
-  },
-  actionIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  actionText: {
-    fontSize: 13,
-    color: "#fff",
-    fontWeight: "500",
-  },
-  emptyState: {
+  emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   emptyText: {
-    color: "#8899a6",
     fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: "#1a2d45",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 320,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
+    color: "#8899a6",
     marginTop: 16,
-    marginBottom: 8,
   },
-  modalMessage: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  imageContainer: {
+    backgroundColor: "#1a2d45",
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  image: {
+    width: "100%",
+    height: 300,
+  },
+  infoCard: {
+    backgroundColor: "#1a2d45",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#2a3d55",
+  },
+  notesRow: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    borderBottomWidth: 0,
+  },
+  infoLabel: {
     fontSize: 14,
     color: "#8899a6",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 20,
   },
-  modalButtons: {
+  infoValue: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "500",
+  },
+  typeBadge: {
+    backgroundColor: "rgba(74, 158, 255, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  typeBadgeContact: {
+    backgroundColor: "rgba(76, 175, 80, 0.2)",
+  },
+  typeText: {
+    fontSize: 14,
+    color: "#4a9eff",
+    fontWeight: "500",
+  },
+  expiryContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  expiredText: {
+    color: "#ff5c5c",
+  },
+  expiringSoonText: {
+    color: "#ff9500",
+  },
+  expiredBadge: {
+    backgroundColor: "rgba(255, 92, 92, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  expiredBadgeText: {
+    fontSize: 10,
+    color: "#ff5c5c",
+    fontWeight: "bold",
+  },
+  expiringSoonBadge: {
+    backgroundColor: "rgba(255, 149, 0, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  expiringSoonBadgeText: {
+    fontSize: 10,
+    color: "#ff9500",
+    fontWeight: "bold",
+  },
+  notesText: {
+    fontSize: 15,
+    color: "#fff",
+    marginTop: 8,
+    lineHeight: 22,
+  },
+  actions: {
     flexDirection: "row",
     gap: 12,
-    width: "100%",
   },
-  cancelButton: {
+  actionButton: {
     flex: 1,
-    backgroundColor: "#3a4d63",
-    paddingVertical: 14,
-    borderRadius: 12,
+    flexDirection: "row",
     alignItems: "center",
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  confirmDeleteButton: {
-    flex: 1,
-    backgroundColor: "#ff5c5c",
-    paddingVertical: 14,
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#1a2d45",
+    paddingVertical: 16,
     borderRadius: 12,
-    alignItems: "center",
   },
-  confirmDeleteText: {
-    color: "#fff",
+  actionButtonText: {
     fontSize: 16,
+    color: "#4a9eff",
     fontWeight: "600",
   },
 });
