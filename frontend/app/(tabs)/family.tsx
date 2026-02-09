@@ -12,7 +12,6 @@ import {
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as Linking from "expo-linking";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -36,6 +35,12 @@ export default function FamilyScreen() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Navigate back to welcome screen - uses dismissAll to close tab navigator then navigate to root
+  const goToHome = () => {
+    router.dismissAll();
+    router.replace("/");
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -144,11 +149,7 @@ export default function FamilyScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => {
-            // Navigate to welcome screen using Linking
-            const url = Linking.createURL("/");
-            Linking.openURL(url);
-          }}
+          onPress={goToHome}
           activeOpacity={0.7}
         >
           <Ionicons name="home-outline" size={22} color="#4a9eff" />

@@ -11,11 +11,9 @@ import {
   Alert,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AdBanner from "../components/AdBanner";
-import * as Linking from "expo-linking";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -37,19 +35,16 @@ interface Prescription {
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
-  // Navigate back to welcome screen
+  // Navigate back to welcome screen - uses dismissAll to close tab navigator then navigate to root
   const goToHome = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'index' }],
-    });
+    router.dismissAll();
+    router.replace("/");
   };
 
   useFocusEffect(
@@ -123,11 +118,7 @@ export default function PrescriptionsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.homeButton}
-          onPress={() => {
-            // Navigate to welcome screen using Linking
-            const url = Linking.createURL("/");
-            Linking.openURL(url);
-          }}
+          onPress={goToHome}
           activeOpacity={0.7}
         >
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
