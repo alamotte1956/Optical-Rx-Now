@@ -39,7 +39,7 @@ export default function FamilyScreen() {
   // Navigate back to welcome screen - uses dismissAll to close tab navigator then navigate to root
   const goToHome = () => {
     router.dismissAll();
-    router.replace("/");
+    router.replace("/welcome");
   };
 
   useFocusEffect(
