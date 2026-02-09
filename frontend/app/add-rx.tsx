@@ -633,4 +633,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
   },
+  expiryContainer: {
+    position: "relative",
+  },
+  expiryInput: {
+    marginBottom: 4,
+  },
+  expiryLoading: {
+    position: "absolute",
+    right: 16,
+    top: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  expiryLoadingText: {
+    color: "#4a9eff",
+    fontSize: 12,
+  },
+  expiryHint: {
+    color: "#4CAF50",
+    fontSize: 12,
+    marginBottom: 24,
+    paddingHorizontal: 4,
+  },
+  expiryHintEmpty: {
+    color: "#8899a6",
+    fontSize: 12,
+    marginBottom: 24,
+    paddingHorizontal: 4,
+    fontStyle: "italic",
+  },
 });
