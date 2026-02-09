@@ -21,22 +21,12 @@ export default function FindOptometristsScreen() {
   const [searching, setSearching] = useState(false);
 
   const handleSearch = async () => {
-    if (!zipCode || zipCode.length < 5) {
-      return;
-    }
-    
-    setSearching(true);
-    
-    // Open Google Maps search for optometrists near the zip code
-    const searchQuery = encodeURIComponent(`optometrists near ${zipCode}`);
-    const googleMapsUrl = `https://www.google.com/maps/search/${searchQuery}`;
+    const url = `https://www.google.com/search?q=optometrists+near+me`;
     
     try {
-      await Linking.openURL(googleMapsUrl);
+      await Linking.openURL(url);
     } catch (error) {
-      console.log("Error opening maps:", error);
-    } finally {
-      setSearching(false);
+      console.log("Error opening Google:", error);
     }
   };
 
