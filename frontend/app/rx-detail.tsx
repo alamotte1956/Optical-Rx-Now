@@ -29,6 +29,7 @@ export default function RxDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [member, setMember] = useState<FamilyMember | null>(null);
 
@@ -53,8 +54,72 @@ export default function RxDetailScreen() {
     }
   };
 
-  const generatePdfHtml = () => {
+  // Format date properly - handles YYYY-MM-DD format
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return "N/A";
+    try {
+      // Handle YYYY-MM-DD format
+      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = dateString.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      }
+      // Handle ISO date string
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      }
+      return dateString;
+    } catch {
+      return dateString;
+    }
+  };
+
+  const isExpired = (expiryDate: string | null): boolean => {
+    if (!expiryDate) return false;
+    try {
+      const [year, month, day] = expiryDate.split('-');
+      const expiry = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return expiry < today;
+    } catch {
+      return false;
+    }
+  };
+
+  const isExpiringSoon = (expiryDate: string | null): boolean => {
+    if (!expiryDate) return false;
+    try {
+      const [year, month, day] = expiryDate.split('-');
+      const expiry = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const daysUntilExpiry = Math.ceil(
+        (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
+    } catch {
+      return false;
+    }
+  };
+
+  const generatePdfHtml = (): string => {
     if (!prescription || !member) return "";
+    
+    const formattedDateTaken = formatDate(prescription.dateTaken);
+    const formattedExpiryDate = prescription.expiryDate ? formatDate(prescription.expiryDate) : null;
+    const formattedCreatedAt = formatDate(prescription.createdAt);
+    const expired = isExpired(prescription.expiryDate);
+    const expiringSoon = isExpiringSoon(prescription.expiryDate);
     
     return `
       <!DOCTYPE html>
@@ -64,168 +129,176 @@ export default function RxDetailScreen() {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Prescription - ${member.name}</title>
           <style>
-            * { box-sizing: border-box; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
             body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-              padding: 40px;
-              max-width: 800px;
-              margin: 0 auto;
+              font-family: Arial, Helvetica, sans-serif;
+              padding: 30px;
+              max-width: 100%;
               color: #333;
+              font-size: 14px;
+              line-height: 1.4;
             }
             .header {
               text-align: center;
               border-bottom: 3px solid #4a9eff;
-              padding-bottom: 20px;
-              margin-bottom: 30px;
+              padding-bottom: 15px;
+              margin-bottom: 20px;
             }
             .header h1 {
               color: #4a9eff;
-              margin: 0 0 10px 0;
-              font-size: 28px;
+              margin: 0 0 5px 0;
+              font-size: 24px;
             }
             .header .subtitle {
               color: #666;
-              font-size: 14px;
+              font-size: 12px;
             }
             .patient-info {
-              background: #f8f9fa;
-              border-radius: 12px;
-              padding: 20px;
-              margin-bottom: 30px;
+              background: #f5f5f5;
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              padding: 15px;
+              margin-bottom: 20px;
             }
             .patient-name {
-              font-size: 24px;
+              font-size: 20px;
               font-weight: bold;
               color: #333;
               margin-bottom: 15px;
+              border-bottom: 1px solid #ddd;
+              padding-bottom: 10px;
             }
-            .info-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15px;
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 8px 0;
+              border-bottom: 1px solid #eee;
             }
-            .info-item {
-              padding: 10px 0;
+            .info-row:last-child {
+              border-bottom: none;
             }
             .info-label {
               font-size: 12px;
               color: #666;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              margin-bottom: 4px;
+              font-weight: bold;
             }
             .info-value {
-              font-size: 16px;
+              font-size: 14px;
               color: #333;
-              font-weight: 500;
+              text-align: right;
             }
             .type-badge {
               display: inline-block;
               background: ${prescription.rxType === "eyeglass" ? "#e3f2fd" : "#e8f5e9"};
               color: ${prescription.rxType === "eyeglass" ? "#1976d2" : "#388e3c"};
-              padding: 6px 12px;
-              border-radius: 20px;
-              font-size: 14px;
-              font-weight: 600;
+              padding: 4px 10px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
             }
             .expiry-warning {
               color: #f57c00;
-              font-weight: 600;
+              font-weight: bold;
             }
             .expiry-expired {
               color: #d32f2f;
-              font-weight: 600;
+              font-weight: bold;
+            }
+            .expiry-ok {
+              color: #388e3c;
             }
             .notes-section {
-              background: #fff3e0;
-              border-radius: 12px;
-              padding: 15px 20px;
-              margin-bottom: 30px;
+              background: #fff8e1;
+              border: 1px solid #ffcc02;
+              border-radius: 8px;
+              padding: 15px;
+              margin-bottom: 20px;
             }
             .notes-title {
               font-size: 12px;
-              color: #e65100;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
+              color: #f57c00;
+              font-weight: bold;
               margin-bottom: 8px;
             }
             .notes-text {
-              font-size: 14px;
+              font-size: 13px;
               color: #333;
-              line-height: 1.5;
             }
             .prescription-image {
               text-align: center;
-              margin: 30px 0;
+              margin: 20px 0;
+              page-break-inside: avoid;
             }
             .prescription-image img {
               max-width: 100%;
-              max-height: 500px;
-              border-radius: 12px;
-              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+              max-height: 400px;
+              border: 1px solid #ddd;
+              border-radius: 8px;
             }
             .image-caption {
-              font-size: 12px;
+              font-size: 11px;
               color: #666;
-              margin-top: 10px;
+              margin-top: 8px;
             }
             .footer {
               text-align: center;
-              padding-top: 30px;
-              border-top: 1px solid #eee;
-              margin-top: 30px;
+              padding-top: 20px;
+              border-top: 1px solid #ddd;
+              margin-top: 20px;
             }
             .footer p {
-              font-size: 12px;
+              font-size: 10px;
               color: #999;
-              margin: 5px 0;
+              margin: 3px 0;
             }
             .footer .app-name {
               color: #4a9eff;
-              font-weight: 600;
+              font-weight: bold;
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>📋 Prescription Record</h1>
+            <h1>Prescription Record</h1>
             <p class="subtitle">Generated by Optical Rx Now</p>
           </div>
 
           <div class="patient-info">
             <div class="patient-name">${member.name}</div>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">Prescription Type</div>
-                <div class="info-value">
-                  <span class="type-badge">
-                    ${prescription.rxType === "eyeglass" ? "👓 Eyeglasses" : "👁️ Contact Lenses"}
-                  </span>
-                </div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Date Taken</div>
-                <div class="info-value">${formatDate(prescription.dateTaken)}</div>
-              </div>
-              ${prescription.expiryDate ? `
-              <div class="info-item">
-                <div class="info-label">Expiration Date</div>
-                <div class="info-value ${isExpired(prescription.expiryDate) ? 'expiry-expired' : isExpiringSoon(prescription.expiryDate) ? 'expiry-warning' : ''}">
-                  ${formatDate(prescription.expiryDate)}
-                  ${isExpired(prescription.expiryDate) ? ' (EXPIRED)' : isExpiringSoon(prescription.expiryDate) ? ' (Expiring Soon)' : ''}
-                </div>
-              </div>
-              ` : ''}
-              <div class="info-item">
-                <div class="info-label">Record Created</div>
-                <div class="info-value">${formatDate(prescription.createdAt)}</div>
-              </div>
+            
+            <div class="info-row">
+              <span class="info-label">PRESCRIPTION TYPE</span>
+              <span class="info-value">
+                <span class="type-badge">
+                  ${prescription.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses"}
+                </span>
+              </span>
+            </div>
+            
+            <div class="info-row">
+              <span class="info-label">DATE TAKEN</span>
+              <span class="info-value">${formattedDateTaken}</span>
+            </div>
+            
+            ${formattedExpiryDate ? `
+            <div class="info-row">
+              <span class="info-label">EXPIRATION DATE</span>
+              <span class="info-value ${expired ? 'expiry-expired' : expiringSoon ? 'expiry-warning' : 'expiry-ok'}">
+                ${formattedExpiryDate}
+                ${expired ? ' (EXPIRED)' : expiringSoon ? ' (Expiring Soon)' : ''}
+              </span>
+            </div>
+            ` : ''}
+            
+            <div class="info-row">
+              <span class="info-label">RECORD CREATED</span>
+              <span class="info-value">${formattedCreatedAt}</span>
             </div>
           </div>
 
           ${prescription.notes ? `
           <div class="notes-section">
-            <div class="notes-title">📝 Notes</div>
+            <div class="notes-title">NOTES</div>
             <div class="notes-text">${prescription.notes}</div>
           </div>
           ` : ''}
@@ -236,7 +309,7 @@ export default function RxDetailScreen() {
           </div>
 
           <div class="footer">
-            <p>This document was generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p>This document was generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} at ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</p>
             <p>Created with <span class="app-name">Optical Rx Now</span></p>
           </div>
         </body>
@@ -249,7 +322,6 @@ export default function RxDetailScreen() {
 
     setSharing(true);
     try {
-      // Check if sharing is available
       const isAvailable = await Sharing.isAvailableAsync();
       
       if (!isAvailable) {
@@ -264,24 +336,20 @@ export default function RxDetailScreen() {
         return;
       }
 
-      // Generate PDF
       const html = generatePdfHtml();
       const { uri } = await Print.printToFileAsync({
         html,
         base64: false,
       });
 
-      // Create a more descriptive filename
       const filename = `Prescription_${member.name.replace(/\s+/g, '_')}_${prescription.rxType}_${new Date().toISOString().split('T')[0]}.pdf`;
       const newUri = `${FileSystem.cacheDirectory}${filename}`;
       
-      // Move file to cache with proper name
       await FileSystem.moveAsync({
         from: uri,
         to: newUri,
       });
 
-      // Share the PDF
       await Sharing.shareAsync(newUri, {
         mimeType: 'application/pdf',
         dialogTitle: `Share ${member.name}'s Prescription`,
@@ -306,12 +374,18 @@ export default function RxDetailScreen() {
   const handlePrint = async () => {
     if (!prescription || !member) return;
 
+    setPrinting(true);
     try {
       const html = generatePdfHtml();
-      await Print.printAsync({ html });
+      await Print.printAsync({ 
+        html,
+        orientation: Print.Orientation.portrait,
+      });
     } catch (error) {
       console.log("Error printing:", error);
-      Alert.alert("Error", "Failed to print prescription");
+      Alert.alert("Print Error", "Unable to print. Please try again or use the Share option to save as PDF.");
+    } finally {
+      setPrinting(false);
     }
   };
 
@@ -335,32 +409,6 @@ export default function RxDetailScreen() {
         },
       ]
     );
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const isExpired = (expiryDate: string | null) => {
-    if (!expiryDate) return false;
-    return new Date(expiryDate) < new Date();
-  };
-
-  const isExpiringSoon = (expiryDate: string | null) => {
-    if (!expiryDate) return false;
-    const expiry = new Date(expiryDate);
-    const daysUntilExpiry = Math.ceil(
-      (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-    return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
   };
 
   if (loading) {
@@ -487,9 +535,19 @@ export default function RxDetailScreen() {
               </>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={handlePrint}>
-            <Ionicons name="print-outline" size={24} color="#4a9eff" />
-            <Text style={styles.actionButtonText}>Print</Text>
+          <TouchableOpacity 
+            style={[styles.actionButton, printing && styles.actionButtonDisabled]} 
+            onPress={handlePrint}
+            disabled={printing}
+          >
+            {printing ? (
+              <ActivityIndicator size="small" color="#4a9eff" />
+            ) : (
+              <>
+                <Ionicons name="print-outline" size={24} color="#4a9eff" />
+                <Text style={styles.actionButtonText}>Print</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
