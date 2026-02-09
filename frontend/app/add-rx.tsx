@@ -365,6 +365,33 @@ export default function AddRxScreen() {
             onChangeText={setDateTaken}
           />
 
+          {/* Expiry Date */}
+          <Text style={styles.label}>Expiration Date</Text>
+          <View style={styles.expiryContainer}>
+            <TextInput
+              style={[styles.input, styles.expiryInput]}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor="#6b7c8f"
+              value={expiryDate}
+              onChangeText={setExpiryDate}
+            />
+            {extractingExpiry && (
+              <View style={styles.expiryLoading}>
+                <ActivityIndicator size="small" color="#4a9eff" />
+                <Text style={styles.expiryLoadingText}>Reading...</Text>
+              </View>
+            )}
+          </View>
+          {expiryDate ? (
+            <Text style={styles.expiryHint}>
+              ✓ Expiry alerts will be sent at 30 days, 2 weeks, 1 week, and 1 day before expiration
+            </Text>
+          ) : (
+            <Text style={styles.expiryHintEmpty}>
+              Add an expiration date to receive email alerts before it expires
+            </Text>
+          )}
+
           {/* Notes */}
           <Text style={styles.label}>Notes (Optional)</Text>
           <TextInput
