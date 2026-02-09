@@ -589,9 +589,6 @@ async def delete_affiliate(affiliate_id: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# Include the router in the main app
-app.include_router(api_router)
-
 # Root health check endpoint for Kubernetes
 @app.get("/")
 async def root_health_check():
