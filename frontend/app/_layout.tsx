@@ -14,6 +14,8 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="age-verify" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
         <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
         <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
@@ -21,6 +23,8 @@ export default function RootLayout() {
         <Stack.Screen name="shop" options={{ presentation: "card" }} />
         <Stack.Screen name="admin" options={{ presentation: "card" }} />
         <Stack.Screen name="manage-affiliates" options={{ presentation: "card" }} />
+        <Stack.Screen name="optical-stores" options={{ presentation: "card" }} />
+        <Stack.Screen name="find-optometrists" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );
