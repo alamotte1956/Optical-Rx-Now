@@ -205,7 +205,7 @@ export default function AddRxScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.dismiss()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Prescription</Text>
@@ -220,8 +220,8 @@ export default function AddRxScreen() {
           <TouchableOpacity
             style={styles.emptyButton}
             onPress={() => {
-              router.back();
-              router.push("/add-member");
+              router.dismiss();
+              setTimeout(() => router.push("/add-member"), 100);
             }}
           >
             <Text style={styles.emptyButtonText}>Add Family Member</Text>
