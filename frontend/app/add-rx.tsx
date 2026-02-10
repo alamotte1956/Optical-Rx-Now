@@ -177,13 +177,15 @@ export default function AddRxScreen() {
         Alert.alert(
           "Prescription Saved",
           "Expiry alerts have been scheduled. You'll receive notifications before the prescription expires.",
-          [{ text: "OK", onPress: () => router.back() }]
+          [{ text: "OK", onPress: () => router.dismiss() }]
         );
       } else {
-        router.back();
+        // Use dismiss for modal screens instead of back
+        router.dismiss();
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to save prescription");
+      console.log("Save error:", error);
+      Alert.alert("Error", "Failed to save prescription. Please try again.");
     } finally {
       setSaving(false);
     }
