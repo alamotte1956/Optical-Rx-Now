@@ -239,7 +239,7 @@ export default function AddRxScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.dismiss()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Prescription</Text>
