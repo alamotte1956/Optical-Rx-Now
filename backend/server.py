@@ -24,3 +24,14 @@ async def api_root():
 async def api_health():
     return {"status": "healthy", "service": "optical-rx-now", "version": "1.0.0"}
 
+# Kubernetes standard health endpoints
+@app.get("/healthz")
+async def healthz():
+    """Kubernetes liveness probe endpoint"""
+    return {"status": "ok"}
+
+@app.get("/readyz")
+async def readyz():
+    """Kubernetes readiness probe endpoint"""
+    return {"status": "ok"}
+
