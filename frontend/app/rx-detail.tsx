@@ -261,7 +261,7 @@ export default function RxDetailScreen() {
           ${prescription.notes ? `
           <div class="notes-section">
             <div class="notes-title">NOTES</div>
-            <div class="notes-text">${prescription.notes}</div>
+            <div class="notes-text">${safeNotes}</div>
           </div>
           ` : ''}
 
