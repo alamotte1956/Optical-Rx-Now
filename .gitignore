@@ -82,3 +82,7 @@ android-sdk/
 # Local development secrets should be in .env.local (which IS ignored)
 .env.local
 .env.*.local
+-e 
+# Environment files
+*.env
+*.env.*
