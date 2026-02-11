@@ -417,11 +417,19 @@ export default function RxDetailScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Prescription Image */}
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: prescription.imageBase64 }}
-            style={styles.image}
-            resizeMode="contain"
-          />
+          {prescription.imageBase64 ? (
+            <Image
+              source={{ uri: prescription.imageBase64 }}
+              style={styles.image}
+              resizeMode="contain"
+              onError={(e) => console.log("Image display error:", e.nativeEvent.error)}
+            />
+          ) : (
+            <View style={[styles.image, styles.imagePlaceholder]}>
+              <Ionicons name="image-outline" size={48} color="#6b7c8f" />
+              <Text style={styles.imagePlaceholderText}>Image not available</Text>
+            </View>
+          )}
         </View>
 
         {/* Info Card */}
