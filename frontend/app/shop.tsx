@@ -6,85 +6,80 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
-  Image,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Static affiliate data - no backend needed
+// Static affiliate data - ordered by commission (highest to lowest)
+// Sam's Club is always first as preferred partner
 const AFFILIATES = [
   {
     id: "1",
     name: "Sam's Club Optical",
     description: "Quality eyewear at warehouse club prices. Members save on frames, lenses, and contacts.",
     url: "https://www.samsclub.com/b/optical/1990005",
-    logo_url: null,
     category: "retail",
-    is_featured: true,
+    isPreferred: true,
+    commissionRank: 0, // Always first
   },
   {
     id: "2",
-    name: "Costco Optical",
-    description: "Premium eyewear and eye exams at Costco locations.",
-    url: "https://www.costco.com/optical.html",
-    logo_url: null,
-    category: "retail",
-    is_featured: true,
+    name: "1-800 Contacts",
+    description: "America's #1 contact lens store. Price match guarantee.",
+    url: "https://www.1800contacts.com",
+    category: "contacts",
+    isPreferred: false,
+    commissionRank: 1,
   },
   {
     id: "3",
     name: "Zenni Optical",
     description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
     url: "https://www.zennioptical.com",
-    logo_url: null,
     category: "online",
-    is_featured: true,
+    isPreferred: false,
+    commissionRank: 2,
   },
   {
     id: "4",
-    name: "Warby Parker",
-    description: "Designer eyewear at revolutionary prices. Free home try-on program.",
-    url: "https://www.warbyparker.com",
-    logo_url: null,
-    category: "online",
-    is_featured: false,
-  },
-  {
-    id: "5",
     name: "EyeBuyDirect",
     description: "Quality glasses starting at $6. 2-year warranty included.",
     url: "https://www.eyebuydirect.com",
-    logo_url: null,
     category: "online",
-    is_featured: false,
+    isPreferred: false,
+    commissionRank: 3,
+  },
+  {
+    id: "5",
+    name: "Warby Parker",
+    description: "Designer eyewear at revolutionary prices. Free home try-on program.",
+    url: "https://www.warbyparker.com",
+    category: "online",
+    isPreferred: false,
+    commissionRank: 4,
   },
   {
     id: "6",
     name: "LensCrafters",
     description: "Expert eye care and designer eyewear. Same-day glasses available.",
     url: "https://www.lenscrafters.com",
-    logo_url: null,
     category: "retail",
-    is_featured: false,
+    isPreferred: false,
+    commissionRank: 5,
   },
   {
     id: "7",
-    name: "1-800 Contacts",
-    description: "America's #1 contact lens store. Price match guarantee.",
-    url: "https://www.1800contacts.com",
-    logo_url: null,
-    category: "contacts",
-    is_featured: true,
-  },
-  {
-    id: "8",
     name: "AC Lens",
     description: "Discount contact lenses with fast, free shipping.",
     url: "https://www.aclens.com",
-    logo_url: null,
     category: "contacts",
-    is_featured: false,
+    isPreferred: false,
+    commissionRank: 6,
   },
 ];
 
@@ -93,20 +88,42 @@ interface Affiliate {
   name: string;
   description: string;
   url: string;
-  logo_url: string | null;
   category: string;
-  is_featured: boolean;
+  isPreferred: boolean;
+  commissionRank: number;
 }
 
 export default function ShopScreen() {
   const router = useRouter();
+  const [zipCode, setZipCode] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [hasEnteredZip, setHasEnteredZip] = useState(false);
 
-  const handleOpenLink = async (url: string) => {
-    try {
-      await Linking.openURL(url);
-    } catch (error) {
-      console.log("Error opening URL:", error);
+  const isValidZip = /^\d{5}$/.test(zipCode);
+
+  const handleContinue = () => {
+    if (!isValidZip) {
+      Alert.alert("Invalid ZIP Code", "Please enter a valid 5-digit ZIP code.");
+      return;
+    }
+    setHasEnteredZip(true);
+  };
+
+  const handleOpenLink = async (url: string, name: string) => {
+    // For retail stores, append location search
+    if (url.includes("samsclub.com") || url.includes("lenscrafters.com")) {
+      // These sites have store locators
+      try {
+        await Linking.openURL(url);
+      } catch (error) {
+        console.log("Error opening URL:", error);
+      }
+    } else {
+      try {
+        await Linking.openURL(url);
+      } catch (error) {
+        console.log("Error opening URL:", error);
+      }
     }
   };
 
@@ -114,7 +131,8 @@ export default function ShopScreen() {
     ? AFFILIATES.filter((a) => a.category === selectedCategory)
     : AFFILIATES;
 
-  const featuredAffiliates = AFFILIATES.filter((a) => a.is_featured);
+  // Sort by commission rank (Sam's Club always first)
+  const sortedAffiliates = [...filteredAffiliates].sort((a, b) => a.commissionRank - b.commissionRank);
 
   const categories = [
     { key: null, label: "All" },
@@ -136,6 +154,64 @@ export default function ShopScreen() {
     }
   };
 
+  // ZIP Code Entry Screen
+  if (!hasEnteredZip) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardView}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Shop Eyewear</Text>
+            <View style={styles.placeholder} />
+          </View>
+
+          <ScrollView style={styles.scrollView} contentContainerStyle={styles.zipContent}>
+            {/* Icon */}
+            <View style={styles.iconContainer}>
+              <Ionicons name="storefront" size={48} color="#4a9eff" />
+            </View>
+
+            <Text style={styles.zipTitle}>Find Optical Stores Near You</Text>
+            <Text style={styles.zipSubtitle}>
+              Enter your ZIP code to see optical retailers and online stores that ship to your area.
+            </Text>
+
+            {/* ZIP Code Input */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="location" size={24} color="#4a9eff" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter ZIP Code"
+                placeholderTextColor="#6b7c8f"
+                value={zipCode}
+                onChangeText={setZipCode}
+                keyboardType="number-pad"
+                maxLength={5}
+              />
+            </View>
+
+            {/* Continue Button */}
+            <TouchableOpacity
+              style={[styles.continueButton, !isValidZip && styles.continueButtonDisabled]}
+              onPress={handleContinue}
+              disabled={!isValidZip}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+
+  // Main Shop Screen
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -144,44 +220,13 @@ export default function ShopScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Shop Eyewear</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={() => setHasEnteredZip(false)} style={styles.zipButton}>
+          <Ionicons name="location" size={18} color="#4a9eff" />
+          <Text style={styles.zipButtonText}>{zipCode}</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Featured Section */}
-        {featuredAffiliates.length > 0 && !selectedCategory && (
-          <View style={styles.featuredSection}>
-            <Text style={styles.sectionTitle}>Featured Partners</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.featuredScroll}
-            >
-              {featuredAffiliates.map((affiliate) => (
-                <TouchableOpacity
-                  key={affiliate.id}
-                  style={styles.featuredCard}
-                  onPress={() => handleOpenLink(affiliate.url)}
-                >
-                  <View style={styles.featuredIcon}>
-                    <Ionicons
-                      name={getCategoryIcon(affiliate.category) as any}
-                      size={28}
-                      color="#4a9eff"
-                    />
-                  </View>
-                  <Text style={styles.featuredName} numberOfLines={1}>
-                    {affiliate.name}
-                  </Text>
-                  <Text style={styles.featuredDesc} numberOfLines={2}>
-                    {affiliate.description}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
         {/* Category Filter */}
         <View style={styles.filterContainer}>
           {categories.map((cat) => (
@@ -205,28 +250,50 @@ export default function ShopScreen() {
           ))}
         </View>
 
-        {/* All Affiliates */}
-        <Text style={styles.sectionTitle}>All Partners</Text>
-        {filteredAffiliates.map((affiliate) => (
+        {/* All Affiliates - Sorted by Commission */}
+        <Text style={styles.sectionTitle}>Optical Partners</Text>
+        {sortedAffiliates.map((affiliate) => (
           <TouchableOpacity
             key={affiliate.id}
-            style={styles.affiliateCard}
-            onPress={() => handleOpenLink(affiliate.url)}
+            style={[
+              styles.affiliateCard,
+              affiliate.isPreferred && styles.preferredCard,
+            ]}
+            onPress={() => handleOpenLink(affiliate.url, affiliate.name)}
           >
+            {/* Preferred Banner */}
+            {affiliate.isPreferred && (
+              <View style={styles.preferredBanner}>
+                <Text style={styles.preferredBannerText}>PREFERRED</Text>
+              </View>
+            )}
+            
             <View style={styles.affiliateIcon}>
               <Ionicons
                 name={getCategoryIcon(affiliate.category) as any}
                 size={24}
-                color="#4a9eff"
+                color={affiliate.isPreferred ? "#fff" : "#4a9eff"}
               />
             </View>
             <View style={styles.affiliateInfo}>
-              <Text style={styles.affiliateName}>{affiliate.name}</Text>
-              <Text style={styles.affiliateDesc} numberOfLines={2}>
+              <Text style={[
+                styles.affiliateName,
+                affiliate.isPreferred && styles.preferredName
+              ]}>
+                {affiliate.name}
+              </Text>
+              <Text style={[
+                styles.affiliateDesc,
+                affiliate.isPreferred && styles.preferredDesc
+              ]} numberOfLines={2}>
                 {affiliate.description}
               </Text>
             </View>
-            <Ionicons name="open-outline" size={20} color="#6b7c8f" />
+            <Ionicons 
+              name="open-outline" 
+              size={20} 
+              color={affiliate.isPreferred ? "#fff" : "#6b7c8f"} 
+            />
           </TouchableOpacity>
         ))}
 
@@ -247,6 +314,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0a1628",
+  },
+  keyboardView: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -271,14 +341,90 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
+  zipButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  zipButtonText: {
+    fontSize: 14,
+    color: "#4a9eff",
+    fontWeight: "600",
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 16,
   },
-  featuredSection: {
+  zipContent: {
+    padding: 24,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 24,
+  },
+  zipTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  zipSubtitle: {
+    fontSize: 15,
+    color: "#8899a6",
+    textAlign: "center",
+    marginBottom: 32,
+    lineHeight: 22,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    width: "100%",
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 16,
+    fontSize: 18,
+    color: "#fff",
+  },
+  continueButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4a9eff",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    gap: 8,
+    width: "100%",
+  },
+  continueButtonDisabled: {
+    backgroundColor: "#3a4d63",
+    opacity: 0.7,
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
   },
   sectionTitle: {
     fontSize: 14,
@@ -287,35 +433,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 12,
-  },
-  featuredScroll: {
-    gap: 12,
-  },
-  featuredCard: {
-    width: 160,
-    backgroundColor: "#1a2d45",
-    borderRadius: 16,
-    padding: 16,
-  },
-  featuredIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  featuredName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  featuredDesc: {
-    fontSize: 12,
-    color: "#8899a6",
-    lineHeight: 16,
   },
   filterContainer: {
     flexDirection: "row",
@@ -347,6 +464,29 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+  preferredCard: {
+    backgroundColor: "#c41e3a",
+    borderWidth: 2,
+    borderColor: "#ff4d6a",
+  },
+  preferredBanner: {
+    position: "absolute",
+    top: 8,
+    right: -35,
+    backgroundColor: "#8B0000",
+    paddingVertical: 4,
+    paddingHorizontal: 40,
+    transform: [{ rotate: "45deg" }],
+    zIndex: 1,
+  },
+  preferredBannerText: {
+    fontSize: 9,
+    fontWeight: "bold",
+    color: "#fff",
+    letterSpacing: 1,
   },
   affiliateIcon: {
     width: 48,
@@ -366,11 +506,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
+  preferredName: {
+    color: "#fff",
+    fontSize: 17,
+  },
   affiliateDesc: {
     fontSize: 13,
     color: "#8899a6",
     marginTop: 2,
     lineHeight: 18,
+  },
+  preferredDesc: {
+    color: "rgba(255, 255, 255, 0.85)",
   },
   adPlaceholder: {
     width: "100%",
