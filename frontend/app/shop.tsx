@@ -273,27 +273,21 @@ export default function ShopScreen() {
               <Ionicons
                 name={getCategoryIcon(affiliate.category) as any}
                 size={24}
-                color={affiliate.isPreferred ? "#fff" : "#4a9eff"}
+                color="#4a9eff"
               />
             </View>
             <View style={styles.affiliateInfo}>
-              <Text style={[
-                styles.affiliateName,
-                affiliate.isPreferred && styles.preferredName
-              ]}>
+              <Text style={styles.affiliateName}>
                 {affiliate.name}
               </Text>
-              <Text style={[
-                styles.affiliateDesc,
-                affiliate.isPreferred && styles.preferredDesc
-              ]} numberOfLines={2}>
+              <Text style={styles.affiliateDesc} numberOfLines={2}>
                 {affiliate.description}
               </Text>
             </View>
             <Ionicons 
               name="open-outline" 
               size={20} 
-              color={affiliate.isPreferred ? "#fff" : "#6b7c8f"} 
+              color="#6b7c8f" 
             />
           </TouchableOpacity>
         ))}
