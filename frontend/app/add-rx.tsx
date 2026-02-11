@@ -72,9 +72,11 @@ export default function AddRxScreen() {
   };
 
   const scanForExpiryDate = async (base64Image: string) => {
+    console.log("Starting OCR scan for expiry date...");
     setScanningExpiry(true);
     try {
       const result = await extractExpiryDateFromImage(base64Image);
+      console.log("OCR result:", result);
       
       if (result.success && result.expiryDate) {
         // Convert to MM/DD/YYYY for display
@@ -86,7 +88,15 @@ export default function AddRxScreen() {
           [{ text: "OK" }]
         );
       } else {
-        console.log("OCR result:", result.message);
+        // Show the message to user if OCR didn't find a date
+        console.log("OCR did not find expiry date:", result.message);
+        if (result.rawText) {
+          console.log("Raw OCR text:", result.rawText);
+        }
+        // Only show alert if there was a specific issue (not just "not found")
+        if (Platform.OS !== "web" && result.message.includes("Error")) {
+          Alert.alert("OCR Scan", result.message);
+        }
       }
     } catch (error) {
       console.log("OCR scan error:", error);
