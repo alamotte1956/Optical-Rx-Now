@@ -99,15 +99,21 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.5, // Reduced for better storage
       base64: true,
       exif: false,
     });
 
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setImageBase64(base64Data);
-      scanForExpiryDate(base64Data);
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      if (asset.base64) {
+        const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+        console.log(`Photo captured, size: ${base64Data.length} chars`);
+        setImageBase64(base64Data);
+        scanForExpiryDate(base64Data);
+      } else {
+        Alert.alert("Error", "Could not capture photo. Please try again.");
+      }
     }
   };
 
@@ -115,15 +121,21 @@ export default function AddRxScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.5, // Reduced for better storage
       base64: true,
       exif: false,
     });
 
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setImageBase64(base64Data);
-      scanForExpiryDate(base64Data);
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      if (asset.base64) {
+        const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+        console.log(`Image selected, size: ${base64Data.length} chars`);
+        setImageBase64(base64Data);
+        scanForExpiryDate(base64Data);
+      } else {
+        Alert.alert("Error", "Could not load image. Please try again.");
+      }
     }
   };
 
