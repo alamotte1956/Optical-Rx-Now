@@ -31,9 +31,12 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
-    const url = `https://www.google.com/search?q=optometrists+near+${zipCode}`;
+    const url = `https://www.google.com/maps/search/optometrists+near+${zipCode}`;
     try {
-      await Linking.openURL(url);
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      }
     } catch (error) {
       console.log("Error opening Google:", error);
     }
