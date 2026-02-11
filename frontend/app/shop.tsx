@@ -116,9 +116,9 @@ export default function ShopScreen() {
     if (url.includes("samsclub.com")) {
       finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
     }
-    // For LensCrafters, use store locator with ZIP code
+    // For LensCrafters, use Google search to find locations near ZIP
     else if (url.includes("lenscrafters.com")) {
-      finalUrl = `https://www.lenscrafters.com/lc-us/store-locator?q=${zipCode}`;
+      finalUrl = `https://www.google.com/search?q=LensCrafters+near+${zipCode}`;
     }
     
     try {
