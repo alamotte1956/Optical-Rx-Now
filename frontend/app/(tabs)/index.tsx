@@ -408,6 +408,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#0a1628",
   },
+  rxImagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+  },
   rxInfo: {
     flex: 1,
     marginLeft: 12,
