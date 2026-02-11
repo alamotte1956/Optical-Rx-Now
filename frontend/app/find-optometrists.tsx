@@ -114,9 +114,9 @@ export default function FindOptometristsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.searchButton, styles.yelpButton]}
+              style={[styles.searchButton, styles.yelpButton, (!/^\d{5}$/.test(zipCode)) && { opacity: 0.5 }]}
               onPress={handleSearchYelp}
-              disabled={!zipCode || zipCode.length < 5}
+              disabled={!/^\d{5}$/.test(zipCode)}
             >
               <Ionicons name="star" size={22} color="#fff" />
               <Text style={styles.searchButtonText}>Search on Yelp</Text>
