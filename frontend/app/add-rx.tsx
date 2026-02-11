@@ -225,16 +225,24 @@ export default function AddRxScreen() {
 
       console.log("Prescription saved with ID:", savedRx.id);
 
-      if (normalizedExpiryDate) {
-        Alert.alert(
-          "Prescription Saved",
-          "Expiry alerts have been scheduled. You'll receive notifications before the prescription expires.",
-          [{ text: "OK", onPress: () => router.dismiss() }]
-        );
-      } else {
-        // Use dismiss for modal screens instead of back
-        router.dismiss();
-      }
+      // Show success and navigate back
+      Alert.alert(
+        "Success",
+        normalizedExpiryDate 
+          ? "Prescription saved! You'll receive notifications before it expires."
+          : "Prescription saved successfully!",
+        [{ 
+          text: "OK", 
+          onPress: () => {
+            try {
+              router.dismiss();
+            } catch (navError) {
+              console.log("Navigation error:", navError);
+              router.back();
+            }
+          }
+        }]
+      );
     } catch (error) {
       console.log("Save error:", error);
       Alert.alert("Error", "Failed to save prescription. Please try again.");
