@@ -135,21 +135,31 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
 export const savePrescription = async (
   prescription: Omit<Prescription, "id" | "createdAt">
 ): Promise<Prescription> => {
-  const prescriptions = await getPrescriptions();
-  const newRx: Prescription = {
-    ...prescription,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-  };
-  prescriptions.push(newRx);
-  await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(prescriptions));
+  try {
+    const prescriptions = await getPrescriptions();
+    const newRx: Prescription = {
+      ...prescription,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+    };
+    prescriptions.push(newRx);
+    
+    const jsonData = JSON.stringify(prescriptions);
+    console.log(`Saving prescriptions, total size: ${jsonData.length} bytes`);
+    
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonData);
+    console.log("Prescription saved successfully");
 
-  // Schedule notifications if expiry date is set
-  if (newRx.expiryDate) {
-    await scheduleExpiryNotifications(newRx);
+    // Schedule notifications if expiry date is set
+    if (newRx.expiryDate) {
+      await scheduleExpiryNotifications(newRx);
+    }
+
+    return newRx;
+  } catch (error) {
+    console.log("Error saving prescription:", error);
+    throw error;
   }
-
-  return newRx;
 };
 
 export const getPrescriptionById = async (
