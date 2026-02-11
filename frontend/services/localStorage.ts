@@ -125,7 +125,21 @@ export const getFamilyMemberById = async (
 export const getPrescriptions = async (): Promise<Prescription[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    
+    const prescriptions = JSON.parse(data);
+    console.log(`Loaded ${prescriptions.length} prescriptions`);
+    
+    // Validate each prescription has image data
+    prescriptions.forEach((rx: Prescription, index: number) => {
+      if (rx.imageBase64) {
+        console.log(`Prescription ${index}: image size = ${rx.imageBase64.length} chars, starts with: ${rx.imageBase64.substring(0, 30)}`);
+      } else {
+        console.log(`Prescription ${index}: NO IMAGE DATA`);
+      }
+    });
+    
+    return prescriptions;
   } catch (error) {
     console.log("Error getting prescriptions:", error);
     return [];
