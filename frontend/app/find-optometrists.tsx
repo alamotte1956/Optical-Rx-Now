@@ -31,14 +31,14 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
-    const url = `https://www.google.com/maps/search/optometrists+near+${zipCode}`;
+    // Use Google search which works reliably across all platforms
+    const searchQuery = encodeURIComponent(`optometrists near ${zipCode}`);
+    const url = `https://www.google.com/search?q=${searchQuery}`;
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      }
+      await Linking.openURL(url);
     } catch (error) {
       console.log("Error opening Google:", error);
+      Alert.alert("Error", "Could not open browser. Please try again.");
     }
   };
 
@@ -48,15 +48,19 @@ export default function FindOptometristsScreen() {
       await Linking.openURL(yelpUrl);
     } catch (error) {
       console.log("Error opening Yelp:", error);
+      Alert.alert("Error", "Could not open Yelp. Please try again.");
     }
   };
 
   const handleSearchHealthgrades = async () => {
-    const url = `https://www.healthgrades.com/optometry-directory/zip-${zipCode}`;
+    // Healthgrades doesn't support direct ZIP URL, use Google to search Healthgrades
+    const searchQuery = encodeURIComponent(`site:healthgrades.com optometrist ${zipCode}`);
+    const url = `https://www.google.com/search?q=${searchQuery}`;
     try {
       await Linking.openURL(url);
     } catch (error) {
       console.log("Error opening Healthgrades:", error);
+      Alert.alert("Error", "Could not open browser. Please try again.");
     }
   };
 
