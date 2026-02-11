@@ -73,6 +73,13 @@ export default function AddRxScreen() {
 
   const scanForExpiryDate = async (base64Image: string) => {
     console.log("Starting OCR scan for expiry date...");
+    
+    // Skip OCR on web - it's not supported
+    if (Platform.OS === "web") {
+      console.log("OCR not available on web");
+      return;
+    }
+    
     setScanningExpiry(true);
     try {
       const result = await extractExpiryDateFromImage(base64Image);
@@ -93,13 +100,10 @@ export default function AddRxScreen() {
         if (result.rawText) {
           console.log("Raw OCR text:", result.rawText);
         }
-        // Only show alert if there was a specific issue (not just "not found")
-        if (Platform.OS !== "web" && result.message.includes("Error")) {
-          Alert.alert("OCR Scan", result.message);
-        }
       }
     } catch (error) {
       console.log("OCR scan error:", error);
+      // Don't show error to user - just fail silently
     } finally {
       setScanningExpiry(false);
     }
