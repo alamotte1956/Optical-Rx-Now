@@ -500,18 +500,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  preferredName: {
-    color: "#fff",
-    fontSize: 17,
-  },
   affiliateDesc: {
     fontSize: 13,
     color: "#8899a6",
     marginTop: 2,
     lineHeight: 18,
-  },
-  preferredDesc: {
-    color: "rgba(255, 255, 255, 0.85)",
   },
   adPlaceholder: {
     width: "100%",
