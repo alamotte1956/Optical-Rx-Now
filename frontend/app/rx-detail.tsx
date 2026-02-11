@@ -226,7 +226,7 @@ export default function RxDetailScreen() {
           </div>
 
           <div class="patient-info">
-            <div class="patient-name">${member.name}</div>
+            <div class="patient-name">${safeMemberName}</div>
             
             <div class="info-row">
               <span class="info-label">PRESCRIPTION TYPE</span>
