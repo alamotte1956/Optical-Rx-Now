@@ -469,9 +469,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   preferredCard: {
-    backgroundColor: "#c41e3a",
     borderWidth: 2,
-    borderColor: "#ff4d6a",
+    borderColor: "#c41e3a",
   },
   preferredBanner: {
     position: "absolute",
