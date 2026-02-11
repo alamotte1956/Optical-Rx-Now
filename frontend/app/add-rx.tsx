@@ -170,11 +170,6 @@ export default function AddRxScreen() {
       Alert.alert("Error", "Could not access photos. Please try again.");
     }
   };
-      } else {
-        Alert.alert("Error", "Could not load image. Please try again.");
-      }
-    }
-  };
 
   const handleRescan = () => {
     if (imageBase64) {
