@@ -150,19 +150,46 @@ export const savePrescription = async (
   prescription: Omit<Prescription, "id" | "createdAt">
 ): Promise<Prescription> => {
   try {
+    // Validate image data before saving
+    if (!prescription.imageBase64 || prescription.imageBase64.length < 100) {
+      console.log("ERROR: Invalid or missing image data");
+      throw new Error("Invalid image data");
+    }
+    
+    // Ensure base64 has proper prefix
+    let imageData = prescription.imageBase64;
+    if (!imageData.startsWith("data:image")) {
+      console.log("WARNING: Image missing data URI prefix, adding it");
+      imageData = `data:image/jpeg;base64,${imageData}`;
+    }
+    
+    console.log(`Image data valid: ${imageData.length} chars, prefix: ${imageData.substring(0, 30)}`);
+    
     const prescriptions = await getPrescriptions();
     const newRx: Prescription = {
       ...prescription,
+      imageBase64: imageData,
       id: generateId(),
       createdAt: new Date().toISOString(),
     };
     prescriptions.push(newRx);
     
     const jsonData = JSON.stringify(prescriptions);
-    console.log(`Saving prescriptions, total size: ${jsonData.length} bytes`);
+    console.log(`Saving prescriptions, total JSON size: ${jsonData.length} bytes`);
     
     await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonData);
-    console.log("Prescription saved successfully");
+    
+    // Verify save was successful
+    const verifyData = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    if (verifyData) {
+      const verified = JSON.parse(verifyData);
+      const savedRx = verified.find((rx: Prescription) => rx.id === newRx.id);
+      if (savedRx && savedRx.imageBase64) {
+        console.log(`Verified: Prescription ${newRx.id} saved with image (${savedRx.imageBase64.length} chars)`);
+      } else {
+        console.log("ERROR: Prescription saved but image data missing!");
+      }
+    }
 
     // Schedule notifications if expiry date is set
     if (newRx.expiryDate) {
