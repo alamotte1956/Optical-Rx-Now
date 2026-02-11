@@ -131,6 +131,7 @@ export default function AddMemberScreen() {
                 value={customRelationship}
                 onChangeText={setCustomRelationship}
                 autoCapitalize="words"
+                maxLength={30}
               />
             </>
           )}
