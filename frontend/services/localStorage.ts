@@ -382,8 +382,9 @@ export const scheduleExpiryNotifications = async (
           sound: true,
         },
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
           seconds: secondsUntilTrigger,
-        },
+        } as any,
       });
 
       scheduledNotifications.push({
