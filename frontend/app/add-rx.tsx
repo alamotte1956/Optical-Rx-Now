@@ -106,43 +106,70 @@ export default function AddRxScreen() {
   };
 
   const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.5, // Reduced for better storage
-      base64: true,
-      exif: false,
-    });
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.5,
+        base64: true,
+        exif: false,
+      });
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      if (asset.base64) {
-        const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-        console.log(`Photo captured, size: ${base64Data.length} chars`);
-        setImageBase64(base64Data);
-        scanForExpiryDate(base64Data);
-      } else {
-        Alert.alert("Error", "Could not capture photo. Please try again.");
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        if (asset.base64) {
+          const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+          console.log(`Photo captured, size: ${base64Data.length} chars`);
+          setImageBase64(base64Data);
+          
+          // Run OCR in background - don't await to prevent blocking
+          setTimeout(() => {
+            scanForExpiryDate(base64Data).catch(err => {
+              console.log("OCR background error:", err);
+            });
+          }, 500);
+        } else {
+          Alert.alert("Error", "Could not capture photo. Please try again.");
+        }
       }
+    } catch (error) {
+      console.log("Camera error:", error);
+      Alert.alert("Error", "Could not access camera. Please try again.");
     }
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.5, // Reduced for better storage
-      base64: true,
-      exif: false,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.5,
+        base64: true,
+        exif: false,
+      });
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      if (asset.base64) {
-        const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-        console.log(`Image selected, size: ${base64Data.length} chars`);
-        setImageBase64(base64Data);
-        scanForExpiryDate(base64Data);
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        if (asset.base64) {
+          const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+          console.log(`Image selected, size: ${base64Data.length} chars`);
+          setImageBase64(base64Data);
+          
+          // Run OCR in background - don't await to prevent blocking
+          setTimeout(() => {
+            scanForExpiryDate(base64Data).catch(err => {
+              console.log("OCR background error:", err);
+            });
+          }, 500);
+        } else {
+          Alert.alert("Error", "Could not load image. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.log("Image picker error:", error);
+      Alert.alert("Error", "Could not access photos. Please try again.");
+    }
+  };
       } else {
         Alert.alert("Error", "Could not load image. Please try again.");
       }
