@@ -29,6 +29,17 @@ import {
   isDateExpiringSoon,
 } from "../services/dateUtils";
 
+// HTML escape function to prevent XSS in PDF generation
+const escapeHtml = (text: string | null | undefined): string => {
+  if (!text) return "";
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 export default function RxDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
