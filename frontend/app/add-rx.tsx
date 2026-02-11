@@ -176,7 +176,9 @@ export default function AddRxScreen() {
       }
       const normalizedExpiryDate = expiryDate ? normalizeDate(expiryDate) : null;
       
-      await savePrescription({
+      console.log("Saving prescription with image size:", imageBase64.length);
+      
+      const savedRx = await savePrescription({
         familyMemberId: selectedMember,
         rxType,
         imageBase64,
@@ -184,6 +186,8 @@ export default function AddRxScreen() {
         dateTaken: normalizedDateTaken,
         expiryDate: normalizedExpiryDate,
       });
+
+      console.log("Prescription saved with ID:", savedRx.id);
 
       if (normalizedExpiryDate) {
         Alert.alert(
