@@ -79,6 +79,10 @@ export default function RxDetailScreen() {
     const expired = isDateExpired(prescription.expiryDate);
     const expiringSoon = isDateExpiringSoon(prescription.expiryDate);
     
+    // Escape user inputs for security
+    const safeMemberName = escapeHtml(member.name);
+    const safeNotes = escapeHtml(prescription.notes);
+    
     return `
       <!DOCTYPE html>
       <html>
