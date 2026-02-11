@@ -590,6 +590,16 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 300,
   },
+  imagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+  },
+  imagePlaceholderText: {
+    color: "#6b7c8f",
+    marginTop: 8,
+    fontSize: 14,
+  },
   infoCard: {
     backgroundColor: "#1a2d45",
     borderRadius: 16,
