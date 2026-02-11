@@ -31,7 +31,8 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchYelp = async () => {
-    if (!zipCode || zipCode.length < 5) {
+    // Validate ZIP code - must be exactly 5 digits
+    if (!zipCode || !/^\d{5}$/.test(zipCode)) {
       return;
     }
     
