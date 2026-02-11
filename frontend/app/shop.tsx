@@ -110,20 +110,21 @@ export default function ShopScreen() {
   };
 
   const handleOpenLink = async (url: string, name: string) => {
-    // For retail stores, append location search
-    if (url.includes("samsclub.com") || url.includes("lenscrafters.com")) {
-      // These sites have store locators
-      try {
-        await Linking.openURL(url);
-      } catch (error) {
-        console.log("Error opening URL:", error);
-      }
-    } else {
-      try {
-        await Linking.openURL(url);
-      } catch (error) {
-        console.log("Error opening URL:", error);
-      }
+    let finalUrl = url;
+    
+    // For Sam's Club, use store locator with ZIP code
+    if (url.includes("samsclub.com")) {
+      finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
+    }
+    // For LensCrafters, use store locator with ZIP code
+    else if (url.includes("lenscrafters.com")) {
+      finalUrl = `https://www.lenscrafters.com/lc-us/store-locator?q=${zipCode}`;
+    }
+    
+    try {
+      await Linking.openURL(finalUrl);
+    } catch (error) {
+      console.log("Error opening URL:", error);
     }
   };
 
