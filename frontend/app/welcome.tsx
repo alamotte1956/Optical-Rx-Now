@@ -94,14 +94,18 @@ export default function WelcomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Logo */}
-          <View style={styles.logoContainer}>
+          {/* Logo - Long press for 3 seconds to access Admin */}
+          <Pressable 
+            style={styles.logoContainer}
+            onPressIn={handleLogoLongPressIn}
+            onPressOut={handleLogoLongPressOut}
+          >
             <Image
               source={require("../assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
-          </View>
+          </Pressable>
 
           {/* Title */}
           <Text style={styles.subtitle}>
