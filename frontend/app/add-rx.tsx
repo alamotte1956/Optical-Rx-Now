@@ -603,22 +603,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 14,
   },
-  scanningOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(10, 22, 40, 0.85)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-  },
-  scanningText: {
-    color: "#fff",
-    marginTop: 12,
-    fontSize: 14,
-  },
   input: {
     backgroundColor: "#1a2d45",
     borderRadius: 12,
