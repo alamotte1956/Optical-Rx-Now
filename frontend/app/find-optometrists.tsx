@@ -31,17 +31,10 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
-    // Use Google Maps search for better location results
-    const url = `https://www.google.com/maps/search/optometrist+near+${zipCode}`;
+    // Simple Google search URL that works on all mobile devices
+    const url = `https://google.com/search?q=optometrist+${zipCode}`;
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        // Fallback to regular Google search
-        const fallbackUrl = `https://www.google.com/search?q=optometrist+near+${zipCode}`;
-        await Linking.openURL(fallbackUrl);
-      }
+      await Linking.openURL(url);
     } catch (error) {
       console.log("Error opening Google:", error);
       Alert.alert("Error", "Could not open browser. Please try again.");
