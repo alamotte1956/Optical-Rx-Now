@@ -216,12 +216,8 @@ export default function AddRxScreen() {
         [{ 
           text: "OK", 
           onPress: () => {
-            try {
-              router.dismiss();
-            } catch (navError) {
-              console.log("Navigation error:", navError);
-              router.back();
-            }
+            // Use router.back() to go to previous screen, not dismiss
+            router.back();
           }
         }]
       );
