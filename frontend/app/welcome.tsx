@@ -142,6 +142,14 @@ export default function WelcomeScreen() {
             <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
             <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
           </TouchableOpacity>
+
+          {/* Reset Age Verification - for testing */}
+          <TouchableOpacity 
+            style={styles.resetButton} 
+            onPress={handleResetAgeVerification}
+          >
+            <Text style={styles.resetButtonText}>Reset Age Verification</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
