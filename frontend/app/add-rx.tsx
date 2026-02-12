@@ -258,7 +258,7 @@ export default function AddRxScreen() {
           <TouchableOpacity
             style={styles.emptyButton}
             onPress={() => {
-              router.dismiss();
+              router.back();
               setTimeout(() => router.push("/add-member"), 100);
             }}
           >
