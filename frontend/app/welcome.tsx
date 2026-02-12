@@ -45,6 +45,28 @@ export default function WelcomeScreen() {
     }
   };
 
+  const handleResetAgeVerification = async () => {
+    Alert.alert(
+      "Reset Age Verification",
+      "This will show the age verification screen again next time you open the app. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem(AGE_VERIFIED_KEY);
+              Alert.alert("Done", "Age verification has been reset. Close and reopen the app to see the verification screen.");
+            } catch (error) {
+              console.log("Error resetting age verification:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Share Button in Header */}
