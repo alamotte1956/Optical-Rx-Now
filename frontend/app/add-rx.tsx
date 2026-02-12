@@ -70,13 +70,6 @@ export default function AddRxScreen() {
     }
   };
 
-  const scanForExpiryDate = async (base64Image: string) => {
-    // OCR is disabled - it was causing crashes
-    // Users will need to enter the expiration date manually
-    console.log("OCR disabled - manual date entry required");
-    return;
-  };
-
   // Maximum image size (4MB in base64 ~ safe for AsyncStorage)
   const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 
@@ -168,10 +161,6 @@ export default function AddRxScreen() {
       console.log("Image picker error:", error);
       Alert.alert("Error", "Could not access photos.");
     }
-  };
-
-  const handleRescan = () => {
-    // OCR disabled
   };
 
   const handleSave = async () => {
