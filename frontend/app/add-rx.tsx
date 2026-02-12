@@ -210,17 +210,6 @@ export default function AddRxScreen() {
       Alert.alert("Error", "Could not access photos. Please check permissions and try again.");
     }
   };
-            });
-          }, 500);
-        } else {
-          Alert.alert("Error", "Could not load image. Please try again.");
-        }
-      }
-    } catch (error) {
-      console.log("Image picker error:", error);
-      Alert.alert("Error", "Could not access photos. Please try again.");
-    }
-  };
 
   const handleRescan = () => {
     if (imageBase64) {
