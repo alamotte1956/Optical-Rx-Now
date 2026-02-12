@@ -216,6 +216,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
+  logoPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
+  },
   logo: {
     width: "100%",
     height: "100%",
