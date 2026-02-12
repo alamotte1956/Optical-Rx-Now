@@ -88,8 +88,8 @@ export default function WelcomeScreen() {
           {/* Logo - Long press for 3 seconds to access Admin */}
           <Pressable 
             style={styles.logoContainer}
-            onPressIn={handleLogoLongPressIn}
-            onPressOut={handleLogoLongPressOut}
+            onLongPress={handleLogoLongPress}
+            delayLongPress={3000}
           >
             <Image
               source={require("../assets/images/logo.png")}
