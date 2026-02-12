@@ -3,7 +3,7 @@
 // Gracefully handles web platform where OCR is not available
 
 import * as FileSystem from "expo-file-system";
-import { Platform, Alert } from "react-native";
+import { Platform } from "react-native";
 
 interface OCRResult {
   success: boolean;
@@ -11,6 +11,9 @@ interface OCRResult {
   message: string;
   rawText?: string;
 }
+
+// Check if we're on a native platform that can support OCR
+const isNativePlatform = Platform.OS === "ios" || Platform.OS === "android";
 
 // Date patterns to look for in extracted text - expanded for better detection
 const DATE_PATTERNS = [
