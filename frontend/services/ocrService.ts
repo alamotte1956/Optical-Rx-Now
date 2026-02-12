@@ -296,6 +296,7 @@ const saveBase64ToTempFile = async (base64Data: string): Promise<string> => {
 
 /**
  * Extract expiration date from a prescription image using on-device OCR
+ * This function is completely defensive and will never throw an error
  */
 export const extractExpiryDateFromImage = async (
   imageBase64: string
@@ -314,8 +315,8 @@ export const extractExpiryDateFromImage = async (
     };
   }
 
-  // On web, OCR is not available
-  if (Platform.OS === "web") {
+  // On web, OCR is not available - return early
+  if (!isNativePlatform) {
     console.log("OCR not available on web platform");
     return {
       success: false,
@@ -324,18 +325,16 @@ export const extractExpiryDateFromImage = async (
     };
   }
 
+  // Wrap everything in a try-catch to prevent any crashes
   try {
-    // Dynamically import expo-text-extractor (only works on native platforms)
-    let isSupported: boolean = false;
-    let extractTextFromImage: ((uri: string) => Promise<string[]>) | null = null;
+    // Dynamically import expo-text-extractor with full error handling
+    let textExtractorModule: any = null;
     
     try {
-      const textExtractor = await import("expo-text-extractor");
-      isSupported = textExtractor.isSupported;
-      extractTextFromImage = textExtractor.extractTextFromImage;
-      console.log(`expo-text-extractor loaded, isSupported: ${isSupported}`);
-    } catch (importError) {
-      console.log("expo-text-extractor import error:", importError);
+      textExtractorModule = require("expo-text-extractor");
+      console.log("expo-text-extractor loaded successfully");
+    } catch (requireError: any) {
+      console.log("Failed to require expo-text-extractor:", requireError?.message || requireError);
       return {
         success: false,
         expiryDate: null,
@@ -343,13 +342,37 @@ export const extractExpiryDateFromImage = async (
       };
     }
 
+    // Check if the module and its functions exist
+    if (!textExtractorModule) {
+      console.log("textExtractorModule is null/undefined");
+      return {
+        success: false,
+        expiryDate: null,
+        message: "OCR module not found. Please enter the expiration date manually.",
+      };
+    }
+
+    const { isSupported, extractTextFromImage } = textExtractorModule;
+    
+    console.log(`isSupported value: ${isSupported}`);
+    console.log(`extractTextFromImage is function: ${typeof extractTextFromImage === 'function'}`);
+
     // Check if OCR is supported on this device
-    if (!isSupported || !extractTextFromImage) {
-      console.log("OCR not supported on this device");
+    if (!isSupported) {
+      console.log("OCR not supported on this device (isSupported is false)");
       return {
         success: false,
         expiryDate: null,
         message: "OCR is not supported on this device. Please enter the expiration date manually.",
+      };
+    }
+
+    if (typeof extractTextFromImage !== "function") {
+      console.log("extractTextFromImage is not a function");
+      return {
+        success: false,
+        expiryDate: null,
+        message: "OCR function not available. Please enter the expiration date manually.",
       };
     }
 
@@ -358,8 +381,8 @@ export const extractExpiryDateFromImage = async (
     try {
       tempFilePath = await saveBase64ToTempFile(imageBase64);
       console.log(`Temp file created: ${tempFilePath}`);
-    } catch (fileError) {
-      console.log("Error creating temp file:", fileError);
+    } catch (fileError: any) {
+      console.log("Error creating temp file:", fileError?.message || fileError);
       return {
         success: false,
         expiryDate: null,
@@ -367,14 +390,25 @@ export const extractExpiryDateFromImage = async (
       };
     }
 
-    // Extract text from image
+    // Extract text from image with timeout
     console.log("Running OCR text extraction...");
-    let extractedLines: string[];
+    let extractedLines: string[] = [];
+    
     try {
-      extractedLines = await extractTextFromImage(tempFilePath);
+      // Add a timeout to prevent hanging
+      const timeoutPromise = new Promise<string[]>((_, reject) => {
+        setTimeout(() => reject(new Error("OCR timeout")), 15000);
+      });
+      
+      const ocrPromise = extractTextFromImage(tempFilePath);
+      extractedLines = await Promise.race([ocrPromise, timeoutPromise]);
       console.log(`OCR returned ${extractedLines?.length || 0} lines`);
-    } catch (ocrError) {
-      console.log("OCR extraction error:", ocrError);
+    } catch (ocrError: any) {
+      console.log("OCR extraction error:", ocrError?.message || ocrError);
+      // Clean up temp file
+      try {
+        await FileSystem.deleteAsync(tempFilePath, { idempotent: true });
+      } catch {}
       return {
         success: false,
         expiryDate: null,
@@ -390,7 +424,7 @@ export const extractExpiryDateFromImage = async (
       // Ignore cleanup errors
     }
 
-    if (!extractedLines || extractedLines.length === 0) {
+    if (!extractedLines || !Array.isArray(extractedLines) || extractedLines.length === 0) {
       console.log("No text extracted from image");
       return {
         success: false,
@@ -423,8 +457,9 @@ export const extractExpiryDateFromImage = async (
       message: "No expiration date found. Please enter it manually or try taking a clearer photo of the expiration date area.",
       rawText,
     };
-  } catch (error) {
-    console.log("OCR extraction error:", error);
+  } catch (error: any) {
+    // Catch-all for any unexpected errors
+    console.log("Unexpected OCR error:", error?.message || error);
     return {
       success: false,
       expiryDate: null,
