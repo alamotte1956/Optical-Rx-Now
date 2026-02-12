@@ -32,6 +32,12 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
+    // Validate zipCode presence
+    if (!zipCode) {
+      Alert.alert("Input Required", "Please enter a zip code first.");
+      return;
+    }
+
     // Build URL with proper encoding
     const searchTerm = `optometrist near ${zipCode}`;
     const encodedSearch = encodeURIComponent(searchTerm);
@@ -41,19 +47,30 @@ export default function FindOptometristsScreen() {
     
     try {
       // Try WebBrowser first (in-app browser)
+      // This keeps the user inside your app's ecosystem
       const result = await WebBrowser.openBrowserAsync(url, {
         dismissButtonStyle: 'close',
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+        toolbarColor: '#ffffff',
       });
+      
       console.log("WebBrowser result:", result);
     } catch (error) {
-      console.log("WebBrowser error:", error);
+      console.error("WebBrowser error, attempting fallback:", error);
+      
       // Fallback to system browser via Linking
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert("Error", "Could not open browser. Please check your device settings.");
+      try {
+        const canOpen = await Linking.canOpenURL(url);
+        if (canOpen) {
+          await Linking.openURL(url);
+        } else {
+          throw new Error("Cannot open URL");
+        }
+      } catch (fallbackError) {
+        Alert.alert(
+          "Error", 
+          "Could not open browser. Please check your device settings or try again later."
+        );
       }
     }
   };
