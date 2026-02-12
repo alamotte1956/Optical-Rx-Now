@@ -257,44 +257,46 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
     if (!data) return [];
     
-    const storedPrescriptions: PrescriptionStorage[] = JSON.parse(data);
-    console.log(`Loading ${storedPrescriptions.length} prescriptions from storage`);
+    const stored: PrescriptionStorage[] = JSON.parse(data);
+    console.log(`Loading ${stored.length} prescriptions`);
     
-    // Load images from files and convert to Prescription format
-    const prescriptions: Prescription[] = await Promise.all(
-      storedPrescriptions.map(async (stored) => {
-        let imageBase64 = "";
-        
-        // Check if it's a file path or legacy base64 data
-        if (stored.imagePath && stored.imagePath.startsWith(FileSystem.documentDirectory || "")) {
-          // New format - load from file
-          const loadedImage = await loadImageFromFile(stored.imagePath);
-          imageBase64 = loadedImage || "";
-        } else if (stored.imagePath) {
-          // Legacy format - imagePath contains base64 data
-          imageBase64 = stored.imagePath;
-        }
-        
-        // Also handle old 'imageBase64' field for backwards compatibility
-        const oldData = stored as any;
-        if (!imageBase64 && oldData.imageBase64) {
-          imageBase64 = oldData.imageBase64;
-        }
-        
-        return {
-          id: stored.id,
-          familyMemberId: stored.familyMemberId,
-          rxType: stored.rxType,
-          imageBase64,
-          notes: stored.notes,
-          dateTaken: stored.dateTaken,
-          expiryDate: stored.expiryDate,
-          createdAt: stored.createdAt,
-        };
-      })
-    );
+    const prescriptions: Prescription[] = [];
     
-    console.log(`Loaded ${prescriptions.length} prescriptions with images`);
+    for (const item of stored) {
+      let imageBase64 = "";
+      
+      // Try to load image from file
+      if (item.imagePath && item.imagePath !== "FILE_SAVE_FAILED") {
+        try {
+          const fileInfo = await FileSystem.getInfoAsync(item.imagePath);
+          if (fileInfo.exists) {
+            const base64 = await FileSystem.readAsStringAsync(item.imagePath, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            imageBase64 = `data:image/jpeg;base64,${base64}`;
+          }
+        } catch (e) {
+          console.log("Error loading image file:", e);
+        }
+      }
+      
+      // Handle legacy data where imagePath might contain base64
+      if (!imageBase64 && item.imagePath && item.imagePath.startsWith("data:")) {
+        imageBase64 = item.imagePath;
+      }
+      
+      prescriptions.push({
+        id: item.id,
+        familyMemberId: item.familyMemberId,
+        rxType: item.rxType,
+        imageBase64,
+        notes: item.notes || "",
+        dateTaken: item.dateTaken,
+        expiryDate: item.expiryDate,
+        createdAt: item.createdAt,
+      });
+    }
+    
     return prescriptions;
   } catch (error) {
     console.log("Error getting prescriptions:", error);
