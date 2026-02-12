@@ -39,7 +39,6 @@ export default function AddRxScreen() {
   const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [scanningExpiry, setScanningExpiry] = useState(false);
 
   useEffect(() => {
     loadFamilyMembers();
