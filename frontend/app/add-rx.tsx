@@ -156,12 +156,8 @@ export default function AddRxScreen() {
           const base64Data = `data:image/jpeg;base64,${asset.base64}`;
           
           if (validateAndSetImage(base64Data)) {
-            // Run OCR in background after a delay
-            setTimeout(() => {
-              scanForExpiryDate(base64Data).catch(err => {
-                console.log("OCR background error:", err);
-              });
-            }, 1000);
+            // Photo selected successfully - no OCR
+            console.log("Photo selected and validated");
           }
         } else {
           console.log("No base64 data in selected image");
