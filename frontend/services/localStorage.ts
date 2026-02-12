@@ -204,18 +204,44 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
     if (!data) return [];
     
-    const prescriptions = JSON.parse(data);
-    console.log(`Loaded ${prescriptions.length} prescriptions`);
+    const storedPrescriptions: PrescriptionStorage[] = JSON.parse(data);
+    console.log(`Loading ${storedPrescriptions.length} prescriptions from storage`);
     
-    // Validate each prescription has image data
-    prescriptions.forEach((rx: Prescription, index: number) => {
-      if (rx.imageBase64) {
-        console.log(`Prescription ${index}: image size = ${rx.imageBase64.length} chars, starts with: ${rx.imageBase64.substring(0, 30)}`);
-      } else {
-        console.log(`Prescription ${index}: NO IMAGE DATA`);
-      }
-    });
+    // Load images from files and convert to Prescription format
+    const prescriptions: Prescription[] = await Promise.all(
+      storedPrescriptions.map(async (stored) => {
+        let imageBase64 = "";
+        
+        // Check if it's a file path or legacy base64 data
+        if (stored.imagePath && stored.imagePath.startsWith(FileSystem.documentDirectory || "")) {
+          // New format - load from file
+          const loadedImage = await loadImageFromFile(stored.imagePath);
+          imageBase64 = loadedImage || "";
+        } else if (stored.imagePath) {
+          // Legacy format - imagePath contains base64 data
+          imageBase64 = stored.imagePath;
+        }
+        
+        // Also handle old 'imageBase64' field for backwards compatibility
+        const oldData = stored as any;
+        if (!imageBase64 && oldData.imageBase64) {
+          imageBase64 = oldData.imageBase64;
+        }
+        
+        return {
+          id: stored.id,
+          familyMemberId: stored.familyMemberId,
+          rxType: stored.rxType,
+          imageBase64,
+          notes: stored.notes,
+          dateTaken: stored.dateTaken,
+          expiryDate: stored.expiryDate,
+          createdAt: stored.createdAt,
+        };
+      })
+    );
     
+    console.log(`Loaded ${prescriptions.length} prescriptions with images`);
     return prescriptions;
   } catch (error) {
     console.log("Error getting prescriptions:", error);
