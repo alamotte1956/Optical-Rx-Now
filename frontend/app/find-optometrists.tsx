@@ -286,7 +286,7 @@ export default function FindOptometristsScreen() {
         {/* Ad Banner Placeholder */}
         <TouchableOpacity 
           style={styles.adPlaceholder}
-          onPress={() => Linking.openURL("https://opticalrxnow.com")}
+          onPress={() => Linking.openURL("mailto:support@OpticalRxNow.com?subject=Advertising%20Inquiry")}
         >
           <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
           <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
