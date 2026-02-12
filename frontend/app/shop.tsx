@@ -247,8 +247,27 @@ export default function ShopScreen() {
     }
   };
 
-  // ZIP Code Entry Screen
-  if (!hasEnteredZip) {
+  // Loading Screen
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Shop Eyewear</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#4a9eff" />
+          <Text style={styles.loadingText}>Getting your location...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ZIP Code Entry Screen (fallback when location is denied)
+  if (!hasEnteredZip && showZipFallback) {
     return (
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
