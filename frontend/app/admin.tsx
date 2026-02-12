@@ -38,7 +38,7 @@ const AFFILIATE_LINKS = [
   },
   {
     name: "Clearly Affiliate",
-    url: "https://www.clearly.com/affiliate",
+    url: "https://www.clearly.ca/en-ca",
     description: "Up to 12% commission",
   },
   {
