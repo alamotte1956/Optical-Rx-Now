@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
 
 export default function FindOptometristsScreen() {
   const router = useRouter();
@@ -31,34 +32,49 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
-    // Simple Google search URL that works on all mobile devices
-    const url = `https://google.com/search?q=optometrist+${zipCode}`;
+    const url = `https://www.google.com/search?q=optometrist+near+${zipCode}`;
+    console.log("Opening Google URL:", url);
     try {
-      await Linking.openURL(url);
+      await WebBrowser.openBrowserAsync(url);
     } catch (error) {
-      console.log("Error opening Google:", error);
-      Alert.alert("Error", "Could not open browser. Please try again.");
+      console.log("WebBrowser error:", error);
+      // Fallback to Linking
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        console.log("Linking error:", linkError);
+        Alert.alert("Error", "Could not open browser. Please try again.");
+      }
     }
   };
 
   const handleSearchYelp = async () => {
-    const yelpUrl = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${zipCode}`;
+    const url = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${zipCode}`;
+    console.log("Opening Yelp URL:", url);
     try {
-      await Linking.openURL(yelpUrl);
+      await WebBrowser.openBrowserAsync(url);
     } catch (error) {
-      console.log("Error opening Yelp:", error);
-      Alert.alert("Error", "Could not open Yelp. Please try again.");
+      console.log("WebBrowser error:", error);
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open Yelp. Please try again.");
+      }
     }
   };
 
   const handleSearchHealthgrades = async () => {
-    // Healthgrades optometry directory with location search
     const url = `https://www.healthgrades.com/optometry-directory?loc=${zipCode}`;
+    console.log("Opening Healthgrades URL:", url);
     try {
-      await Linking.openURL(url);
+      await WebBrowser.openBrowserAsync(url);
     } catch (error) {
-      console.log("Error opening Healthgrades:", error);
-      Alert.alert("Error", "Could not open browser. Please try again.");
+      console.log("WebBrowser error:", error);
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open browser. Please try again.");
+      }
     }
   };
 
