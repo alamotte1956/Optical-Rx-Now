@@ -316,20 +316,29 @@ export const savePrescription = async (
     let imagePath = "";
     if (prescription.imageBase64) {
       console.log(`Saving image to file system, data length: ${prescription.imageBase64.length}`);
-      imagePath = await saveImageToFile(prescription.imageBase64, prescriptionId);
-      console.log(`Image saved to: ${imagePath}`);
+      const savedPath = await saveImageToFile(prescription.imageBase64, prescriptionId);
+      
+      if (savedPath) {
+        imagePath = savedPath;
+        console.log(`Image saved to: ${imagePath}`);
+      } else {
+        // File system save failed - fall back to storing base64 directly
+        // This may fail on Android for large images, but at least we try
+        console.log("File system save failed, using fallback");
+        imagePath = prescription.imageBase64;
+      }
     }
     
     // Get current prescriptions (stored format without image data)
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
     const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
     
-    // Create storage object (without base64 data)
+    // Create storage object
     const storageRx: PrescriptionStorage = {
       id: prescriptionId,
       familyMemberId: prescription.familyMemberId,
       rxType: prescription.rxType,
-      imagePath, // Store file path, not base64
+      imagePath, // Store file path or fallback to base64
       notes: prescription.notes,
       dateTaken: prescription.dateTaken,
       expiryDate: prescription.expiryDate,
@@ -339,7 +348,7 @@ export const savePrescription = async (
     // Add to array
     storedPrescriptions.push(storageRx);
     
-    // Save to AsyncStorage (small JSON without image data)
+    // Save to AsyncStorage
     const jsonData = JSON.stringify(storedPrescriptions);
     console.log(`Saving ${storedPrescriptions.length} prescriptions, JSON size: ${jsonData.length} bytes`);
     
