@@ -109,60 +109,107 @@ export default function AddRxScreen() {
     }
   };
 
+  // Maximum image size (4MB in base64 ~ safe for AsyncStorage)
+  const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
+
+  const validateAndSetImage = (base64Data: string): boolean => {
+    if (!base64Data || base64Data.length < 100) {
+      console.log("Invalid image data - too small or empty");
+      Alert.alert("Error", "Could not process image. Please try again.");
+      return false;
+    }
+    
+    if (base64Data.length > MAX_IMAGE_SIZE) {
+      console.log(`Image too large: ${base64Data.length} bytes`);
+      Alert.alert(
+        "Image Too Large", 
+        "The photo is too large. Please take a photo with lower resolution or try again."
+      );
+      return false;
+    }
+    
+    console.log(`Image validated, size: ${base64Data.length} chars`);
+    setImageBase64(base64Data);
+    return true;
+  };
+
   const takePhoto = async () => {
     try {
+      console.log("Opening camera...");
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
         allowsEditing: false,
-        quality: 0.5,
+        quality: 0.3, // Lower quality for smaller file size
         base64: true,
         exif: false,
       });
 
+      console.log("Camera result:", result.canceled ? "canceled" : "captured");
+
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
-        if (asset.base64) {
+        console.log("Asset received, has base64:", !!asset.base64);
+        
+        if (asset.base64 && asset.base64.length > 0) {
           const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-          console.log(`Photo captured, size: ${base64Data.length} chars`);
-          setImageBase64(base64Data);
           
-          // Run OCR in background - don't await to prevent blocking
-          setTimeout(() => {
-            scanForExpiryDate(base64Data).catch(err => {
-              console.log("OCR background error:", err);
-            });
-          }, 500);
+          if (validateAndSetImage(base64Data)) {
+            // Run OCR in background after a delay
+            setTimeout(() => {
+              scanForExpiryDate(base64Data).catch(err => {
+                console.log("OCR background error:", err);
+              });
+            }, 1000);
+          }
         } else {
+          console.log("No base64 data in captured photo");
           Alert.alert("Error", "Could not capture photo. Please try again.");
         }
       }
     } catch (error) {
       console.log("Camera error:", error);
-      Alert.alert("Error", "Could not access camera. Please try again.");
+      Alert.alert("Error", "Could not access camera. Please check permissions and try again.");
     }
   };
 
   const pickImage = async () => {
     try {
+      console.log("Opening image library...");
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: false,
-        quality: 0.5,
+        quality: 0.3, // Lower quality for smaller file size
         base64: true,
         exif: false,
       });
 
+      console.log("Library result:", result.canceled ? "canceled" : "selected");
+
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
-        if (asset.base64) {
+        console.log("Asset received, has base64:", !!asset.base64);
+        
+        if (asset.base64 && asset.base64.length > 0) {
           const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-          console.log(`Image selected, size: ${base64Data.length} chars`);
-          setImageBase64(base64Data);
           
-          // Run OCR in background - don't await to prevent blocking
-          setTimeout(() => {
-            scanForExpiryDate(base64Data).catch(err => {
-              console.log("OCR background error:", err);
+          if (validateAndSetImage(base64Data)) {
+            // Run OCR in background after a delay
+            setTimeout(() => {
+              scanForExpiryDate(base64Data).catch(err => {
+                console.log("OCR background error:", err);
+              });
+            }, 1000);
+          }
+        } else {
+          console.log("No base64 data in selected image");
+          Alert.alert("Error", "Could not load image. Please try a different photo.");
+        }
+      }
+    } catch (error) {
+      console.log("Image picker error:", error);
+      Alert.alert("Error", "Could not access photos. Please check permissions and try again.");
+    }
+  };
             });
           }, 500);
         } else {
