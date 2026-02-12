@@ -15,7 +15,8 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Static affiliate data - ordered by commission (highest to lowest)
+// Static affiliate data - only stores with verified affiliate programs
+// Ordered by commission rate (highest to lowest)
 // Sam's Club is always first as preferred partner
 const AFFILIATES = [
   {
@@ -29,57 +30,66 @@ const AFFILIATES = [
   },
   {
     id: "2",
-    name: "1-800 Contacts",
-    description: "America's #1 contact lens store. Price match guarantee.",
-    url: "https://www.1800contacts.com",
-    category: "contacts",
+    name: "Zenni Optical",
+    description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
+    url: "https://www.zennioptical.com",
+    category: "online",
     isPreferred: false,
     commissionRank: 1,
   },
   {
     id: "3",
-    name: "Zenni Optical",
-    description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
-    url: "https://www.zennioptical.com",
+    name: "Eyeglasses.com",
+    description: "Over 200,000 frames from 300+ brands. Up to 15% affiliate commission.",
+    url: "https://www.eyeglasses.com",
     category: "online",
     isPreferred: false,
     commissionRank: 2,
   },
   {
     id: "4",
-    name: "EyeBuyDirect",
-    description: "Quality glasses starting at $6. 2-year warranty included.",
-    url: "https://www.eyebuydirect.com",
+    name: "Designer Optics",
+    description: "400+ designer brands including Gucci, Ray-Ban, Prada. 15% commission.",
+    url: "https://www.designeroptics.com",
     category: "online",
     isPreferred: false,
     commissionRank: 3,
   },
   {
     id: "5",
-    name: "Warby Parker",
-    description: "Designer eyewear at revolutionary prices. Free home try-on program.",
-    url: "https://www.warbyparker.com",
-    category: "online",
+    name: "Clearly",
+    description: "Quality contacts, eyeglasses & sunglasses. Up to 12% commission.",
+    url: "https://www.clearly.com",
+    category: "contacts",
     isPreferred: false,
     commissionRank: 4,
   },
   {
     id: "6",
-    name: "LensCrafters",
-    description: "Expert eye care and designer eyewear. Same-day glasses available.",
-    url: "https://www.lenscrafters.com",
+    name: "Target Optical",
+    description: "Designer eyewear at Target. Ray-Ban, Oakley & more. Up to 8% commission.",
+    url: "https://www.targetoptical.com",
     category: "retail",
     isPreferred: false,
     commissionRank: 5,
   },
   {
     id: "7",
-    name: "AC Lens",
-    description: "Discount contact lenses with fast, free shipping.",
-    url: "https://www.aclens.com",
-    category: "contacts",
+    name: "Eyeconic",
+    description: "VSP/MetLife integration, virtual try-on, doctor network. Competitive rates.",
+    url: "https://www.eyeconic.com",
+    category: "online",
     isPreferred: false,
     commissionRank: 6,
+  },
+  {
+    id: "8",
+    name: "SportRx",
+    description: "Premium sports eyewear and prescription sunglasses. High average order value.",
+    url: "https://www.sportrx.com",
+    category: "online",
+    isPreferred: false,
+    commissionRank: 7,
   },
 ];
 
