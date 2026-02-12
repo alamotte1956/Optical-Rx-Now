@@ -11,7 +11,6 @@ const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
 
   useEffect(() => {
