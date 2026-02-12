@@ -34,6 +34,7 @@ export default function AddRxScreen() {
   const [selectedMember, setSelectedMember] = useState<string>("");
   const [rxType, setRxType] = useState<"eyeglass" | "contact">("eyeglass");
   const [imageBase64, setImageBase64] = useState<string>("");
+  const [imageUri, setImageUri] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [dateTaken, setDateTaken] = useState(getTodayFormatted());
   const [expiryDate, setExpiryDate] = useState("");
