@@ -332,9 +332,11 @@ export default function ShopScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Shop Eyewear</Text>
-        <TouchableOpacity onPress={() => setHasEnteredZip(false)} style={styles.zipButton}>
+        <TouchableOpacity onPress={handleUseZipInstead} style={styles.zipButton}>
           <Ionicons name="location" size={18} color="#4a9eff" />
-          <Text style={styles.zipButtonText}>{zipCode}</Text>
+          <Text style={styles.zipButtonText} numberOfLines={1}>
+            {usingLocation ? (locationName || "Near You") : zipCode}
+          </Text>
         </TouchableOpacity>
       </View>
 
