@@ -32,18 +32,28 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
-    const url = `https://www.google.com/search?q=optometrist+near+${zipCode}`;
+    // Build URL with proper encoding
+    const searchTerm = `optometrist near ${zipCode}`;
+    const encodedSearch = encodeURIComponent(searchTerm);
+    const url = `https://www.google.com/search?q=${encodedSearch}`;
+    
     console.log("Opening Google URL:", url);
+    
     try {
-      await WebBrowser.openBrowserAsync(url);
+      // Try WebBrowser first (in-app browser)
+      const result = await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
+      console.log("WebBrowser result:", result);
     } catch (error) {
       console.log("WebBrowser error:", error);
-      // Fallback to Linking
-      try {
+      // Fallback to system browser via Linking
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
         await Linking.openURL(url);
-      } catch (linkError) {
-        console.log("Linking error:", linkError);
-        Alert.alert("Error", "Could not open browser. Please try again.");
+      } else {
+        Alert.alert("Error", "Could not open browser. Please check your device settings.");
       }
     }
   };
