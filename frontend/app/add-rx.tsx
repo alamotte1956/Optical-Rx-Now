@@ -80,27 +80,6 @@ export default function AddRxScreen() {
   // Maximum image size (4MB in base64 ~ safe for AsyncStorage)
   const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 
-  const validateAndSetImage = (base64Data: string): boolean => {
-    if (!base64Data || base64Data.length < 100) {
-      console.log("Invalid image data - too small or empty");
-      Alert.alert("Error", "Could not process image. Please try again.");
-      return false;
-    }
-    
-    if (base64Data.length > MAX_IMAGE_SIZE) {
-      console.log(`Image too large: ${base64Data.length} bytes`);
-      Alert.alert(
-        "Image Too Large", 
-        "The photo is too large. Please take a photo with lower resolution or try again."
-      );
-      return false;
-    }
-    
-    console.log(`Image validated, size: ${base64Data.length} chars`);
-    setImageBase64(base64Data);
-    return true;
-  };
-
   const takePhoto = async () => {
     try {
       console.log("Opening camera...");
