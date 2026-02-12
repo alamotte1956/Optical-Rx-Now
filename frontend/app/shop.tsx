@@ -468,11 +468,13 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     gap: 4,
+    maxWidth: 140,
   },
   zipButtonText: {
     fontSize: 14,
     color: "#4a9eff",
     fontWeight: "600",
+    flexShrink: 1,
   },
   scrollView: {
     flex: 1,
