@@ -619,23 +619,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
   },
-  ocrBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(74, 158, 255, 0.1)",
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 12,
-    gap: 8,
-  },
-  ocrBannerText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#8899a6",
-  },
-  rescanButton: {
-    padding: 4,
-  },
   input: {
     backgroundColor: "#1a2d45",
     borderRadius: 12,
