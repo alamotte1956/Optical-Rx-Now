@@ -77,7 +77,7 @@ export default function AddRxScreen() {
     try {
       console.log("Opening camera...");
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.3,
         base64: true,
