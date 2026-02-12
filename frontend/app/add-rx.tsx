@@ -627,17 +627,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
-  expiryInputContainer: {
-    position: "relative",
-  },
-  expiryInput: {
-    paddingRight: 50,
-  },
-  expiryScanning: {
-    position: "absolute",
-    right: 16,
-    top: 14,
-  },
   notesInput: {
     height: 100,
     paddingTop: 14,
