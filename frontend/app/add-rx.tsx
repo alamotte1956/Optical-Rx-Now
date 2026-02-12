@@ -179,9 +179,7 @@ export default function AddRxScreen() {
   };
 
   const handleRescan = () => {
-    if (imageBase64) {
-      scanForExpiryDate(imageBase64);
-    }
+    // OCR disabled
   };
 
   const handleSave = async () => {
