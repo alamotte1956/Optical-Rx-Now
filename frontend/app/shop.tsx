@@ -426,6 +426,17 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#8899a6",
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
