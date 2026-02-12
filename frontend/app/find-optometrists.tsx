@@ -32,22 +32,25 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchGoogle = async () => {
+    // Get current zip code value
+    const currentZip = zipCode.trim();
+    
     // Validate zipCode presence
-    if (!zipCode) {
-      Alert.alert("Input Required", "Please enter a zip code first.");
+    if (!currentZip || currentZip.length !== 5) {
+      Alert.alert("Input Required", "Please enter a valid 5-digit zip code first.");
       return;
     }
 
     // Build URL with proper encoding
-    const searchTerm = `optometrist near ${zipCode}`;
+    const searchTerm = `optometrist near ${currentZip}`;
     const encodedSearch = encodeURIComponent(searchTerm);
     const url = `https://www.google.com/search?q=${encodedSearch}`;
     
+    console.log("ZIP Code:", currentZip);
     console.log("Opening Google URL:", url);
     
     try {
       // Try WebBrowser first (in-app browser)
-      // This keeps the user inside your app's ecosystem
       const result = await WebBrowser.openBrowserAsync(url, {
         dismissButtonStyle: 'close',
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
@@ -76,10 +79,17 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchYelp = async () => {
-    const url = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${zipCode}`;
+    const currentZip = zipCode.trim();
+    if (!currentZip) return;
+    
+    const url = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${currentZip}`;
+    console.log("ZIP Code:", currentZip);
     console.log("Opening Yelp URL:", url);
     try {
-      await WebBrowser.openBrowserAsync(url);
+      await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
     } catch (error) {
       console.log("WebBrowser error:", error);
       try {
@@ -91,10 +101,17 @@ export default function FindOptometristsScreen() {
   };
 
   const handleSearchHealthgrades = async () => {
-    const url = `https://www.healthgrades.com/optometry-directory?loc=${zipCode}`;
+    const currentZip = zipCode.trim();
+    if (!currentZip) return;
+    
+    const url = `https://www.healthgrades.com/optometry-directory?loc=${currentZip}`;
+    console.log("ZIP Code:", currentZip);
     console.log("Opening Healthgrades URL:", url);
     try {
-      await WebBrowser.openBrowserAsync(url);
+      await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
     } catch (error) {
       console.log("WebBrowser error:", error);
       try {
