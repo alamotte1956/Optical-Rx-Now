@@ -11,7 +11,7 @@ from datetime import datetime
 import sys
 
 # Use the frontend environment URL for testing
-BASE_URL = "https://lens-vault-2.preview.emergentagent.com/api"
+BASE_URL = "https://visionscript-2.preview.emergentagent.com/api"
 
 class VisionRxAPITester:
     def __init__(self):

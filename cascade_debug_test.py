@@ -6,7 +6,7 @@ Debug test for cascade delete functionality
 import requests
 import json
 
-BASE_URL = "https://lens-vault-2.preview.emergentagent.com/api"
+BASE_URL = "https://visionscript-2.preview.emergentagent.com/api"
 
 def debug_cascade_delete():
     session = requests.Session()
