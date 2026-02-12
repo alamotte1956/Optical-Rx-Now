@@ -305,83 +305,88 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
 export const savePrescription = async (
   prescription: Omit<Prescription, "id" | "createdAt">
 ): Promise<Prescription> => {
-  try {
-    console.log("savePrescription called");
-    
-    // Generate ID first
-    const prescriptionId = generateId();
-    console.log(`Creating prescription with ID: ${prescriptionId}`);
-    
-    // Save image to file system (not AsyncStorage)
-    let imagePath = "";
-    if (prescription.imageBase64) {
-      console.log(`Saving image to file system, data length: ${prescription.imageBase64.length}`);
-      const savedPath = await saveImageToFile(prescription.imageBase64, prescriptionId);
+  const prescriptionId = generateId();
+  const createdAt = new Date().toISOString();
+  
+  console.log("savePrescription called, ID:", prescriptionId);
+  
+  // Step 1: Try to save image to file system
+  let imagePath = "";
+  
+  if (prescription.imageBase64) {
+    try {
+      // Ensure directory exists
+      const imageDir = `${FileSystem.documentDirectory}rx_images/`;
+      const dirInfo = await FileSystem.getInfoAsync(imageDir);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(imageDir, { intermediates: true });
+      }
       
-      if (savedPath) {
-        imagePath = savedPath;
-        console.log(`Image saved to: ${imagePath}`);
-      } else {
-        // File system save failed - fall back to storing base64 directly
-        // This may fail on Android for large images, but at least we try
-        console.log("File system save failed, using fallback");
-        imagePath = prescription.imageBase64;
+      // Extract raw base64 (remove data URI prefix)
+      let rawBase64 = prescription.imageBase64;
+      if (rawBase64.startsWith("data:")) {
+        rawBase64 = rawBase64.split(",")[1] || "";
       }
+      
+      // Write to file
+      const filePath = `${imageDir}${prescriptionId}.jpg`;
+      await FileSystem.writeAsStringAsync(filePath, rawBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      imagePath = filePath;
+      console.log("Image saved to file:", filePath);
+    } catch (fileError) {
+      console.log("File save error:", fileError);
+      // Don't store base64 in AsyncStorage - it will crash
+      // Just save without image path, user can re-add later
+      imagePath = "FILE_SAVE_FAILED";
     }
-    
-    // Get current prescriptions (stored format without image data)
-    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
-    const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
-    
-    // Create storage object
-    const storageRx: PrescriptionStorage = {
-      id: prescriptionId,
-      familyMemberId: prescription.familyMemberId,
-      rxType: prescription.rxType,
-      imagePath, // Store file path or fallback to base64
-      notes: prescription.notes,
-      dateTaken: prescription.dateTaken,
-      expiryDate: prescription.expiryDate,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // Add to array
-    storedPrescriptions.push(storageRx);
-    
-    // Save to AsyncStorage
-    const jsonData = JSON.stringify(storedPrescriptions);
-    console.log(`Saving ${storedPrescriptions.length} prescriptions, JSON size: ${jsonData.length} bytes`);
-    
-    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonData);
-    console.log("Prescription saved to AsyncStorage");
-
-    // Create return object with image data
-    const newRx: Prescription = {
-      id: prescriptionId,
-      familyMemberId: prescription.familyMemberId,
-      rxType: prescription.rxType,
-      imageBase64: prescription.imageBase64,
-      notes: prescription.notes,
-      dateTaken: prescription.dateTaken,
-      expiryDate: prescription.expiryDate,
-      createdAt: storageRx.createdAt,
-    };
-
-    // Schedule notifications if expiry date is set (don't let this crash the save)
-    if (newRx.expiryDate) {
-      try {
-        await scheduleExpiryNotifications(newRx);
-        console.log("Notifications scheduled");
-      } catch (notifError) {
-        console.log("Notification scheduling failed (non-critical):", notifError);
-      }
-    }
-
-    return newRx;
-  } catch (error) {
-    console.log("Error saving prescription:", error);
-    throw error;
   }
+  
+  // Step 2: Save prescription metadata to AsyncStorage (no image data!)
+  try {
+    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const stored: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+    
+    const newStored: PrescriptionStorage = {
+      id: prescriptionId,
+      familyMemberId: prescription.familyMemberId,
+      rxType: prescription.rxType,
+      imagePath, // File path only, NOT base64
+      notes: prescription.notes || "",
+      dateTaken: prescription.dateTaken,
+      expiryDate: prescription.expiryDate,
+      createdAt,
+    };
+    
+    stored.push(newStored);
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(stored));
+    console.log("Prescription metadata saved to AsyncStorage");
+  } catch (storageError) {
+    console.log("AsyncStorage error:", storageError);
+    throw new Error("Failed to save prescription");
+  }
+  
+  // Step 3: Schedule notifications (non-blocking)
+  const newRx: Prescription = {
+    id: prescriptionId,
+    familyMemberId: prescription.familyMemberId,
+    rxType: prescription.rxType,
+    imageBase64: prescription.imageBase64,
+    notes: prescription.notes || "",
+    dateTaken: prescription.dateTaken,
+    expiryDate: prescription.expiryDate,
+    createdAt,
+  };
+  
+  if (newRx.expiryDate) {
+    scheduleExpiryNotifications(newRx).catch((e) => 
+      console.log("Notification error (non-critical):", e)
+    );
+  }
+  
+  return newRx;
 };
 
 export const getPrescriptionById = async (
