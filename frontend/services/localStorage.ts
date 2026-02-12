@@ -330,14 +330,32 @@ export const getPrescriptionById = async (
 };
 
 export const deletePrescription = async (id: string): Promise<boolean> => {
-  const prescriptions = await getPrescriptions();
-  const filtered = prescriptions.filter((p) => p.id !== id);
-  await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(filtered));
+  try {
+    // Get stored prescriptions
+    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+    
+    // Find the prescription to get image path
+    const toDelete = storedPrescriptions.find((p) => p.id === id);
+    
+    // Delete the image file if it exists
+    if (toDelete?.imagePath && toDelete.imagePath.startsWith(FileSystem.documentDirectory || "")) {
+      await deleteImageFile(toDelete.imagePath);
+    }
+    
+    // Remove from array
+    const filtered = storedPrescriptions.filter((p) => p.id !== id);
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(filtered));
 
-  // Cancel associated notifications
-  await cancelPrescriptionNotifications(id);
+    // Cancel associated notifications
+    await cancelPrescriptionNotifications(id);
 
-  return true;
+    console.log(`Deleted prescription ${id}`);
+    return true;
+  } catch (error) {
+    console.log("Error deleting prescription:", error);
+    return false;
+  }
 };
 
 export const getPrescriptionsByMember = async (
