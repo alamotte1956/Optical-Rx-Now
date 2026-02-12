@@ -382,11 +382,12 @@ export const savePrescription = async (
     createdAt,
   };
   
-  if (newRx.expiryDate) {
-    scheduleExpiryNotifications(newRx).catch((e) => 
-      console.log("Notification error (non-critical):", e)
-    );
-  }
+  // TEMPORARY: Disable notifications to prevent crash
+  // if (newRx.expiryDate) {
+  //   scheduleExpiryNotifications(newRx).catch((e) => 
+  //     console.log("Notification error (non-critical):", e)
+  //   );
+  // }
   
   return newRx;
 };
