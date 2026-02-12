@@ -110,8 +110,73 @@ export default function ShopScreen() {
   const [zipCode, setZipCode] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [hasEnteredZip, setHasEnteredZip] = useState(false);
+  
+  // Location state
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
+  const [usingLocation, setUsingLocation] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showZipFallback, setShowZipFallback] = useState(false);
 
   const isValidZip = /^\d{5}$/.test(zipCode);
+
+  // Request location on mount
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    setLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== "granted") {
+        console.log("Location permission denied, showing ZIP fallback");
+        setShowZipFallback(true);
+        setLoading(false);
+        return;
+      }
+
+      // Get current location
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
+      setLocation(currentLocation);
+      console.log("Location obtained:", currentLocation.coords);
+
+      // Get location name (city, state)
+      try {
+        const [address] = await Location.reverseGeocodeAsync({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        });
+        
+        if (address) {
+          const name = [address.city, address.region].filter(Boolean).join(", ");
+          setLocationName(name || "Your Location");
+          console.log("Location name:", name);
+        }
+      } catch (geocodeError) {
+        console.log("Geocode error:", geocodeError);
+        setLocationName("Your Location");
+      }
+
+      setUsingLocation(true);
+      setHasEnteredZip(true); // Skip ZIP entry, go straight to store list
+    } catch (error) {
+      console.log("Location error:", error);
+      setShowZipFallback(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUseZipInstead = () => {
+    setUsingLocation(false);
+    setHasEnteredZip(false);
+    setShowZipFallback(true);
+  };
 
   const handleContinue = () => {
     if (!isValidZip) {
