@@ -21,6 +21,9 @@ export default function FindOptometristsScreen() {
   const router = useRouter();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [locationName, setLocationName] = useState<string>("");
+  const [locationCity, setLocationCity] = useState<string>("");
+  const [locationState, setLocationState] = useState<string>("");
+  const [locationStateAbbrev, setLocationStateAbbrev] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
