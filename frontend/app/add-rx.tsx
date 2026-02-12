@@ -72,49 +72,10 @@ export default function AddRxScreen() {
   };
 
   const scanForExpiryDate = async (base64Image: string) => {
-    console.log("Starting OCR scan for expiry date...");
-    
-    // Skip OCR on web - it's not supported
-    if (Platform.OS === "web") {
-      console.log("OCR not available on web");
-      return;
-    }
-    
-    setScanningExpiry(true);
-    try {
-      // Wrap in additional try-catch for extra safety
-      let result;
-      try {
-        result = await extractExpiryDateFromImage(base64Image);
-      } catch (innerError) {
-        console.log("Inner OCR error caught:", innerError);
-        result = { success: false, expiryDate: null, message: "OCR failed" };
-      }
-      
-      console.log("OCR result:", result);
-      
-      if (result && result.success && result.expiryDate) {
-        // Convert to MM/DD/YYYY for display
-        const displayDate = formatDateForInput(result.expiryDate);
-        setExpiryDate(displayDate);
-        Alert.alert(
-          "✓ Expiration Date Found!",
-          `Detected: ${displayDate}\n\nPlease verify this is correct.`,
-          [{ text: "OK" }]
-        );
-      } else {
-        // Show the message to user if OCR didn't find a date
-        console.log("OCR did not find expiry date:", result?.message || "Unknown");
-        if (result?.rawText) {
-          console.log("Raw OCR text:", result.rawText);
-        }
-      }
-    } catch (error) {
-      console.log("OCR scan error (outer catch):", error);
-      // Don't show error to user - just fail silently
-    } finally {
-      setScanningExpiry(false);
-    }
+    // OCR is disabled - it was causing crashes
+    // Users will need to enter the expiration date manually
+    console.log("OCR disabled - manual date entry required");
+    return;
   };
 
   // Maximum image size (4MB in base64 ~ safe for AsyncStorage)
