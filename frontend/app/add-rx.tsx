@@ -122,7 +122,7 @@ export default function AddRxScreen() {
     try {
       console.log("Opening image library...");
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         quality: 0.3,
         base64: true,
