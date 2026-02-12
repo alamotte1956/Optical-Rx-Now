@@ -261,4 +261,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1,
   },
+  resetButton: {
+    paddingVertical: 12,
+    marginBottom: 24,
+  },
+  resetButtonText: {
+    fontSize: 12,
+    color: "#6b7c8f",
+    textDecorationLine: "underline",
+  },
 });
