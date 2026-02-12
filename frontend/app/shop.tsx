@@ -59,7 +59,7 @@ const AFFILIATES = [
     id: "5",
     name: "Clearly",
     description: "Quality contacts, eyeglasses & sunglasses. Up to 12% commission.",
-    url: "https://www.clearly.com",
+    url: "https://www.clearly.ca/en-ca",
     category: "contacts",
     isPreferred: false,
     commissionRank: 4,
