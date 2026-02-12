@@ -21,7 +21,6 @@ import {
   savePrescription,
   FamilyMember,
 } from "../services/localStorage";
-import { extractExpiryDateFromImage } from "../services/ocrService";
 import {
   getTodayFormatted,
   formatDateForInput,
