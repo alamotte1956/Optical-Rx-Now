@@ -168,9 +168,18 @@ export default function FindOptometristsScreen() {
       return;
     }
 
-    const { latitude, longitude } = location.coords;
-    // Healthgrades with coordinates
-    const url = `https://www.healthgrades.com/optometry-directory?lat=${latitude}&lon=${longitude}`;
+    // Healthgrades uses city/state URL path format, not lat/lon parameters
+    // Format: https://www.healthgrades.com/optometry-directory/[state-abbrev]-[state-name]/[city]
+    let url = "https://www.healthgrades.com/optometry-directory";
+    
+    if (locationStateAbbrev && locationState && locationCity) {
+      // Full city/state URL
+      url = `https://www.healthgrades.com/optometry-directory/${locationStateAbbrev}-${locationState}/${locationCity}`;
+    } else if (locationStateAbbrev && locationState) {
+      // State-only URL
+      url = `https://www.healthgrades.com/optometry-directory/${locationStateAbbrev}-${locationState}`;
+    }
+    // If no location data, falls back to main directory
     
     console.log("Opening Healthgrades URL:", url);
     
