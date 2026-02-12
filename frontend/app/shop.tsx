@@ -183,20 +183,33 @@ export default function ShopScreen() {
       Alert.alert("Invalid ZIP Code", "Please enter a valid 5-digit ZIP code.");
       return;
     }
+    setUsingLocation(false);
     setHasEnteredZip(true);
   };
 
   const handleOpenLink = async (url: string, name: string) => {
     let finalUrl = url;
     
-    // For Sam's Club, use store locator with ZIP code
+    // For Sam's Club, use store locator
     if (url.includes("samsclub.com")) {
-      finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
+      if (usingLocation && location) {
+        // Use coordinates for location-based search
+        const { latitude, longitude } = location.coords;
+        finalUrl = `https://www.google.com/maps/search/Sam's+Club+Optical/@${latitude},${longitude},12z`;
+      } else {
+        // Use ZIP code
+        finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
+      }
     }
-    // For LensCrafters, use Google search to find locations near ZIP
-    else if (url.includes("lenscrafters.com")) {
-      const searchQuery = encodeURIComponent(`LensCrafters near ${zipCode}`);
-      finalUrl = `https://www.google.com/search?q=${searchQuery}`;
+    // For Target Optical
+    else if (url.includes("targetoptical.com")) {
+      if (usingLocation && location) {
+        const { latitude, longitude } = location.coords;
+        finalUrl = `https://www.google.com/maps/search/Target+Optical/@${latitude},${longitude},12z`;
+      } else {
+        const searchQuery = encodeURIComponent(`Target Optical near ${zipCode}`);
+        finalUrl = `https://www.google.com/search?q=${searchQuery}`;
+      }
     }
     
     try {
