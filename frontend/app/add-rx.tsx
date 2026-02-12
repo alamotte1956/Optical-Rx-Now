@@ -423,21 +423,6 @@ export default function AddRxScreen() {
             </View>
           )}
 
-          {/* OCR Info Banner */}
-          {imageBase64 && !scanningExpiry && (
-            <View style={styles.ocrBanner}>
-              <Ionicons name="scan" size={20} color="#4a9eff" />
-              <Text style={styles.ocrBannerText}>
-                {expiryDate 
-                  ? "Expiration date detected automatically" 
-                  : "No expiration date detected"}
-              </Text>
-              <TouchableOpacity onPress={handleRescan} style={styles.rescanButton}>
-                <Ionicons name="refresh" size={18} color="#4a9eff" />
-              </TouchableOpacity>
-            </View>
-          )}
-
           {/* Date */}
           <Text style={styles.label}>Prescription Date</Text>
           <TextInput
