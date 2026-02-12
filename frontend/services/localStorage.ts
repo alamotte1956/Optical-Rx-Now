@@ -255,28 +255,55 @@ export const savePrescription = async (
   try {
     console.log("savePrescription called");
     
-    // Get current prescriptions
-    const prescriptions = await getPrescriptions();
+    // Generate ID first
+    const prescriptionId = generateId();
+    console.log(`Creating prescription with ID: ${prescriptionId}`);
     
-    // Create new prescription object
-    const newRx: Prescription = {
-      ...prescription,
-      id: generateId(),
+    // Save image to file system (not AsyncStorage)
+    let imagePath = "";
+    if (prescription.imageBase64) {
+      console.log(`Saving image to file system, data length: ${prescription.imageBase64.length}`);
+      imagePath = await saveImageToFile(prescription.imageBase64, prescriptionId);
+      console.log(`Image saved to: ${imagePath}`);
+    }
+    
+    // Get current prescriptions (stored format without image data)
+    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+    
+    // Create storage object (without base64 data)
+    const storageRx: PrescriptionStorage = {
+      id: prescriptionId,
+      familyMemberId: prescription.familyMemberId,
+      rxType: prescription.rxType,
+      imagePath, // Store file path, not base64
+      notes: prescription.notes,
+      dateTaken: prescription.dateTaken,
+      expiryDate: prescription.expiryDate,
       createdAt: new Date().toISOString(),
     };
     
-    console.log(`Creating prescription with ID: ${newRx.id}`);
-    console.log(`Image data present: ${!!newRx.imageBase64}, length: ${newRx.imageBase64?.length || 0}`);
-    
     // Add to array
-    prescriptions.push(newRx);
+    storedPrescriptions.push(storageRx);
     
-    // Save to storage
-    const jsonData = JSON.stringify(prescriptions);
-    console.log(`Saving ${prescriptions.length} prescriptions, JSON size: ${jsonData.length} bytes`);
+    // Save to AsyncStorage (small JSON without image data)
+    const jsonData = JSON.stringify(storedPrescriptions);
+    console.log(`Saving ${storedPrescriptions.length} prescriptions, JSON size: ${jsonData.length} bytes`);
     
     await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonData);
     console.log("Prescription saved to AsyncStorage");
+
+    // Create return object with image data
+    const newRx: Prescription = {
+      id: prescriptionId,
+      familyMemberId: prescription.familyMemberId,
+      rxType: prescription.rxType,
+      imageBase64: prescription.imageBase64,
+      notes: prescription.notes,
+      dateTaken: prescription.dateTaken,
+      expiryDate: prescription.expiryDate,
+      createdAt: storageRx.createdAt,
+    };
 
     // Schedule notifications if expiry date is set (don't let this crash the save)
     if (newRx.expiryDate) {
@@ -285,7 +312,6 @@ export const savePrescription = async (
         console.log("Notifications scheduled");
       } catch (notifError) {
         console.log("Notification scheduling failed (non-critical):", notifError);
-        // Don't throw - notifications are optional
       }
     }
 
