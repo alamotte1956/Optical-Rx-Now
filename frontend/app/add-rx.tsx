@@ -107,7 +107,7 @@ export default function AddRxScreen() {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
         allowsEditing: false,
-        quality: 0.3, // Lower quality for smaller file size
+        quality: 0.3,
         base64: true,
         exif: false,
       });
@@ -116,23 +116,33 @@ export default function AddRxScreen() {
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
-        console.log("Asset received, has base64:", !!asset.base64);
+        console.log("Asset received, uri:", asset.uri);
         
+        // Use URI for preview (more efficient)
+        if (asset.uri) {
+          setImageUri(asset.uri);
+        }
+        
+        // Store base64 for saving
         if (asset.base64 && asset.base64.length > 0) {
           const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-          
-          if (validateAndSetImage(base64Data)) {
-            // Photo captured successfully - no OCR
-            console.log("Photo captured and validated");
+          if (base64Data.length <= MAX_IMAGE_SIZE) {
+            setImageBase64(base64Data);
+            console.log("Photo captured successfully, size:", base64Data.length);
+          } else {
+            console.log("Image too large:", base64Data.length);
+            Alert.alert("Image Too Large", "Please take a lower resolution photo.");
+            setImageUri("");
           }
         } else {
-          console.log("No base64 data in captured photo");
+          console.log("No base64 data");
           Alert.alert("Error", "Could not capture photo. Please try again.");
+          setImageUri("");
         }
       }
     } catch (error) {
       console.log("Camera error:", error);
-      Alert.alert("Error", "Could not access camera. Please check permissions and try again.");
+      Alert.alert("Error", "Could not access camera.");
     }
   };
 
