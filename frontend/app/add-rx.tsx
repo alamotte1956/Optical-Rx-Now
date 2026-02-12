@@ -152,7 +152,7 @@ export default function AddRxScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: false,
-        quality: 0.3, // Lower quality for smaller file size
+        quality: 0.3,
         base64: true,
         exif: false,
       });
@@ -161,23 +161,33 @@ export default function AddRxScreen() {
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const asset = result.assets[0];
-        console.log("Asset received, has base64:", !!asset.base64);
+        console.log("Asset received, uri:", asset.uri);
         
+        // Use URI for preview (more efficient)
+        if (asset.uri) {
+          setImageUri(asset.uri);
+        }
+        
+        // Store base64 for saving
         if (asset.base64 && asset.base64.length > 0) {
           const base64Data = `data:image/jpeg;base64,${asset.base64}`;
-          
-          if (validateAndSetImage(base64Data)) {
-            // Photo selected successfully - no OCR
-            console.log("Photo selected and validated");
+          if (base64Data.length <= MAX_IMAGE_SIZE) {
+            setImageBase64(base64Data);
+            console.log("Photo selected successfully, size:", base64Data.length);
+          } else {
+            console.log("Image too large:", base64Data.length);
+            Alert.alert("Image Too Large", "Please select a smaller image.");
+            setImageUri("");
           }
         } else {
-          console.log("No base64 data in selected image");
-          Alert.alert("Error", "Could not load image. Please try a different photo.");
+          console.log("No base64 data");
+          Alert.alert("Error", "Could not load image. Please try another.");
+          setImageUri("");
         }
       }
     } catch (error) {
       console.log("Image picker error:", error);
-      Alert.alert("Error", "Could not access photos. Please check permissions and try again.");
+      Alert.alert("Error", "Could not access photos.");
     }
   };
 
