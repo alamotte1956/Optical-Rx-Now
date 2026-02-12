@@ -403,12 +403,6 @@ export default function AddRxScreen() {
               >
                 <Ionicons name="close-circle" size={28} color="#ff5c5c" />
               </TouchableOpacity>
-              {scanningExpiry && (
-                <View style={styles.scanningOverlay}>
-                  <ActivityIndicator size="large" color="#4a9eff" />
-                  <Text style={styles.scanningText}>Scanning for expiration date...</Text>
-                </View>
-              )}
             </View>
           ) : (
             <View style={styles.imageButtons}>
