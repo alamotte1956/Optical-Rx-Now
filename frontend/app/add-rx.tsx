@@ -402,13 +402,14 @@ export default function AddRxScreen() {
 
           {/* Image Capture */}
           <Text style={styles.label}>Prescription Image</Text>
-          {imageBase64 ? (
+          {imageUri ? (
             <View style={styles.imagePreviewContainer}>
-              <Image source={{ uri: imageBase64 }} style={styles.imagePreview} resizeMode="contain" />
+              <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="contain" />
               <TouchableOpacity
                 style={styles.removeImageButton}
                 onPress={() => {
                   setImageBase64("");
+                  setImageUri("");
                   setExpiryDate("");
                 }}
               >
