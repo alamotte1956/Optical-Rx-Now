@@ -59,6 +59,70 @@ const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
+// Image storage directory
+const IMAGE_DIR = `${FileSystem.documentDirectory}prescription_images/`;
+
+// Ensure image directory exists
+const ensureImageDir = async (): Promise<void> => {
+  const dirInfo = await FileSystem.getInfoAsync(IMAGE_DIR);
+  if (!dirInfo.exists) {
+    await FileSystem.makeDirectoryAsync(IMAGE_DIR, { intermediates: true });
+    console.log("Created image directory:", IMAGE_DIR);
+  }
+};
+
+// Save image to file system and return file path
+const saveImageToFile = async (base64Data: string, prescriptionId: string): Promise<string> => {
+  await ensureImageDir();
+  
+  // Remove data URI prefix if present
+  let imageData = base64Data;
+  if (base64Data.startsWith("data:")) {
+    imageData = base64Data.split(",")[1];
+  }
+  
+  const filePath = `${IMAGE_DIR}${prescriptionId}.jpg`;
+  await FileSystem.writeAsStringAsync(filePath, imageData, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  
+  console.log("Image saved to:", filePath);
+  return filePath;
+};
+
+// Load image from file system as base64 data URI
+const loadImageFromFile = async (filePath: string): Promise<string | null> => {
+  try {
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (!fileInfo.exists) {
+      console.log("Image file not found:", filePath);
+      return null;
+    }
+    
+    const base64 = await FileSystem.readAsStringAsync(filePath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    return `data:image/jpeg;base64,${base64}`;
+  } catch (error) {
+    console.log("Error loading image:", error);
+    return null;
+  }
+};
+
+// Delete image file
+const deleteImageFile = async (filePath: string): Promise<void> => {
+  try {
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (fileInfo.exists) {
+      await FileSystem.deleteAsync(filePath);
+      console.log("Deleted image file:", filePath);
+    }
+  } catch (error) {
+    console.log("Error deleting image:", error);
+  }
+};
+
 // ==================== Family Members ====================
 
 export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
