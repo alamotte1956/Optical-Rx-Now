@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,6 +11,7 @@ const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
 
   useEffect(() => {
