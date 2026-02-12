@@ -68,18 +68,9 @@ export default function WelcomeScreen() {
     );
   };
 
-  // Long press handlers for admin access
-  const handleLogoLongPressIn = () => {
-    longPressTimer.current = setTimeout(() => {
-      router.push("/admin");
-    }, 3000); // 3 seconds
-  };
-
-  const handleLogoLongPressOut = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
+  // Long press handler for admin access
+  const handleLogoLongPress = () => {
+    router.push("/admin");
   };
 
   return (
