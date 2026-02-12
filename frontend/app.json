@@ -76,7 +76,8 @@
         {
           "locationWhenInUsePermission": "Find nearby optical stores for eyewear shopping"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
