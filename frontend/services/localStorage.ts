@@ -75,31 +75,84 @@ const generateId = (): string => {
 const IMAGE_DIR = `${FileSystem.documentDirectory}prescription_images/`;
 
 // Ensure image directory exists
-const ensureImageDir = async (): Promise<void> => {
-  const dirInfo = await FileSystem.getInfoAsync(IMAGE_DIR);
-  if (!dirInfo.exists) {
-    await FileSystem.makeDirectoryAsync(IMAGE_DIR, { intermediates: true });
-    console.log("Created image directory:", IMAGE_DIR);
+const ensureImageDir = async (): Promise<boolean> => {
+  try {
+    if (!FileSystem.documentDirectory) {
+      console.log("FileSystem.documentDirectory is not available");
+      return false;
+    }
+    
+    const dirInfo = await FileSystem.getInfoAsync(IMAGE_DIR);
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(IMAGE_DIR, { intermediates: true });
+      console.log("Created image directory:", IMAGE_DIR);
+    }
+    return true;
+  } catch (error) {
+    console.log("Error ensuring image directory:", error);
+    return false;
   }
 };
 
+// Validate base64 data
+const isValidBase64 = (data: string): boolean => {
+  if (!data || data.length < 100) return false;
+  
+  // Check if it has data URI prefix or is raw base64
+  const base64Part = data.startsWith("data:") ? data.split(",")[1] : data;
+  if (!base64Part || base64Part.length < 100) return false;
+  
+  // Basic base64 character validation
+  const base64Regex = /^[A-Za-z0-9+/=]+$/;
+  return base64Regex.test(base64Part.substring(0, 100)); // Check first 100 chars
+};
+
 // Save image to file system and return file path
-const saveImageToFile = async (base64Data: string, prescriptionId: string): Promise<string> => {
-  await ensureImageDir();
-  
-  // Remove data URI prefix if present
-  let imageData = base64Data;
-  if (base64Data.startsWith("data:")) {
-    imageData = base64Data.split(",")[1];
+const saveImageToFile = async (base64Data: string, prescriptionId: string): Promise<string | null> => {
+  try {
+    // Validate input
+    if (!isValidBase64(base64Data)) {
+      console.log("Invalid base64 data provided");
+      return null;
+    }
+    
+    // Ensure directory exists
+    const dirReady = await ensureImageDir();
+    if (!dirReady) {
+      console.log("Could not create image directory");
+      return null;
+    }
+    
+    // Remove data URI prefix if present
+    let imageData = base64Data;
+    if (base64Data.startsWith("data:")) {
+      const parts = base64Data.split(",");
+      if (parts.length < 2) {
+        console.log("Invalid data URI format");
+        return null;
+      }
+      imageData = parts[1];
+    }
+    
+    const filePath = `${IMAGE_DIR}${prescriptionId}.jpg`;
+    
+    await FileSystem.writeAsStringAsync(filePath, imageData, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // Verify file was created
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (!fileInfo.exists) {
+      console.log("File was not created");
+      return null;
+    }
+    
+    console.log("Image saved to:", filePath, "size:", fileInfo.size);
+    return filePath;
+  } catch (error) {
+    console.log("Error saving image to file:", error);
+    return null;
   }
-  
-  const filePath = `${IMAGE_DIR}${prescriptionId}.jpg`;
-  await FileSystem.writeAsStringAsync(filePath, imageData, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  
-  console.log("Image saved to:", filePath);
-  return filePath;
 };
 
 // Load image from file system as base64 data URI
