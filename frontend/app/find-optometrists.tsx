@@ -1,66 +1,211 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Linking,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
+import * as Location from "expo-location";
+
+// Helper function to get state abbreviation
+const getStateAbbreviation = (stateName: string): string => {
+  const stateMap: { [key: string]: string } = {
+    'alabama': 'al', 'alaska': 'ak', 'arizona': 'az', 'arkansas': 'ar', 'california': 'ca',
+    'colorado': 'co', 'connecticut': 'ct', 'delaware': 'de', 'florida': 'fl', 'georgia': 'ga',
+    'hawaii': 'hi', 'idaho': 'id', 'illinois': 'il', 'indiana': 'in', 'iowa': 'ia',
+    'kansas': 'ks', 'kentucky': 'ky', 'louisiana': 'la', 'maine': 'me', 'maryland': 'md',
+    'massachusetts': 'ma', 'michigan': 'mi', 'minnesota': 'mn', 'mississippi': 'ms', 'missouri': 'mo',
+    'montana': 'mt', 'nebraska': 'ne', 'nevada': 'nv', 'new hampshire': 'nh', 'new jersey': 'nj',
+    'new mexico': 'nm', 'new york': 'ny', 'north carolina': 'nc', 'north dakota': 'nd', 'ohio': 'oh',
+    'oklahoma': 'ok', 'oregon': 'or', 'pennsylvania': 'pa', 'rhode island': 'ri', 'south carolina': 'sc',
+    'south dakota': 'sd', 'tennessee': 'tn', 'texas': 'tx', 'utah': 'ut', 'vermont': 'vt',
+    'virginia': 'va', 'washington': 'wa', 'west virginia': 'wv', 'wisconsin': 'wi', 'wyoming': 'wy',
+    'district of columbia': 'dc'
+  };
+  return stateMap[stateName.toLowerCase()] || '';
+};
 
 export default function FindOptometristsScreen() {
   const router = useRouter();
-  const [zipCode, setZipCode] = useState("");
-  const [searching, setSearching] = useState(false);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
+  const [locationCity, setLocationCity] = useState<string>("");
+  const [locationState, setLocationState] = useState<string>("");
+  const [locationStateAbbrev, setLocationStateAbbrev] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
-  const handleSearch = async () => {
-    const url = `https://www.google.com/search?q=optometrists%20near%20me`;
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  const requestLocationPermission = async () => {
+    setLoading(true);
+    try {
+      // Request permission
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== "granted") {
+        setPermissionDenied(true);
+        setLoading(false);
+        return;
+      }
+
+      // Get current location
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
+      setLocation(currentLocation);
+      console.log("Location obtained:", currentLocation.coords);
+
+      // Get location name (city, state)
+      try {
+        const [address] = await Location.reverseGeocodeAsync({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        });
+        
+        if (address) {
+          const name = [address.city, address.region].filter(Boolean).join(", ");
+          setLocationName(name || "Your Location");
+          
+          // Store city and state for Healthgrades search
+          if (address.city) {
+            setLocationCity(address.city.toLowerCase().replace(/\s+/g, '-'));
+          }
+          if (address.region) {
+            setLocationState(address.region.toLowerCase().replace(/\s+/g, '-'));
+            // Store region code if available (e.g., "CA", "NY")
+            setLocationStateAbbrev(address.region.length === 2 ? address.region.toLowerCase() : getStateAbbreviation(address.region));
+          }
+          
+          console.log("Location name:", name);
+          console.log("City:", address.city, "State:", address.region);
+        }
+      } catch (geocodeError) {
+        console.log("Geocode error:", geocodeError);
+        setLocationName("Your Location");
+      }
+    } catch (error) {
+      console.log("Location error:", error);
+      setPermissionDenied(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchGoogle = async () => {
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
+      return;
+    }
+
+    const { latitude, longitude } = location.coords;
+    const searchTerm = `optometrist near me`;
+    const encodedSearch = encodeURIComponent(searchTerm);
+    // Use Google Maps search with coordinates
+    const url = `https://www.google.com/maps/search/optometrist/@${latitude},${longitude},14z`;
+    
+    console.log("Opening Google Maps URL:", url);
     
     try {
-      await Linking.openURL(url);
+      await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+        toolbarColor: '#ffffff',
+      });
     } catch (error) {
-      console.log("Error opening Google:", error);
+      console.error("WebBrowser error:", error);
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open browser.");
+      }
     }
   };
 
   const handleSearchYelp = async () => {
-    if (!zipCode || zipCode.length < 5) {
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
       return;
     }
+
+    const { latitude, longitude } = location.coords;
+    // Yelp supports lat/lng parameters
+    const url = `https://www.yelp.com/search?find_desc=Optometrists&l=g:${longitude},${latitude},${longitude},${latitude}`;
     
-    const yelpUrl = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${zipCode}`;
+    console.log("Opening Yelp URL:", url);
     
     try {
-      await Linking.openURL(yelpUrl);
+      await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
     } catch (error) {
-      console.log("Error opening Yelp:", error);
+      console.log("WebBrowser error:", error);
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open Yelp.");
+      }
     }
   };
 
   const handleSearchHealthgrades = async () => {
-    const url = `https://www.healthgrades.com/optometry-directory`;
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
+      return;
+    }
+
+    // Healthgrades uses city/state URL path format, not lat/lon parameters
+    // Format: https://www.healthgrades.com/optometry-directory/[state-abbrev]-[state-name]/[city]
+    let url = "https://www.healthgrades.com/optometry-directory";
+    
+    if (locationStateAbbrev && locationState && locationCity) {
+      // Full city/state URL
+      url = `https://www.healthgrades.com/optometry-directory/${locationStateAbbrev}-${locationState}/${locationCity}`;
+    } else if (locationStateAbbrev && locationState) {
+      // State-only URL
+      url = `https://www.healthgrades.com/optometry-directory/${locationStateAbbrev}-${locationState}`;
+    }
+    // If no location data, falls back to main directory
+    
+    console.log("Opening Healthgrades URL:", url);
     
     try {
-      await Linking.openURL(url);
+      await WebBrowser.openBrowserAsync(url, {
+        dismissButtonStyle: 'close',
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+      });
     } catch (error) {
-      console.log("Error opening Healthgrades:", error);
+      console.log("WebBrowser error:", error);
+      try {
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open browser.");
+      }
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
-        {/* Header */}
+  const handleOpenSettings = () => {
+    Linking.openSettings();
+  };
+
+  // Loading Screen
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -68,70 +213,127 @@ export default function FindOptometristsScreen() {
           <Text style={styles.headerTitle}>Find Optometrists</Text>
           <View style={styles.placeholder} />
         </View>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#4a9eff" />
+          <Text style={styles.loadingText}>Getting your location...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-          {/* Icon */}
-          <View style={styles.iconContainer}>
-            <Ionicons name="eye" size={48} color="#4a9eff" />
-          </View>
-
-          <Text style={styles.title}>Find Eye Doctors Near You</Text>
-          <Text style={styles.subtitle}>
-            Enter your ZIP code to find optometrists and eye care professionals in your area.
-          </Text>
-
-          {/* ZIP Code Input */}
-          <View style={styles.inputContainer}>
-            <Ionicons name="location" size={24} color="#4a9eff" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter ZIP Code"
-              placeholderTextColor="#6b7c8f"
-              value={zipCode}
-              onChangeText={setZipCode}
-              keyboardType="number-pad"
-              maxLength={5}
-            />
-          </View>
-
-          {/* Search Buttons */}
-          <View style={styles.searchButtons}>
-            <TouchableOpacity
-              style={[styles.searchButton, styles.healthButton]}
-              onPress={handleSearchHealthgrades}
-            >
-              <Ionicons name="medkit" size={22} color="#fff" />
-              <Text style={styles.searchButtonText}>Search Healthgrades</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.searchButton, styles.primaryButton]}
-              onPress={handleSearch}
-            >
-              <Ionicons name="search" size={22} color="#fff" />
-              <Text style={styles.searchButtonText}>Search on Google</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.searchButton, styles.yelpButton]}
-              onPress={handleSearchYelp}
-              disabled={!zipCode || zipCode.length < 5}
-            >
-              <Ionicons name="star" size={22} color="#fff" />
-              <Text style={styles.searchButtonText}>Search on Yelp</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Ad Banner Placeholder */}
-          <TouchableOpacity 
-            style={styles.adPlaceholder}
-            onPress={() => Linking.openURL("https://opticalrxnow.com")}
-          >
-            <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
-            <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+  // Permission Denied Screen
+  if (permissionDenied) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <Text style={styles.headerTitle}>Find Optometrists</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centerContainer}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="location-outline" size={48} color="#ff6b6b" />
+          </View>
+          <Text style={styles.title}>Location Access Required</Text>
+          <Text style={styles.subtitle}>
+            To find optometrists near you, please enable location access for this app.
+          </Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleOpenSettings}>
+            <Ionicons name="settings-outline" size={20} color="#fff" />
+            <Text style={styles.primaryButtonText}>Open Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryButton} onPress={requestLocationPermission}>
+            <Text style={styles.secondaryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Main Search Screen
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Find Optometrists</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Location Info */}
+        <View style={styles.locationCard}>
+          <Ionicons name="location" size={24} color="#4a9eff" />
+          <View style={styles.locationInfo}>
+            <Text style={styles.locationLabel}>Your Location</Text>
+            <Text style={styles.locationName}>{locationName || "Location detected"}</Text>
+          </View>
+          <TouchableOpacity onPress={requestLocationPermission}>
+            <Ionicons name="refresh" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Icon */}
+        <View style={styles.iconContainerSmall}>
+          <Ionicons name="eye" size={36} color="#4a9eff" />
+        </View>
+
+        <Text style={styles.titleSmall}>Search for Optometrists</Text>
+        <Text style={styles.subtitleSmall}>
+          Find eye doctors and optometrists near your current location
+        </Text>
+
+        {/* Search Buttons */}
+        <View style={styles.searchButtons}>
+          <TouchableOpacity
+            style={[styles.searchButton, styles.googleButton]}
+            onPress={handleSearchGoogle}
+          >
+            <Ionicons name="search" size={22} color="#fff" />
+            <Text style={styles.searchButtonText}>Search on Google Maps</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.searchButton, styles.healthButton]}
+            onPress={handleSearchHealthgrades}
+          >
+            <Ionicons name="medkit" size={22} color="#fff" />
+            <Text style={styles.searchButtonText}>Search Healthgrades</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.searchButton, styles.yelpButton]}
+            onPress={handleSearchYelp}
+          >
+            <Ionicons name="star" size={22} color="#fff" />
+            <Text style={styles.searchButtonText}>Search on Yelp</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <Ionicons name="information-circle" size={24} color="#4a9eff" />
+          <View style={styles.infoTextContainer}>
+            <Text style={styles.infoTitle}>Prescription Tip</Text>
+            <Text style={styles.infoText}>
+              Eye prescriptions typically expire 1-2 years from the exam date. Schedule regular eye exams to keep your prescription current.
+            </Text>
+          </View>
+        </View>
+
+        {/* Ad Banner Placeholder */}
+        <TouchableOpacity 
+          style={styles.adPlaceholder}
+          onPress={() => Linking.openURL("mailto:support@OpticalRxNow.com?subject=Advertising%20Inquiry")}
+        >
+          <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
+          <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -140,9 +342,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0a1628",
-  },
-  keyboardView: {
-    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -167,6 +366,17 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 44,
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#8899a6",
+  },
   scrollView: {
     flex: 1,
   },
@@ -174,17 +384,58 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
   },
+  locationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 16,
+    width: "100%",
+    marginBottom: 24,
+    gap: 12,
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationLabel: {
+    fontSize: 12,
+    color: "#8899a6",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  locationName: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+    marginTop: 2,
+  },
   iconContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    backgroundColor: "rgba(255, 107, 107, 0.15)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 24,
   },
+  iconContainerSmall: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   title: {
     fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  titleSmall: {
+    fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
@@ -196,24 +447,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 32,
     lineHeight: 22,
+    paddingHorizontal: 16,
   },
-  inputContainer: {
+  subtitleSmall: {
+    fontSize: 14,
+    color: "#8899a6",
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  primaryButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a2d45",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    width: "100%",
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#4a9eff",
     paddingVertical: 16,
-    fontSize: 18,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    gap: 8,
+    width: "100%",
+    marginBottom: 12,
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "#fff",
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    color: "#4a9eff",
+    textDecorationLine: "underline",
   },
   searchButtons: {
     width: "100%",
@@ -229,7 +495,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 10,
   },
-  primaryButton: {
+  googleButton: {
     backgroundColor: "#4a9eff",
   },
   yelpButton: {
@@ -242,6 +508,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+  },
+  infoCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "rgba(74, 158, 255, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+    marginBottom: 24,
+    width: "100%",
+  },
+  infoTextContainer: {
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  infoText: {
+    fontSize: 13,
+    color: "#8899a6",
+    lineHeight: 18,
   },
   adPlaceholder: {
     width: "100%",

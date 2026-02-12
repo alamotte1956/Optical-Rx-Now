@@ -21,6 +21,12 @@ import {
   savePrescription,
   FamilyMember,
 } from "../services/localStorage";
+import {
+  getTodayFormatted,
+  formatDateForInput,
+  normalizeDate,
+  isValidDate,
+} from "../services/dateUtils";
 
 export default function AddRxScreen() {
   const router = useRouter();
@@ -28,10 +34,9 @@ export default function AddRxScreen() {
   const [selectedMember, setSelectedMember] = useState<string>("");
   const [rxType, setRxType] = useState<"eyeglass" | "contact">("eyeglass");
   const [imageBase64, setImageBase64] = useState<string>("");
+  const [imageUri, setImageUri] = useState<string>("");
   const [notes, setNotes] = useState("");
-  const [dateTaken, setDateTaken] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [dateTaken, setDateTaken] = useState(getTodayFormatted());
   const [expiryDate, setExpiryDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,33 +70,96 @@ export default function AddRxScreen() {
     }
   };
 
-  const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.8,
-      base64: true,
-      exif: false,
-    });
+  // Maximum image size (4MB in base64 ~ safe for AsyncStorage)
+  const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
 
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setImageBase64(base64Data);
+  const takePhoto = async () => {
+    try {
+      console.log("Opening camera...");
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.3,
+        base64: true,
+        exif: false,
+      });
+
+      console.log("Camera result:", result.canceled ? "canceled" : "captured");
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        console.log("Asset received, uri:", asset.uri);
+        
+        // Use URI for preview (more efficient)
+        if (asset.uri) {
+          setImageUri(asset.uri);
+        }
+        
+        // Store base64 for saving
+        if (asset.base64 && asset.base64.length > 0) {
+          const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+          if (base64Data.length <= MAX_IMAGE_SIZE) {
+            setImageBase64(base64Data);
+            console.log("Photo captured successfully, size:", base64Data.length);
+          } else {
+            console.log("Image too large:", base64Data.length);
+            Alert.alert("Image Too Large", "Please take a lower resolution photo.");
+            setImageUri("");
+          }
+        } else {
+          console.log("No base64 data");
+          Alert.alert("Error", "Could not capture photo. Please try again.");
+          setImageUri("");
+        }
+      }
+    } catch (error) {
+      console.log("Camera error:", error);
+      Alert.alert("Error", "Could not access camera.");
     }
   };
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.8,
-      base64: true,
-      exif: false,
-    });
+    try {
+      console.log("Opening image library...");
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.3,
+        base64: true,
+        exif: false,
+      });
 
-    if (!result.canceled && result.assets[0].base64) {
-      const base64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setImageBase64(base64Data);
+      console.log("Library result:", result.canceled ? "canceled" : "selected");
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        console.log("Asset received, uri:", asset.uri);
+        
+        // Use URI for preview (more efficient)
+        if (asset.uri) {
+          setImageUri(asset.uri);
+        }
+        
+        // Store base64 for saving
+        if (asset.base64 && asset.base64.length > 0) {
+          const base64Data = `data:image/jpeg;base64,${asset.base64}`;
+          if (base64Data.length <= MAX_IMAGE_SIZE) {
+            setImageBase64(base64Data);
+            console.log("Photo selected successfully, size:", base64Data.length);
+          } else {
+            console.log("Image too large:", base64Data.length);
+            Alert.alert("Image Too Large", "Please select a smaller image.");
+            setImageUri("");
+          }
+        } else {
+          console.log("No base64 data");
+          Alert.alert("Error", "Could not load image. Please try another.");
+          setImageUri("");
+        }
+      }
+    } catch (error) {
+      console.log("Image picker error:", error);
+      Alert.alert("Error", "Could not access photos.");
     }
   };
 
@@ -104,29 +172,62 @@ export default function AddRxScreen() {
       Alert.alert("Error", "Please capture or select an image of the prescription");
       return;
     }
+    
+    // Validate dates
+    if (dateTaken && !isValidDate(dateTaken)) {
+      Alert.alert("Invalid Date", "Please enter the prescription date in MM/DD/YYYY format");
+      return;
+    }
+    if (expiryDate && !isValidDate(expiryDate)) {
+      Alert.alert("Invalid Date", "Please enter the expiration date in MM/DD/YYYY format");
+      return;
+    }
 
     setSaving(true);
     try {
-      await savePrescription({
+      // Normalize dates to YYYY-MM-DD for storage
+      let normalizedDateTaken = normalizeDate(dateTaken);
+      if (!normalizedDateTaken) {
+        // Fallback: create today's date in YYYY-MM-DD format
+        const today = new Date();
+        normalizedDateTaken = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      }
+      const normalizedExpiryDate = expiryDate ? normalizeDate(expiryDate) : null;
+      
+      console.log("Saving prescription with image size:", imageBase64.length);
+      
+      const savedRx = await savePrescription({
         familyMemberId: selectedMember,
         rxType,
         imageBase64,
         notes: notes.trim(),
-        dateTaken,
-        expiryDate: expiryDate || null,
+        dateTaken: normalizedDateTaken,
+        expiryDate: normalizedExpiryDate,
       });
 
-      if (expiryDate) {
-        Alert.alert(
-          "Prescription Saved",
-          "Expiry alerts have been scheduled. You'll receive notifications before the prescription expires.",
-          [{ text: "OK", onPress: () => router.back() }]
-        );
-      } else {
-        router.back();
-      }
+      console.log("Prescription saved with ID:", savedRx.id);
+
+      // Show success and navigate back
+      Alert.alert(
+        "Success",
+        normalizedExpiryDate 
+          ? "Prescription saved! You'll receive notifications before it expires."
+          : "Prescription saved successfully!",
+        [{ 
+          text: "OK", 
+          onPress: () => {
+            try {
+              router.dismiss();
+            } catch (navError) {
+              console.log("Navigation error:", navError);
+              router.back();
+            }
+          }
+        }]
+      );
     } catch (error) {
-      Alert.alert("Error", "Failed to save prescription");
+      console.log("Save error:", error);
+      Alert.alert("Error", "Failed to save prescription. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -146,7 +247,7 @@ export default function AddRxScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.dismiss()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Prescription</Text>
@@ -161,8 +262,8 @@ export default function AddRxScreen() {
           <TouchableOpacity
             style={styles.emptyButton}
             onPress={() => {
-              router.back();
-              router.push("/add-member");
+              router.dismiss();
+              setTimeout(() => router.push("/add-member"), 100);
             }}
           >
             <Text style={styles.emptyButtonText}>Add Family Member</Text>
@@ -180,7 +281,7 @@ export default function AddRxScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.dismiss()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add Prescription</Text>
@@ -269,12 +370,16 @@ export default function AddRxScreen() {
 
           {/* Image Capture */}
           <Text style={styles.label}>Prescription Image</Text>
-          {imageBase64 ? (
+          {imageUri ? (
             <View style={styles.imagePreviewContainer}>
-              <Image source={{ uri: imageBase64 }} style={styles.imagePreview} resizeMode="contain" />
+              <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="contain" />
               <TouchableOpacity
                 style={styles.removeImageButton}
-                onPress={() => setImageBase64("")}
+                onPress={() => {
+                  setImageBase64("");
+                  setImageUri("");
+                  setExpiryDate("");
+                }}
               >
                 <Ionicons name="close-circle" size={28} color="#ff5c5c" />
               </TouchableOpacity>
@@ -296,24 +401,26 @@ export default function AddRxScreen() {
           <Text style={styles.label}>Prescription Date</Text>
           <TextInput
             style={styles.input}
-            placeholder="YYYY-MM-DD"
+            placeholder="MM/DD/YYYY"
             placeholderTextColor="#6b7c8f"
             value={dateTaken}
             onChangeText={setDateTaken}
+            keyboardType="numbers-and-punctuation"
           />
 
           {/* Expiry Date */}
           <Text style={styles.label}>Expiration Date</Text>
           <TextInput
             style={styles.input}
-            placeholder="YYYY-MM-DD (optional)"
+            placeholder="MM/DD/YYYY (optional)"
             placeholderTextColor="#6b7c8f"
             value={expiryDate}
             onChangeText={setExpiryDate}
+            keyboardType="numbers-and-punctuation"
           />
           {expiryDate ? (
             <Text style={styles.expiryHint}>
-              ✓ You'll receive notifications at 30 days, 2 weeks, 1 week, and 1 day before expiration
+              ✓ You'll receive notifications at 30 days, 14 days, 7 days, 2 days, and the morning of expiration
             </Text>
           ) : (
             <Text style={styles.expiryHintEmpty}>

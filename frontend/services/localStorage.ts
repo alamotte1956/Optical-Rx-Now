@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
 
 // Storage Keys
@@ -23,7 +24,19 @@ export interface Prescription {
   id: string;
   familyMemberId: string;
   rxType: "eyeglass" | "contact";
-  imageBase64: string;
+  imageBase64: string; // Now stores file path instead of base64
+  notes: string;
+  dateTaken: string;
+  expiryDate: string | null;
+  createdAt: string;
+}
+
+// Internal type for storage (without image data)
+interface PrescriptionStorage {
+  id: string;
+  familyMemberId: string;
+  rxType: "eyeglass" | "contact";
+  imagePath: string; // File path to image
   notes: string;
   dateTaken: string;
   expiryDate: string | null;
@@ -55,7 +68,124 @@ Notifications.setNotificationHandler({
 // ==================== Utility Functions ====================
 
 const generateId = (): string => {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
+
+// Image storage directory
+const IMAGE_DIR = `${FileSystem.documentDirectory}prescription_images/`;
+
+// Ensure image directory exists
+const ensureImageDir = async (): Promise<boolean> => {
+  try {
+    if (!FileSystem.documentDirectory) {
+      console.log("FileSystem.documentDirectory is not available");
+      return false;
+    }
+    
+    const dirInfo = await FileSystem.getInfoAsync(IMAGE_DIR);
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(IMAGE_DIR, { intermediates: true });
+      console.log("Created image directory:", IMAGE_DIR);
+    }
+    return true;
+  } catch (error) {
+    console.log("Error ensuring image directory:", error);
+    return false;
+  }
+};
+
+// Validate base64 data
+const isValidBase64 = (data: string): boolean => {
+  if (!data || data.length < 100) return false;
+  
+  // Check if it has data URI prefix or is raw base64
+  const base64Part = data.startsWith("data:") ? data.split(",")[1] : data;
+  if (!base64Part || base64Part.length < 100) return false;
+  
+  // Basic base64 character validation
+  const base64Regex = /^[A-Za-z0-9+/=]+$/;
+  return base64Regex.test(base64Part.substring(0, 100)); // Check first 100 chars
+};
+
+// Save image to file system and return file path
+const saveImageToFile = async (base64Data: string, prescriptionId: string): Promise<string | null> => {
+  try {
+    // Validate input
+    if (!isValidBase64(base64Data)) {
+      console.log("Invalid base64 data provided");
+      return null;
+    }
+    
+    // Ensure directory exists
+    const dirReady = await ensureImageDir();
+    if (!dirReady) {
+      console.log("Could not create image directory");
+      return null;
+    }
+    
+    // Remove data URI prefix if present
+    let imageData = base64Data;
+    if (base64Data.startsWith("data:")) {
+      const parts = base64Data.split(",");
+      if (parts.length < 2) {
+        console.log("Invalid data URI format");
+        return null;
+      }
+      imageData = parts[1];
+    }
+    
+    const filePath = `${IMAGE_DIR}${prescriptionId}.jpg`;
+    
+    await FileSystem.writeAsStringAsync(filePath, imageData, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // Verify file was created
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (!fileInfo.exists) {
+      console.log("File was not created");
+      return null;
+    }
+    
+    console.log("Image saved to:", filePath, "size:", fileInfo.size);
+    return filePath;
+  } catch (error) {
+    console.log("Error saving image to file:", error);
+    return null;
+  }
+};
+
+// Load image from file system as base64 data URI
+const loadImageFromFile = async (filePath: string): Promise<string | null> => {
+  try {
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (!fileInfo.exists) {
+      console.log("Image file not found:", filePath);
+      return null;
+    }
+    
+    const base64 = await FileSystem.readAsStringAsync(filePath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    return `data:image/jpeg;base64,${base64}`;
+  } catch (error) {
+    console.log("Error loading image:", error);
+    return null;
+  }
+};
+
+// Delete image file
+const deleteImageFile = async (filePath: string): Promise<void> => {
+  try {
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (fileInfo.exists) {
+      await FileSystem.deleteAsync(filePath);
+      console.log("Deleted image file:", filePath);
+    }
+  } catch (error) {
+    console.log("Error deleting image:", error);
+  }
 };
 
 // ==================== Family Members ====================
@@ -125,7 +255,47 @@ export const getFamilyMemberById = async (
 export const getPrescriptions = async (): Promise<Prescription[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    
+    const storedPrescriptions: PrescriptionStorage[] = JSON.parse(data);
+    console.log(`Loading ${storedPrescriptions.length} prescriptions from storage`);
+    
+    // Load images from files and convert to Prescription format
+    const prescriptions: Prescription[] = await Promise.all(
+      storedPrescriptions.map(async (stored) => {
+        let imageBase64 = "";
+        
+        // Check if it's a file path or legacy base64 data
+        if (stored.imagePath && stored.imagePath.startsWith(FileSystem.documentDirectory || "")) {
+          // New format - load from file
+          const loadedImage = await loadImageFromFile(stored.imagePath);
+          imageBase64 = loadedImage || "";
+        } else if (stored.imagePath) {
+          // Legacy format - imagePath contains base64 data
+          imageBase64 = stored.imagePath;
+        }
+        
+        // Also handle old 'imageBase64' field for backwards compatibility
+        const oldData = stored as any;
+        if (!imageBase64 && oldData.imageBase64) {
+          imageBase64 = oldData.imageBase64;
+        }
+        
+        return {
+          id: stored.id,
+          familyMemberId: stored.familyMemberId,
+          rxType: stored.rxType,
+          imageBase64,
+          notes: stored.notes,
+          dateTaken: stored.dateTaken,
+          expiryDate: stored.expiryDate,
+          createdAt: stored.createdAt,
+        };
+      })
+    );
+    
+    console.log(`Loaded ${prescriptions.length} prescriptions with images`);
+    return prescriptions;
   } catch (error) {
     console.log("Error getting prescriptions:", error);
     return [];
@@ -135,21 +305,83 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
 export const savePrescription = async (
   prescription: Omit<Prescription, "id" | "createdAt">
 ): Promise<Prescription> => {
-  const prescriptions = await getPrescriptions();
-  const newRx: Prescription = {
-    ...prescription,
-    id: generateId(),
-    createdAt: new Date().toISOString(),
-  };
-  prescriptions.push(newRx);
-  await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(prescriptions));
+  try {
+    console.log("savePrescription called");
+    
+    // Generate ID first
+    const prescriptionId = generateId();
+    console.log(`Creating prescription with ID: ${prescriptionId}`);
+    
+    // Save image to file system (not AsyncStorage)
+    let imagePath = "";
+    if (prescription.imageBase64) {
+      console.log(`Saving image to file system, data length: ${prescription.imageBase64.length}`);
+      const savedPath = await saveImageToFile(prescription.imageBase64, prescriptionId);
+      
+      if (savedPath) {
+        imagePath = savedPath;
+        console.log(`Image saved to: ${imagePath}`);
+      } else {
+        // File system save failed - fall back to storing base64 directly
+        // This may fail on Android for large images, but at least we try
+        console.log("File system save failed, using fallback");
+        imagePath = prescription.imageBase64;
+      }
+    }
+    
+    // Get current prescriptions (stored format without image data)
+    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+    
+    // Create storage object
+    const storageRx: PrescriptionStorage = {
+      id: prescriptionId,
+      familyMemberId: prescription.familyMemberId,
+      rxType: prescription.rxType,
+      imagePath, // Store file path or fallback to base64
+      notes: prescription.notes,
+      dateTaken: prescription.dateTaken,
+      expiryDate: prescription.expiryDate,
+      createdAt: new Date().toISOString(),
+    };
+    
+    // Add to array
+    storedPrescriptions.push(storageRx);
+    
+    // Save to AsyncStorage
+    const jsonData = JSON.stringify(storedPrescriptions);
+    console.log(`Saving ${storedPrescriptions.length} prescriptions, JSON size: ${jsonData.length} bytes`);
+    
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonData);
+    console.log("Prescription saved to AsyncStorage");
 
-  // Schedule notifications if expiry date is set
-  if (newRx.expiryDate) {
-    await scheduleExpiryNotifications(newRx);
+    // Create return object with image data
+    const newRx: Prescription = {
+      id: prescriptionId,
+      familyMemberId: prescription.familyMemberId,
+      rxType: prescription.rxType,
+      imageBase64: prescription.imageBase64,
+      notes: prescription.notes,
+      dateTaken: prescription.dateTaken,
+      expiryDate: prescription.expiryDate,
+      createdAt: storageRx.createdAt,
+    };
+
+    // Schedule notifications if expiry date is set (don't let this crash the save)
+    if (newRx.expiryDate) {
+      try {
+        await scheduleExpiryNotifications(newRx);
+        console.log("Notifications scheduled");
+      } catch (notifError) {
+        console.log("Notification scheduling failed (non-critical):", notifError);
+      }
+    }
+
+    return newRx;
+  } catch (error) {
+    console.log("Error saving prescription:", error);
+    throw error;
   }
-
-  return newRx;
 };
 
 export const getPrescriptionById = async (
@@ -160,14 +392,32 @@ export const getPrescriptionById = async (
 };
 
 export const deletePrescription = async (id: string): Promise<boolean> => {
-  const prescriptions = await getPrescriptions();
-  const filtered = prescriptions.filter((p) => p.id !== id);
-  await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(filtered));
+  try {
+    // Get stored prescriptions
+    const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const storedPrescriptions: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+    
+    // Find the prescription to get image path
+    const toDelete = storedPrescriptions.find((p) => p.id === id);
+    
+    // Delete the image file if it exists
+    if (toDelete?.imagePath && toDelete.imagePath.startsWith(FileSystem.documentDirectory || "")) {
+      await deleteImageFile(toDelete.imagePath);
+    }
+    
+    // Remove from array
+    const filtered = storedPrescriptions.filter((p) => p.id !== id);
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(filtered));
 
-  // Cancel associated notifications
-  await cancelPrescriptionNotifications(id);
+    // Cancel associated notifications
+    await cancelPrescriptionNotifications(id);
 
-  return true;
+    console.log(`Deleted prescription ${id}`);
+    return true;
+  } catch (error) {
+    console.log("Error deleting prescription:", error);
+    return false;
+  }
 };
 
 export const getPrescriptionsByMember = async (
@@ -256,8 +506,40 @@ export const scheduleExpiryNotifications = async (
   const hasPermission = await requestNotificationPermissions();
   if (!hasPermission) return;
 
-  const expiryDate = new Date(prescription.expiryDate);
-  const alertDays = [30, 14, 7, 1, 0]; // Days before expiry
+  // Parse the expiry date properly (handles YYYY-MM-DD format)
+  let expiryDate: Date;
+  const dateStr = prescription.expiryDate;
+  
+  // Try YYYY-MM-DD format first
+  const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    expiryDate = new Date(
+      parseInt(isoMatch[1]),
+      parseInt(isoMatch[2]) - 1,
+      parseInt(isoMatch[3])
+    );
+  } else {
+    // Try MM/DD/YYYY format
+    const usMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (usMatch) {
+      expiryDate = new Date(
+        parseInt(usMatch[3]),
+        parseInt(usMatch[1]) - 1,
+        parseInt(usMatch[2])
+      );
+    } else {
+      // Fallback to Date constructor
+      expiryDate = new Date(dateStr);
+    }
+  }
+
+  // Validate the date
+  if (isNaN(expiryDate.getTime())) {
+    console.log("Invalid expiry date, skipping notification scheduling");
+    return;
+  }
+  // Notification schedule: 30 days, 14 days, 7 days, 2 days, and morning of expiration
+  const alertDays = [30, 14, 7, 2, 0];
   const member = await getFamilyMemberById(prescription.familyMemberId);
   const memberName = member?.name || "Family member";
 
@@ -266,25 +548,41 @@ export const scheduleExpiryNotifications = async (
   for (const daysBefore of alertDays) {
     const triggerDate = new Date(expiryDate);
     triggerDate.setDate(triggerDate.getDate() - daysBefore);
-    triggerDate.setHours(9, 0, 0, 0); // Send at 9 AM
+    // Send at 8 AM in the morning
+    triggerDate.setHours(8, 0, 0, 0);
 
     // Skip if the trigger date is in the past
     if (triggerDate <= new Date()) continue;
 
-    const title =
-      daysBefore === 0
-        ? "Prescription Expires Today!"
-        : `Prescription Expires in ${daysBefore} ${daysBefore === 1 ? "Day" : "Days"}`;
-
-    const body = `${memberName}'s ${prescription.rxType} prescription expires ${
-      daysBefore === 0
-        ? "today"
-        : daysBefore === 1
-          ? "tomorrow"
-          : `on ${expiryDate.toLocaleDateString()}`
-    }. Time to schedule an eye exam!`;
+    let title: string;
+    let body: string;
+    
+    if (daysBefore === 0) {
+      title = "⚠️ Prescription Expires TODAY!";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires TODAY! Schedule an eye exam immediately to renew your prescription.`;
+    } else if (daysBefore === 2) {
+      title = "⏰ Prescription Expires in 2 Days!";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 2 days on ${expiryDate.toLocaleDateString()}. Don't forget to schedule your eye exam!`;
+    } else if (daysBefore === 7) {
+      title = "📅 Prescription Expires in 1 Week";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 7 days on ${expiryDate.toLocaleDateString()}. Time to book your eye appointment!`;
+    } else if (daysBefore === 14) {
+      title = "📋 Prescription Expires in 2 Weeks";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription expires in 14 days on ${expiryDate.toLocaleDateString()}. Consider scheduling an eye exam soon.`;
+    } else {
+      title = "🔔 Prescription Expires in 30 Days";
+      body = `${memberName}'s ${prescription.rxType === "eyeglass" ? "eyeglass" : "contact lens"} prescription will expire on ${expiryDate.toLocaleDateString()}. Start planning your next eye exam!`;
+    }
 
     try {
+      // Calculate seconds until the trigger date
+      const secondsUntilTrigger = Math.floor(
+        (triggerDate.getTime() - Date.now()) / 1000
+      );
+
+      // Skip if less than 60 seconds (notification won't work properly)
+      if (secondsUntilTrigger < 60) continue;
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title,
@@ -293,8 +591,9 @@ export const scheduleExpiryNotifications = async (
           sound: true,
         },
         trigger: {
-          date: triggerDate,
-        },
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: secondsUntilTrigger,
+        } as any,
       });
 
       scheduledNotifications.push({

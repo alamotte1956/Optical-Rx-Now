@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking, Pressable, Vibration } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStats, requestNotificationPermissions } from "../services/localStorage";
+import * as Haptics from "expo-haptics";
+
+const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -42,6 +46,41 @@ export default function WelcomeScreen() {
     }
   };
 
+  const handleResetAgeVerification = async () => {
+    Alert.alert(
+      "Reset Age Verification",
+      "This will show the age verification screen again next time you open the app. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem(AGE_VERIFIED_KEY);
+              Alert.alert("Done", "Age verification has been reset. Close and reopen the app to see the verification screen.");
+            } catch (error) {
+              console.log("Error resetting age verification:", error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Long press handler for admin access
+  const handleLogoLongPress = async () => {
+    console.log("Long press detected - navigating to admin");
+    // Provide haptic feedback
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      // Fallback to vibration if haptics not available
+      Vibration.vibrate(100);
+    }
+    router.push("/admin");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Share Button in Header */}
@@ -54,14 +93,21 @@ export default function WelcomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Logo */}
-          <View style={styles.logoContainer}>
+          {/* Logo - Long press for 2 seconds to access Admin */}
+          <Pressable 
+            style={({ pressed }) => [
+              styles.logoContainer,
+              pressed && styles.logoPressed
+            ]}
+            onLongPress={handleLogoLongPress}
+            delayLongPress={2000}
+          >
             <Image
               source={require("../assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
-          </View>
+          </Pressable>
 
           {/* Title */}
           <Text style={styles.subtitle}>
@@ -112,10 +158,18 @@ export default function WelcomeScreen() {
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
             style={styles.adPlaceholder}
-            onPress={() => Linking.openURL("https://opticalrxnow.com")}
+            onPress={() => Linking.openURL("mailto:support@OpticalRxNow.com?subject=Advertising%20Inquiry")}
           >
             <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
             <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
+          </TouchableOpacity>
+
+          {/* Reset Age Verification - for testing */}
+          <TouchableOpacity 
+            style={styles.resetButton} 
+            onPress={handleResetAgeVerification}
+          >
+            <Text style={styles.resetButtonText}>Reset Age Verification</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -161,6 +215,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
+  },
+  logoPressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   logo: {
     width: "100%",
@@ -227,5 +285,14 @@ const styles = StyleSheet.create({
     color: "#6b7c8f",
     textTransform: "uppercase",
     letterSpacing: 1,
+  },
+  resetButton: {
+    paddingVertical: 12,
+    marginBottom: 24,
+  },
+  resetButtonText: {
+    fontSize: 12,
+    color: "#6b7c8f",
+    textDecorationLine: "underline",
   },
 });

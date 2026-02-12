@@ -225,11 +225,18 @@ export default function PrescriptionsScreen() {
               onPress={() => router.push(`/rx-detail?id=${rx.id}`)}
               onLongPress={() => handleDeletePrescription(rx)}
             >
-              <Image
-                source={{ uri: rx.imageBase64 }}
-                style={styles.rxImage}
-                resizeMode="cover"
-              />
+              {rx.imageBase64 ? (
+                <Image
+                  source={{ uri: rx.imageBase64 }}
+                  style={styles.rxImage}
+                  resizeMode="cover"
+                  onError={(e) => console.log("Image load error:", e.nativeEvent.error)}
+                />
+              ) : (
+                <View style={[styles.rxImage, styles.rxImagePlaceholder]}>
+                  <Ionicons name="image-outline" size={24} color="#6b7c8f" />
+                </View>
+              )}
               <View style={styles.rxInfo}>
                 <View style={styles.rxHeader}>
                   <Text style={styles.rxMember}>{getMemberName(rx.familyMemberId)}</Text>
@@ -400,6 +407,11 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 8,
     backgroundColor: "#0a1628",
+  },
+  rxImagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
   },
   rxInfo: {
     flex: 1,

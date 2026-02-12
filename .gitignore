@@ -77,6 +77,35 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/
+
+# Note: .env files are NOT ignored - they are required for deployment
+# Local development secrets should be in .env.local (which IS ignored)
+.env.local
+.env.*.local
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
 -e 
 # Environment files
 *.env

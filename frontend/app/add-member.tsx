@@ -93,6 +93,7 @@ export default function AddMemberScreen() {
             onChangeText={setName}
             autoCapitalize="words"
             autoFocus
+            maxLength={50}
           />
 
           {/* Relationship Selection */}
@@ -130,6 +131,7 @@ export default function AddMemberScreen() {
                 value={customRelationship}
                 onChangeText={setCustomRelationship}
                 autoCapitalize="words"
+                maxLength={30}
               />
             </>
           )}
