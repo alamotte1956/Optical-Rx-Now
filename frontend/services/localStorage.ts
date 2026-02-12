@@ -24,7 +24,19 @@ export interface Prescription {
   id: string;
   familyMemberId: string;
   rxType: "eyeglass" | "contact";
-  imageBase64: string;
+  imageBase64: string; // Now stores file path instead of base64
+  notes: string;
+  dateTaken: string;
+  expiryDate: string | null;
+  createdAt: string;
+}
+
+// Internal type for storage (without image data)
+interface PrescriptionStorage {
+  id: string;
+  familyMemberId: string;
+  rxType: "eyeglass" | "contact";
+  imagePath: string; // File path to image
   notes: string;
   dateTaken: string;
   expiryDate: string | null;
