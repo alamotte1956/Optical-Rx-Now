@@ -1,90 +1,119 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Linking,
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
+import * as Location from "expo-location";
 
 export default function FindOptometristsScreen() {
   const router = useRouter();
-  const [zipCode, setZipCode] = useState("");
-  const [hasEnteredZip, setHasEnteredZip] = useState(false);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
-  const isValidZip = /^\d{5}$/.test(zipCode);
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
 
-  const handleContinue = () => {
-    if (!isValidZip) {
-      Alert.alert("Invalid ZIP Code", "Please enter a valid 5-digit ZIP code.");
-      return;
+  const requestLocationPermission = async () => {
+    setLoading(true);
+    try {
+      // Request permission
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== "granted") {
+        setPermissionDenied(true);
+        setLoading(false);
+        return;
+      }
+
+      // Get current location
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
+      setLocation(currentLocation);
+      console.log("Location obtained:", currentLocation.coords);
+
+      // Get location name (city, state)
+      try {
+        const [address] = await Location.reverseGeocodeAsync({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        });
+        
+        if (address) {
+          const name = [address.city, address.region].filter(Boolean).join(", ");
+          setLocationName(name || "Your Location");
+          console.log("Location name:", name);
+        }
+      } catch (geocodeError) {
+        console.log("Geocode error:", geocodeError);
+        setLocationName("Your Location");
+      }
+    } catch (error) {
+      console.log("Location error:", error);
+      setPermissionDenied(true);
+    } finally {
+      setLoading(false);
     }
-    setHasEnteredZip(true);
   };
 
   const handleSearchGoogle = async () => {
-    // Get current zip code value
-    const currentZip = zipCode.trim();
-    
-    // Validate zipCode presence
-    if (!currentZip || currentZip.length !== 5) {
-      Alert.alert("Input Required", "Please enter a valid 5-digit zip code first.");
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
       return;
     }
 
-    // Build URL with proper encoding
-    const searchTerm = `optometrist near ${currentZip}`;
+    const { latitude, longitude } = location.coords;
+    const searchTerm = `optometrist near me`;
     const encodedSearch = encodeURIComponent(searchTerm);
-    const url = `https://www.google.com/search?q=${encodedSearch}`;
+    // Use Google Maps search with coordinates
+    const url = `https://www.google.com/maps/search/optometrist/@${latitude},${longitude},14z`;
     
-    console.log("ZIP Code:", currentZip);
-    console.log("Opening Google URL:", url);
+    console.log("Opening Google Maps URL:", url);
     
     try {
-      // Try WebBrowser first (in-app browser)
-      const result = await WebBrowser.openBrowserAsync(url, {
+      await WebBrowser.openBrowserAsync(url, {
         dismissButtonStyle: 'close',
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
         toolbarColor: '#ffffff',
       });
-      
-      console.log("WebBrowser result:", result);
     } catch (error) {
-      console.error("WebBrowser error, attempting fallback:", error);
-      
-      // Fallback to system browser via Linking
+      console.error("WebBrowser error:", error);
       try {
-        const canOpen = await Linking.canOpenURL(url);
-        if (canOpen) {
-          await Linking.openURL(url);
-        } else {
-          throw new Error("Cannot open URL");
-        }
-      } catch (fallbackError) {
-        Alert.alert(
-          "Error", 
-          "Could not open browser. Please check your device settings or try again later."
-        );
+        await Linking.openURL(url);
+      } catch (linkError) {
+        Alert.alert("Error", "Could not open browser.");
       }
     }
   };
 
   const handleSearchYelp = async () => {
-    const currentZip = zipCode.trim();
-    if (!currentZip) return;
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
+      return;
+    }
+
+    const { latitude, longitude } = location.coords;
+    // Yelp supports lat/lng parameters
+    const url = `https://www.yelp.com/search?find_desc=Optometrists&l=g:${longitude},${latitude},${longitude},${latitude}`;
     
-    const url = `https://www.yelp.com/search?find_desc=Optometrists&find_loc=${currentZip}`;
-    console.log("ZIP Code:", currentZip);
     console.log("Opening Yelp URL:", url);
+    
     try {
       await WebBrowser.openBrowserAsync(url, {
         dismissButtonStyle: 'close',
@@ -95,18 +124,23 @@ export default function FindOptometristsScreen() {
       try {
         await Linking.openURL(url);
       } catch (linkError) {
-        Alert.alert("Error", "Could not open Yelp. Please try again.");
+        Alert.alert("Error", "Could not open Yelp.");
       }
     }
   };
 
   const handleSearchHealthgrades = async () => {
-    const currentZip = zipCode.trim();
-    if (!currentZip) return;
+    if (!location) {
+      Alert.alert("Location Required", "Please enable location access to search.");
+      return;
+    }
+
+    const { latitude, longitude } = location.coords;
+    // Healthgrades with coordinates
+    const url = `https://www.healthgrades.com/optometry-directory?lat=${latitude}&lon=${longitude}`;
     
-    const url = `https://www.healthgrades.com/optometry-directory?loc=${currentZip}`;
-    console.log("ZIP Code:", currentZip);
     console.log("Opening Healthgrades URL:", url);
+    
     try {
       await WebBrowser.openBrowserAsync(url, {
         dismissButtonStyle: 'close',
@@ -117,78 +151,66 @@ export default function FindOptometristsScreen() {
       try {
         await Linking.openURL(url);
       } catch (linkError) {
-        Alert.alert("Error", "Could not open browser. Please try again.");
+        Alert.alert("Error", "Could not open browser.");
       }
     }
   };
 
-  // ZIP Code Entry Screen
-  if (!hasEnteredZip) {
+  const handleOpenSettings = () => {
+    Linking.openSettings();
+  };
+
+  // Loading Screen
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Find Optometrists</Text>
-            <View style={styles.placeholder} />
-          </View>
-
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-            {/* Icon */}
-            <View style={styles.iconContainer}>
-              <Ionicons name="eye" size={48} color="#4a9eff" />
-            </View>
-
-            <Text style={styles.title}>Find Eye Doctors Near You</Text>
-            <Text style={styles.subtitle}>
-              Enter your ZIP code to find optometrists and eye care professionals in your area.
-            </Text>
-
-            {/* ZIP Code Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="location" size={24} color="#4a9eff" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter ZIP Code"
-                placeholderTextColor="#6b7c8f"
-                value={zipCode}
-                onChangeText={setZipCode}
-                keyboardType="number-pad"
-                maxLength={5}
-              />
-            </View>
-
-            {/* Continue Button */}
-            <TouchableOpacity
-              style={[styles.continueButton, !isValidZip && styles.continueButtonDisabled]}
-              onPress={handleContinue}
-              disabled={!isValidZip}
-            >
-              <Text style={styles.continueButtonText}>Find Optometrists</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
-            </TouchableOpacity>
-
-            {/* Ad Banner Placeholder */}
-            <TouchableOpacity 
-              style={styles.adPlaceholder}
-              onPress={() => Linking.openURL("https://opticalrxnow.com")}
-            >
-              <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
-              <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </KeyboardAvoidingView>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Find Optometrists</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#4a9eff" />
+          <Text style={styles.loadingText}>Getting your location...</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
-  // Search Results Screen
+  // Permission Denied Screen
+  if (permissionDenied) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Find Optometrists</Text>
+          <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centerContainer}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="location-outline" size={48} color="#ff6b6b" />
+          </View>
+          <Text style={styles.title}>Location Access Required</Text>
+          <Text style={styles.subtitle}>
+            To find optometrists near you, please enable location access for this app.
+          </Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleOpenSettings}>
+            <Ionicons name="settings-outline" size={20} color="#fff" />
+            <Text style={styles.primaryButtonText}>Open Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryButton} onPress={requestLocationPermission}>
+            <Text style={styles.secondaryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Main Search Screen
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -197,13 +219,22 @@ export default function FindOptometristsScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Find Optometrists</Text>
-        <TouchableOpacity onPress={() => setHasEnteredZip(false)} style={styles.zipButton}>
-          <Ionicons name="location" size={18} color="#4a9eff" />
-          <Text style={styles.zipButtonText}>{zipCode}</Text>
-        </TouchableOpacity>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Location Info */}
+        <View style={styles.locationCard}>
+          <Ionicons name="location" size={24} color="#4a9eff" />
+          <View style={styles.locationInfo}>
+            <Text style={styles.locationLabel}>Your Location</Text>
+            <Text style={styles.locationName}>{locationName || "Location detected"}</Text>
+          </View>
+          <TouchableOpacity onPress={requestLocationPermission}>
+            <Ionicons name="refresh" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+        </View>
+
         {/* Icon */}
         <View style={styles.iconContainerSmall}>
           <Ionicons name="eye" size={36} color="#4a9eff" />
@@ -211,25 +242,25 @@ export default function FindOptometristsScreen() {
 
         <Text style={styles.titleSmall}>Search for Optometrists</Text>
         <Text style={styles.subtitleSmall}>
-          Choose a service below to find eye doctors near ZIP code {zipCode}
+          Find eye doctors and optometrists near your current location
         </Text>
 
         {/* Search Buttons */}
         <View style={styles.searchButtons}>
+          <TouchableOpacity
+            style={[styles.searchButton, styles.googleButton]}
+            onPress={handleSearchGoogle}
+          >
+            <Ionicons name="search" size={22} color="#fff" />
+            <Text style={styles.searchButtonText}>Search on Google Maps</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.searchButton, styles.healthButton]}
             onPress={handleSearchHealthgrades}
           >
             <Ionicons name="medkit" size={22} color="#fff" />
             <Text style={styles.searchButtonText}>Search Healthgrades</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.searchButton, styles.primaryButton]}
-            onPress={handleSearchGoogle}
-          >
-            <Ionicons name="search" size={22} color="#fff" />
-            <Text style={styles.searchButtonText}>Search on Google</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -270,9 +301,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0a1628",
   },
-  keyboardView: {
-    flex: 1,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -296,19 +324,16 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 44,
   },
-  zipButton: {
-    flexDirection: "row",
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
+    padding: 24,
   },
-  zipButtonText: {
-    fontSize: 14,
-    color: "#4a9eff",
-    fontWeight: "600",
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#8899a6",
   },
   scrollView: {
     flex: 1,
@@ -317,11 +342,36 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
   },
+  locationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 16,
+    width: "100%",
+    marginBottom: 24,
+    gap: 12,
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationLabel: {
+    fontSize: 12,
+    color: "#8899a6",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  locationName: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+    marginTop: 2,
+  },
   iconContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    backgroundColor: "rgba(255, 107, 107, 0.15)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 24,
@@ -355,6 +405,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 32,
     lineHeight: 22,
+    paddingHorizontal: 16,
   },
   subtitleSmall: {
     fontSize: 14,
@@ -363,25 +414,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     lineHeight: 20,
   },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1a2d45",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    width: "100%",
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 16,
-    fontSize: 18,
-    color: "#fff",
-  },
-  continueButton: {
+  primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -391,16 +424,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
     width: "100%",
-    marginBottom: 24,
+    marginBottom: 12,
   },
-  continueButtonDisabled: {
-    backgroundColor: "#3a4d63",
-    opacity: 0.7,
-  },
-  continueButtonText: {
-    fontSize: 18,
+  primaryButtonText: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    color: "#4a9eff",
+    textDecorationLine: "underline",
   },
   searchButtons: {
     width: "100%",
@@ -416,7 +453,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 10,
   },
-  primaryButton: {
+  googleButton: {
     backgroundColor: "#4a9eff",
   },
   yelpButton: {
