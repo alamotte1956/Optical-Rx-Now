@@ -10,20 +10,32 @@ export default function IndexScreen() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    checkAgeVerification();
+    // Small delay to ensure AsyncStorage is ready on mobile
+    const timer = setTimeout(() => {
+      checkAgeVerification();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const checkAgeVerification = async () => {
     try {
       const verified = await AsyncStorage.getItem(AGE_VERIFIED_KEY);
-      if (verified === "true") {
+      console.log("Age verification status:", verified);
+      
+      // Explicit check for the string "true"
+      if (verified !== null && verified === "true") {
         router.replace("/welcome");
       } else {
+        // Not verified or null - show age verification
         router.replace("/age-verify");
       }
     } catch (error) {
       console.log("Error checking age verification:", error);
+      // On error, always show age verification
       router.replace("/age-verify");
+    } finally {
+      setChecking(false);
     }
   };
 
