@@ -93,11 +93,14 @@ export default function WelcomeScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Logo - Long press for 3 seconds to access Admin */}
+          {/* Logo - Long press for 2 seconds to access Admin */}
           <Pressable 
-            style={styles.logoContainer}
+            style={({ pressed }) => [
+              styles.logoContainer,
+              pressed && styles.logoPressed
+            ]}
             onLongPress={handleLogoLongPress}
-            delayLongPress={3000}
+            delayLongPress={2000}
           >
             <Image
               source={require("../assets/images/logo.png")}
