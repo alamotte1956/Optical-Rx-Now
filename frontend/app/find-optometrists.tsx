@@ -61,7 +61,19 @@ export default function FindOptometristsScreen() {
         if (address) {
           const name = [address.city, address.region].filter(Boolean).join(", ");
           setLocationName(name || "Your Location");
+          
+          // Store city and state for Healthgrades search
+          if (address.city) {
+            setLocationCity(address.city.toLowerCase().replace(/\s+/g, '-'));
+          }
+          if (address.region) {
+            setLocationState(address.region.toLowerCase().replace(/\s+/g, '-'));
+            // Store region code if available (e.g., "CA", "NY")
+            setLocationStateAbbrev(address.region.length === 2 ? address.region.toLowerCase() : getStateAbbreviation(address.region));
+          }
+          
           console.log("Location name:", name);
+          console.log("City:", address.city, "State:", address.region);
         }
       } catch (geocodeError) {
         console.log("Geocode error:", geocodeError);
