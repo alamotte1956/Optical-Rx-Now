@@ -265,15 +265,23 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
     for (const item of stored) {
       let imageBase64 = "";
       
+      console.log(`Processing prescription ${item.id}, imagePath: ${item.imagePath?.substring(0, 50)}...`);
+      
       // Try to load image from file
-      if (item.imagePath && item.imagePath !== "FILE_SAVE_FAILED") {
+      if (item.imagePath && item.imagePath !== "FILE_SAVE_FAILED" && !item.imagePath.startsWith("data:")) {
         try {
+          console.log(`Checking file exists: ${item.imagePath}`);
           const fileInfo = await FileSystem.getInfoAsync(item.imagePath);
+          console.log(`File exists: ${fileInfo.exists}`);
+          
           if (fileInfo.exists) {
             const base64 = await FileSystem.readAsStringAsync(item.imagePath, {
               encoding: FileSystem.EncodingType.Base64,
             });
             imageBase64 = `data:image/jpeg;base64,${base64}`;
+            console.log(`Image loaded successfully, size: ${imageBase64.length}`);
+          } else {
+            console.log(`Image file not found at: ${item.imagePath}`);
           }
         } catch (e) {
           console.log("Error loading image file:", e);
@@ -283,6 +291,7 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
       // Handle legacy data where imagePath might contain base64
       if (!imageBase64 && item.imagePath && item.imagePath.startsWith("data:")) {
         imageBase64 = item.imagePath;
+        console.log(`Using legacy base64 data, size: ${imageBase64.length}`);
       }
       
       prescriptions.push({
