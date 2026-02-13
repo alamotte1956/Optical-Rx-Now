@@ -255,43 +255,52 @@ export const getFamilyMemberById = async (
 export const getPrescriptions = async (): Promise<Prescription[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
-    if (!data) return [];
+    if (!data) {
+      console.log("No prescriptions in storage");
+      return [];
+    }
     
     const stored: PrescriptionStorage[] = JSON.parse(data);
-    console.log(`Loading ${stored.length} prescriptions`);
+    console.log(`=== Loading ${stored.length} prescriptions ===`);
     
     const prescriptions: Prescription[] = [];
     
     for (const item of stored) {
       let imageBase64 = "";
       
-      console.log(`Processing prescription ${item.id}, imagePath: ${item.imagePath?.substring(0, 50)}...`);
+      console.log(`Processing: ${item.id}`);
+      console.log(`  imagePath: ${item.imagePath?.substring(0, 60)}...`);
       
-      // Try to load image from file
-      if (item.imagePath && item.imagePath !== "FILE_SAVE_FAILED" && !item.imagePath.startsWith("data:")) {
+      // Check if imagePath is a valid file path (not an error marker)
+      const errorMarkers = ["FILE_SAVE_FAILED", "FILE_SAVE_ERROR", "NO_DOC_DIR", "FILE_NOT_CREATED", "INVALID_BASE64"];
+      const isErrorMarker = errorMarkers.includes(item.imagePath);
+      const isDataUri = item.imagePath?.startsWith("data:");
+      const isFilePath = item.imagePath && !isErrorMarker && !isDataUri && item.imagePath.length > 10;
+      
+      if (isFilePath) {
         try {
-          console.log(`Checking file exists: ${item.imagePath}`);
+          console.log(`  Checking file: ${item.imagePath}`);
           const fileInfo = await FileSystem.getInfoAsync(item.imagePath);
-          console.log(`File exists: ${fileInfo.exists}`);
+          console.log(`  File exists: ${fileInfo.exists}`);
           
           if (fileInfo.exists) {
             const base64 = await FileSystem.readAsStringAsync(item.imagePath, {
               encoding: FileSystem.EncodingType.Base64,
             });
             imageBase64 = `data:image/jpeg;base64,${base64}`;
-            console.log(`Image loaded successfully, size: ${imageBase64.length}`);
+            console.log(`  Image loaded, size: ${imageBase64.length}`);
           } else {
-            console.log(`Image file not found at: ${item.imagePath}`);
+            console.log(`  File not found at path`);
           }
-        } catch (e) {
-          console.log("Error loading image file:", e);
+        } catch (e: any) {
+          console.log(`  Error loading image: ${e?.message || e}`);
         }
-      }
-      
-      // Handle legacy data where imagePath might contain base64
-      if (!imageBase64 && item.imagePath && item.imagePath.startsWith("data:")) {
+      } else if (isDataUri) {
+        // Legacy: imagePath contains base64 data directly
         imageBase64 = item.imagePath;
-        console.log(`Using legacy base64 data, size: ${imageBase64.length}`);
+        console.log(`  Using legacy base64 data, size: ${imageBase64.length}`);
+      } else {
+        console.log(`  No valid image path (marker: ${item.imagePath})`);
       }
       
       prescriptions.push({
@@ -306,7 +315,13 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
       });
     }
     
+    console.log(`=== Loaded ${prescriptions.length} prescriptions ===`);
     return prescriptions;
+  } catch (error: any) {
+    console.log("Error getting prescriptions:", error?.message || error);
+    return [];
+  }
+};
   } catch (error) {
     console.log("Error getting prescriptions:", error);
     return [];
