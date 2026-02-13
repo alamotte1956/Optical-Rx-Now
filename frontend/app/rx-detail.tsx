@@ -282,6 +282,19 @@ export default function RxDetailScreen() {
   const handleShare = async () => {
     if (!prescription || !member) return;
 
+    // Check if image is available
+    if (!prescription.imageBase64) {
+      Alert.alert(
+        "Image Not Available",
+        "The prescription image is not available. Would you like to share the PDF without the image?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Share Without Image", onPress: () => shareWithoutImage() },
+        ]
+      );
+      return;
+    }
+
     setSharing(true);
     try {
       const isAvailable = await Sharing.isAvailableAsync();
@@ -328,6 +341,38 @@ export default function RxDetailScreen() {
           { text: "Print", onPress: handlePrint },
         ]
       );
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const shareWithoutImage = async () => {
+    if (!prescription || !member) return;
+    
+    setSharing(true);
+    try {
+      const html = generatePdfHtmlNoImage();
+      const { uri } = await Print.printToFileAsync({
+        html,
+        base64: false,
+      });
+
+      const filename = `Prescription_${member.name.replace(/\s+/g, '_')}_${prescription.rxType}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const newUri = `${FileSystem.cacheDirectory}${filename}`;
+      
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      await Sharing.shareAsync(newUri, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Share ${member.name}'s Prescription`,
+        UTI: 'com.adobe.pdf',
+      });
+    } catch (error) {
+      console.log("Error sharing PDF without image:", error);
+      Alert.alert("Error", "Failed to create PDF.");
     } finally {
       setSharing(false);
     }
