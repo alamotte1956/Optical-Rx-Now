@@ -322,11 +322,6 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
     return [];
   }
 };
-  } catch (error) {
-    console.log("Error getting prescriptions:", error);
-    return [];
-  }
-};
 
 export const savePrescription = async (
   prescription: Omit<Prescription, "id" | "createdAt">
