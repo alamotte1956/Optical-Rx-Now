@@ -110,6 +110,9 @@ export default function WelcomeScreen() {
             />
           </Pressable>
 
+          {/* Hidden hint - only visible when pressed */}
+          <Text style={styles.hiddenHint}>Hold logo for admin</Text>
+
           {/* Title */}
           <Text style={styles.subtitle}>
             Store and manage your family's eyeglass and contact lens prescriptions
