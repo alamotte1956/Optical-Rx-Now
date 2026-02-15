@@ -224,6 +224,12 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     transform: [{ scale: 0.98 }],
   },
+  hiddenHint: {
+    fontSize: 10,
+    color: "#3a4d63",
+    marginTop: -8,
+    marginBottom: 8,
+  },
   logo: {
     width: "100%",
     height: "100%",
