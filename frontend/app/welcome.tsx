@@ -69,15 +69,16 @@ export default function WelcomeScreen() {
   };
 
   // Long press handler for admin access
-  const handleLogoLongPress = async () => {
-    console.log("Long press detected - navigating to admin");
+  const handleLogoLongPress = () => {
+    console.log("=== Long press detected ===");
     // Provide haptic feedback
     try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
       // Fallback to vibration if haptics not available
       Vibration.vibrate(100);
     }
+    // Navigate to admin
     router.push("/admin");
   };
 
