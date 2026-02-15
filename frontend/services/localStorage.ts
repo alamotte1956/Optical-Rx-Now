@@ -263,47 +263,15 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
     const stored: PrescriptionStorage[] = JSON.parse(data);
     console.log(`=== Loading ${stored.length} prescriptions ===`);
     
-    const prescriptions: Prescription[] = [];
-    
-    for (const item of stored) {
+    const prescriptions: Prescription[] = stored.map((item) => {
+      // imagePath now contains the actual image data (base64 with data URI prefix)
       let imageBase64 = "";
       
-      console.log(`Processing: ${item.id}`);
-      console.log(`  imagePath: ${item.imagePath?.substring(0, 60)}...`);
-      
-      // Check if imagePath is a valid file path (not an error marker)
-      const errorMarkers = ["FILE_SAVE_FAILED", "FILE_SAVE_ERROR", "NO_DOC_DIR", "FILE_NOT_CREATED", "INVALID_BASE64"];
-      const isErrorMarker = errorMarkers.includes(item.imagePath);
-      const isDataUri = item.imagePath?.startsWith("data:");
-      const isFilePath = item.imagePath && !isErrorMarker && !isDataUri && item.imagePath.length > 10;
-      
-      if (isFilePath) {
-        try {
-          console.log(`  Checking file: ${item.imagePath}`);
-          const fileInfo = await FileSystem.getInfoAsync(item.imagePath);
-          console.log(`  File exists: ${fileInfo.exists}`);
-          
-          if (fileInfo.exists) {
-            const base64 = await FileSystem.readAsStringAsync(item.imagePath, {
-              encoding: FileSystem.EncodingType.Base64,
-            });
-            imageBase64 = `data:image/jpeg;base64,${base64}`;
-            console.log(`  Image loaded, size: ${imageBase64.length}`);
-          } else {
-            console.log(`  File not found at path`);
-          }
-        } catch (e: any) {
-          console.log(`  Error loading image: ${e?.message || e}`);
-        }
-      } else if (isDataUri) {
-        // Legacy: imagePath contains base64 data directly
+      if (item.imagePath && item.imagePath.startsWith("data:")) {
         imageBase64 = item.imagePath;
-        console.log(`  Using legacy base64 data, size: ${imageBase64.length}`);
-      } else {
-        console.log(`  No valid image path (marker: ${item.imagePath})`);
       }
       
-      prescriptions.push({
+      return {
         id: item.id,
         familyMemberId: item.familyMemberId,
         rxType: item.rxType,
@@ -312,8 +280,8 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
         dateTaken: item.dateTaken,
         expiryDate: item.expiryDate,
         createdAt: item.createdAt,
-      });
-    }
+      };
+    });
     
     console.log(`=== Loaded ${prescriptions.length} prescriptions ===`);
     return prescriptions;
