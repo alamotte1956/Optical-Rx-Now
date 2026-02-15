@@ -413,26 +413,6 @@ export const savePrescription = async (
   console.log("=== savePrescription complete ===");
   return newRx;
 };
-  } catch (storageError: any) {
-    console.log("AsyncStorage error:", storageError?.message || storageError);
-    throw new Error("Failed to save prescription");
-  }
-  
-  // Return the prescription with original image data
-  const newRx: Prescription = {
-    id: prescriptionId,
-    familyMemberId: prescription.familyMemberId,
-    rxType: prescription.rxType,
-    imageBase64: prescription.imageBase64,
-    notes: prescription.notes || "",
-    dateTaken: prescription.dateTaken,
-    expiryDate: prescription.expiryDate,
-    createdAt,
-  };
-  
-  console.log("=== savePrescription complete ===");
-  return newRx;
-};
 
 export const getPrescriptionById = async (
   id: string
