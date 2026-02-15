@@ -334,72 +334,18 @@ export const savePrescription = async (
   console.log("Has image:", !!prescription.imageBase64);
   console.log("Image length:", prescription.imageBase64?.length || 0);
   
-  // Step 1: Try to save image to file system
-  let imagePath = "";
+  // For reliability, store image data directly in AsyncStorage
+  // The image is already compressed at capture (quality 0.3)
+  let imageData = prescription.imageBase64 || "";
   
-  if (prescription.imageBase64 && prescription.imageBase64.length > 100) {
-    try {
-      const docDir = FileSystem.documentDirectory;
-      if (!docDir) {
-        console.log("ERROR: documentDirectory is null");
-        imagePath = "NO_DOC_DIR";
-      } else {
-        const imageDir = `${docDir}rx_images/`;
-        console.log("Image directory:", imageDir);
-        
-        // Ensure directory exists
-        const dirInfo = await FileSystem.getInfoAsync(imageDir);
-        console.log("Directory exists:", dirInfo.exists);
-        
-        if (!dirInfo.exists) {
-          await FileSystem.makeDirectoryAsync(imageDir, { intermediates: true });
-          console.log("Created directory");
-        }
-        
-        // Extract raw base64 (remove data URI prefix)
-        let rawBase64 = prescription.imageBase64;
-        if (rawBase64.startsWith("data:")) {
-          const parts = rawBase64.split(",");
-          rawBase64 = parts[1] || "";
-        }
-        console.log("Raw base64 length:", rawBase64.length);
-        
-        if (rawBase64.length > 100) {
-          // Write to file
-          const filePath = `${imageDir}${prescriptionId}.jpg`;
-          console.log("Writing to:", filePath);
-          
-          await FileSystem.writeAsStringAsync(filePath, rawBase64, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          
-          // Verify file was written
-          const fileInfo = await FileSystem.getInfoAsync(filePath);
-          console.log("File created:", fileInfo.exists, "Size:", (fileInfo as any).size);
-          
-          if (fileInfo.exists) {
-            imagePath = filePath;
-            console.log("SUCCESS: Image saved to:", filePath);
-          } else {
-            console.log("ERROR: File not created");
-            imagePath = "FILE_NOT_CREATED";
-          }
-        } else {
-          console.log("ERROR: Raw base64 too short");
-          imagePath = "INVALID_BASE64";
-        }
-      }
-    } catch (fileError: any) {
-      console.log("File save error:", fileError?.message || fileError);
-      imagePath = "FILE_SAVE_ERROR";
-    }
-  } else {
-    console.log("No valid image data to save");
+  // Ensure it has the data URI prefix
+  if (imageData && !imageData.startsWith("data:") && imageData.length > 100) {
+    imageData = `data:image/jpeg;base64,${imageData}`;
   }
   
-  console.log("Final imagePath:", imagePath);
+  console.log("Image data to store length:", imageData.length);
   
-  // Step 2: Save prescription metadata to AsyncStorage
+  // Step 2: Save prescription to AsyncStorage
   try {
     const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
     const stored: PrescriptionStorage[] = data ? JSON.parse(data) : [];
@@ -408,7 +354,7 @@ export const savePrescription = async (
       id: prescriptionId,
       familyMemberId: prescription.familyMemberId,
       rxType: prescription.rxType,
-      imagePath,
+      imagePath: imageData, // Store image data directly
       notes: prescription.notes || "",
       dateTaken: prescription.dateTaken,
       expiryDate: prescription.expiryDate,
@@ -416,8 +362,57 @@ export const savePrescription = async (
     };
     
     stored.push(newStored);
-    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(stored));
-    console.log("Prescription metadata saved, total count:", stored.length);
+    
+    // Save to AsyncStorage
+    const jsonString = JSON.stringify(stored);
+    console.log("Total JSON size:", jsonString.length, "bytes");
+    
+    await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, jsonString);
+    console.log("Prescription saved successfully, total count:", stored.length);
+  } catch (storageError: any) {
+    console.log("AsyncStorage error:", storageError?.message || storageError);
+    
+    // If storage fails (likely too large), try without image
+    console.log("Retrying without image...");
+    try {
+      const data = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+      const stored: PrescriptionStorage[] = data ? JSON.parse(data) : [];
+      
+      const newStored: PrescriptionStorage = {
+        id: prescriptionId,
+        familyMemberId: prescription.familyMemberId,
+        rxType: prescription.rxType,
+        imagePath: "IMAGE_TOO_LARGE", // Mark as failed
+        notes: prescription.notes || "",
+        dateTaken: prescription.dateTaken,
+        expiryDate: prescription.expiryDate,
+        createdAt,
+      };
+      
+      stored.push(newStored);
+      await AsyncStorage.setItem(KEYS.PRESCRIPTIONS, JSON.stringify(stored));
+      console.log("Saved without image");
+    } catch (retryError) {
+      console.log("Retry also failed:", retryError);
+      throw new Error("Failed to save prescription");
+    }
+  }
+  
+  // Return the prescription with original image data
+  const newRx: Prescription = {
+    id: prescriptionId,
+    familyMemberId: prescription.familyMemberId,
+    rxType: prescription.rxType,
+    imageBase64: prescription.imageBase64,
+    notes: prescription.notes || "",
+    dateTaken: prescription.dateTaken,
+    expiryDate: prescription.expiryDate,
+    createdAt,
+  };
+  
+  console.log("=== savePrescription complete ===");
+  return newRx;
+};
   } catch (storageError: any) {
     console.log("AsyncStorage error:", storageError?.message || storageError);
     throw new Error("Failed to save prescription");
