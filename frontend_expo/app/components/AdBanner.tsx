@@ -2,16 +2,14 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { trackAdClick } from "../../services/analytics";
 
 export default function AdBanner() {
   const router = useRouter();
 
   const handleAdPress = async () => {
-    // Track ad click for analytics (non-blocking)
-    try {
-      const { trackAdClick } = await import("../../services/analytics");
-      trackAdClick("shop_banner");
-    } catch (e) {}
+    // Track ad click for analytics
+    await trackAdClick("shop_banner");
     // Navigate to shop page with eyewear retailers
     router.push("/shop");
   };
