@@ -24,7 +24,8 @@
       },
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "associatedDomains": ["applinks:opticalrxnow.com"]
     },
     "android": {
       "package": "com.opticalrxnow.app",
@@ -89,7 +90,10 @@
     "extra": {
       "eas": {
         "projectId": "optical-rx-now"
-      }
+      },
+      "privacyPolicyUrl": "https://opticalrxnow.com/privacy",
+      "supportEmail": "support@OpticalRxNow.com",
+      "websiteUrl": "https://opticalrxnow.com"
     }
   }
 }
