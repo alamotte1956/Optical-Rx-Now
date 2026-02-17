@@ -323,7 +323,20 @@ export default function AdminScreen() {
   useEffect(() => {
     loadAffiliates();
     loadAnalytics();
+    loadAnalyticsStats();
   }, []);
+
+  const loadAnalyticsStats = async () => {
+    setLoadingAnalytics(true);
+    try {
+      const stats = await getAnalyticsStats();
+      setAnalyticsStats(stats);
+    } catch (error) {
+      console.log("Error loading analytics stats:", error);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
 
   const loadAffiliates = async () => {
     try {
@@ -331,7 +344,7 @@ export default function AdminScreen() {
       if (stored) {
         const parsedAffiliates = JSON.parse(stored);
         // Sort by commission percentage (highest first)
-        parsedAffiliates.sort((a: any, b: any) => b.commission - a.commission);
+        parsedAffiliates.sort((a: AffiliateType, b: AffiliateType) => b.commission - a.commission);
         setAffiliates(parsedAffiliates);
       } else {
         // Save default affiliates
@@ -342,7 +355,7 @@ export default function AdminScreen() {
     }
   };
 
-  const saveAffiliates = async (updatedAffiliates: typeof DEFAULT_AFFILIATES) => {
+  const saveAffiliates = async (updatedAffiliates: AffiliateType[]) => {
     try {
       // Sort by commission before saving
       const sorted = [...updatedAffiliates].sort((a, b) => b.commission - a.commission);
@@ -351,6 +364,25 @@ export default function AdminScreen() {
     } catch (error) {
       console.log("Error saving affiliates:", error);
     }
+  };
+
+  const openEditModal = (affiliate: AffiliateType) => {
+    setEditingAffiliate(affiliate);
+    setTempAffiliateId(affiliate.affiliateId || "");
+    setEditModalVisible(true);
+  };
+
+  const saveAffiliateId = async () => {
+    if (!editingAffiliate) return;
+    
+    const updated = affiliates.map((aff) =>
+      aff.id === editingAffiliate.id ? { ...aff, affiliateId: tempAffiliateId.trim() } : aff
+    );
+    await saveAffiliates(updated);
+    setEditModalVisible(false);
+    setEditingAffiliate(null);
+    setTempAffiliateId("");
+    Alert.alert("Saved", "Affiliate ID has been updated!");
   };
 
   const loadAnalytics = async () => {
