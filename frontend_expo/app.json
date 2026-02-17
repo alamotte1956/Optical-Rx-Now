@@ -30,7 +30,7 @@
       "package": "com.opticalrxnow.app",
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A1628"
       },
       "edgeToEdgeEnabled": true,
