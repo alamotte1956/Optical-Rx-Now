@@ -338,37 +338,42 @@ export default function ShopScreen() {
     // Track the click
     await trackAffiliateClick(affiliate.id, affiliate.name);
     
-    // For Sam's Club, use store locator
-    if (affiliate.baseUrl.includes("samsclub.com")) {
+    // For RETAIL category stores, use location-based search
+    if (affiliate.category === "retail") {
+      const storeName = encodeURIComponent(affiliate.name);
+      
       if (usingLocation && location) {
         const { latitude, longitude } = location.coords;
-        finalUrl = `https://www.google.com/maps/search/Sam's+Club+Optical/@${latitude},${longitude},12z`;
+        // Use Google Maps to find nearest location
+        finalUrl = `https://www.google.com/maps/search/${storeName}/@${latitude},${longitude},12z`;
       } else if (zipCode) {
-        finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
-      }
-    }
-    // For Target Optical
-    else if (affiliate.baseUrl.includes("targetoptical.com")) {
-      if (usingLocation && location) {
-        const { latitude, longitude } = location.coords;
-        finalUrl = `https://www.google.com/maps/search/Target+Optical/@${latitude},${longitude},12z`;
-      } else if (zipCode) {
-        const searchQuery = encodeURIComponent(`Target Optical near ${zipCode}`);
-        finalUrl = `https://www.google.com/search?q=${searchQuery}`;
-      }
-    }
-    // For Costco Optical
-    else if (affiliate.baseUrl.includes("costco.com")) {
-      if (usingLocation && location) {
-        const { latitude, longitude } = location.coords;
-        finalUrl = `https://www.google.com/maps/search/Costco+Optical/@${latitude},${longitude},12z`;
-      }
-    }
-    // For America's Best
-    else if (affiliate.baseUrl.includes("americasbest.com")) {
-      if (usingLocation && location) {
-        const { latitude, longitude } = location.coords;
-        finalUrl = `https://www.google.com/maps/search/America's+Best+Eyeglasses/@${latitude},${longitude},12z`;
+        // Use ZIP code based search
+        const searchQuery = encodeURIComponent(`${affiliate.name} near ${zipCode}`);
+        
+        // Some retailers have specific store locators
+        if (affiliate.id === "sams-club") {
+          finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
+        } else if (affiliate.id === "target-optical") {
+          finalUrl = `https://www.targetoptical.com/to-us/stores?zip=${zipCode}`;
+        } else if (affiliate.id === "costco-optical") {
+          finalUrl = `https://www.costco.com/warehouse-locations?langId=-1&zipCode=${zipCode}`;
+        } else if (affiliate.id === "americas-best") {
+          finalUrl = `https://www.americasbest.com/locations?search=${zipCode}`;
+        } else if (affiliate.id === "walmart-vision") {
+          finalUrl = `https://www.walmart.com/store/finder?location=${zipCode}&distance=50`;
+        } else if (affiliate.id === "lenscrafters") {
+          finalUrl = `https://www.lenscrafters.com/lc-us/store-locator?zip=${zipCode}`;
+        } else if (affiliate.id === "pearle-vision") {
+          finalUrl = `https://www.pearlevision.com/pv-us/store-locator?zip=${zipCode}`;
+        } else if (affiliate.id === "visionworks") {
+          finalUrl = `https://www.visionworks.com/find-a-store?zipcode=${zipCode}`;
+        } else {
+          // Default: Google search with ZIP
+          finalUrl = `https://www.google.com/maps/search/${searchQuery}`;
+        }
+      } else {
+        // No location or ZIP - open Google Maps search
+        finalUrl = `https://www.google.com/maps/search/${storeName}`;
       }
     }
     
