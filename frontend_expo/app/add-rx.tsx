@@ -219,12 +219,6 @@ export default function AddRxScreen() {
         <View style={styles.previewContainer}>
           <View style={styles.imagePreview}>
             <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="contain" />
-            {processingOCR && (
-              <View style={styles.ocrOverlay}>
-                <ActivityIndicator size="large" color="#4a9eff" />
-                <Text style={styles.ocrText}>Detecting expiration date...</Text>
-              </View>
-            )}
           </View>
 
           <View style={styles.infoSection}>
@@ -289,27 +283,37 @@ export default function AddRxScreen() {
               </View>
             </View>
 
-            {expiryDate && (
-              <View style={styles.infoCard}>
-                <Ionicons name="calendar" size={20} color="#4CAF50" />
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Expiration Date (Auto-detected)</Text>
-                  <Text style={styles.expiryValue}>{expiryDate}</Text>
+            {/* Manual Expiration Date Entry - HIPAA Compliant */}
+            <View style={styles.infoCard}>
+              <Ionicons name="calendar" size={20} color={expiryDate ? "#4CAF50" : "#4a9eff"} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Expiration Date</Text>
+                <View style={styles.dateInputContainer}>
+                  <TextInput
+                    style={styles.dateInput}
+                    placeholder="MM/DD/YYYY"
+                    placeholderTextColor="#6b7c8f"
+                    value={expiryInput}
+                    onChangeText={handleExpiryInput}
+                    keyboardType="numeric"
+                    maxLength={10}
+                  />
+                  {expiryDate ? (
+                    <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                  ) : (
+                    <Text style={styles.dateHint}>Optional</Text>
+                  )}
                 </View>
-                <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
               </View>
-            )}
+            </View>
 
-            {!expiryDate && !processingOCR && (
-              <View style={[styles.infoCard, styles.warningCard]}>
-                <Ionicons name="alert-circle" size={20} color="#FF9800" />
-                <View style={styles.infoContent}>
-                  <Text style={styles.warningText}>
-                    No expiration date detected. You can still save the prescription.
-                  </Text>
-                </View>
-              </View>
-            )}
+            {/* HIPAA Notice */}
+            <View style={styles.hipaaNotice}>
+              <Ionicons name="shield-checkmark" size={16} color="#4CAF50" />
+              <Text style={styles.hipaaText}>
+                Your data stays on this device only - never sent to any server
+              </Text>
+            </View>
           </View>
         </View>
 
