@@ -11,7 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.opticalrxnow.app",
-      "buildNumber": "110",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": []
       },
@@ -29,15 +28,10 @@
     },
     "android": {
       "package": "com.opticalrxnow.app",
-      "versionCode": 110,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#0a1628"
-      },
-      "androidStatusBar": {
-        "backgroundColor": "#0a1628",
-        "barStyle": "light-content"
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#0A1628"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
@@ -53,6 +47,10 @@
         "android.permission.SCHEDULE_EXACT_ALARM"
       ]
     },
+    "androidStatusBar": {
+      "backgroundColor": "#0A1628",
+      "barStyle": "light-content"
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -66,7 +64,7 @@
           "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#000000"
         }
       ],
       [
