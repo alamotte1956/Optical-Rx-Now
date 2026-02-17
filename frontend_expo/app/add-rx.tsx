@@ -264,6 +264,13 @@ export default function AddRxScreen() {
         <View style={styles.previewContainer}>
           <View style={styles.imagePreview}>
             <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="contain" />
+            {processingOCR && (
+              <View style={styles.ocrOverlay}>
+                <ActivityIndicator size="large" color="#4a9eff" />
+                <Text style={styles.ocrText}>Reading expiration date...</Text>
+                <Text style={styles.ocrSubtext}>Processing on device only</Text>
+              </View>
+            )}
           </View>
 
           <View style={styles.infoSection}>
@@ -300,27 +307,27 @@ export default function AddRxScreen() {
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Type</Text>
                 <View style={styles.typeSelector}>
-                  {RX_TYPES.map((type) => (
+                  {RX_TYPES.map((rxTypeOption) => (
                     <TouchableOpacity
-                      key={type.value}
+                      key={rxTypeOption.value}
                       style={[
                         styles.typeChip,
-                        rxType === type.value && styles.typeChipActive,
+                        rxType === rxTypeOption.value && styles.typeChipActive,
                       ]}
-                      onPress={() => setRxType(type.value)}
+                      onPress={() => setRxType(rxTypeOption.value)}
                     >
                       <Ionicons
-                        name={type.icon as any}
+                        name={rxTypeOption.icon as any}
                         size={18}
-                        color={rxType === type.value ? "#fff" : "#8899a6"}
+                        color={rxType === rxTypeOption.value ? "#fff" : "#8899a6"}
                       />
                       <Text
                         style={[
                           styles.typeChipText,
-                          rxType === type.value && styles.typeChipTextActive,
+                          rxType === rxTypeOption.value && styles.typeChipTextActive,
                         ]}
                       >
-                        {type.label}
+                        {rxTypeOption.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -328,27 +335,51 @@ export default function AddRxScreen() {
               </View>
             </View>
 
-            {/* Manual Expiration Date Entry - HIPAA Compliant */}
-            <View style={styles.infoCard}>
-              <Ionicons name="calendar" size={20} color={expiryDate ? "#4CAF50" : "#4a9eff"} />
+            {/* Expiration Date - Auto-detected or Manual Entry */}
+            <View style={[styles.infoCard, !expiryDate && ocrAttempted && styles.requiredCard]}>
+              <Ionicons 
+                name="calendar" 
+                size={20} 
+                color={expiryDate ? "#4CAF50" : (ocrAttempted ? "#FF9800" : "#4a9eff")} 
+              />
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Expiration Date</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.infoLabel}>
+                    Expiration Date {!expiryDate && ocrAttempted && <Text style={styles.requiredLabel}>(Required)</Text>}
+                  </Text>
+                  {dateAutoDetected && (
+                    <View style={styles.autoDetectedBadge}>
+                      <Ionicons name="scan" size={12} color="#4CAF50" />
+                      <Text style={styles.autoDetectedText}>Auto-detected</Text>
+                    </View>
+                  )}
+                </View>
                 <View style={styles.dateInputContainer}>
                   <TextInput
-                    style={styles.dateInput}
+                    style={[
+                      styles.dateInput,
+                      expiryDate && styles.dateInputValid,
+                      !expiryDate && ocrAttempted && styles.dateInputRequired,
+                    ]}
                     placeholder="MM/DD/YYYY"
                     placeholderTextColor="#6b7c8f"
                     value={expiryInput}
                     onChangeText={handleExpiryInput}
                     keyboardType="numeric"
                     maxLength={10}
+                    editable={!processingOCR}
                   />
                   {expiryDate ? (
                     <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-                  ) : (
-                    <Text style={styles.dateHint}>Optional</Text>
-                  )}
+                  ) : processingOCR ? (
+                    <ActivityIndicator size="small" color="#4a9eff" />
+                  ) : null}
                 </View>
+                {!expiryDate && ocrAttempted && !processingOCR && (
+                  <Text style={styles.dateHelp}>
+                    Please enter the expiration date from your prescription
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -369,9 +400,12 @@ export default function AddRxScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.saveButton, (saving || !selectedMemberId) && styles.saveButtonDisabled]}
+            style={[
+              styles.saveButton, 
+              (saving || !selectedMemberId || !expiryDate || processingOCR) && styles.saveButtonDisabled
+            ]}
             onPress={handleSave}
-            disabled={saving || !selectedMemberId}
+            disabled={saving || !selectedMemberId || !expiryDate || processingOCR}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#fff" />
