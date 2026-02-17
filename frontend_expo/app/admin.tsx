@@ -844,6 +844,63 @@ export default function AdminScreen() {
           <Text style={styles.footerSubtext}>© 2025 Optical Rx Now</Text>
         </View>
       </ScrollView>
+
+      {/* Edit Affiliate ID Modal */}
+      <Modal
+        visible={editModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="key" size={32} color="#FF9800" />
+              <Text style={styles.modalTitle}>Edit Affiliate ID</Text>
+            </View>
+            
+            <Text style={styles.modalSubtitle}>
+              {editingAffiliate?.name}
+            </Text>
+            <Text style={styles.modalNetwork}>
+              Network: {editingAffiliate?.network}
+            </Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter your affiliate ID"
+              placeholderTextColor="#6b7c8f"
+              value={tempAffiliateId}
+              onChangeText={setTempAffiliateId}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            
+            <Text style={styles.modalHint}>
+              Get your affiliate ID from the {editingAffiliate?.network} dashboard
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setEditingAffiliate(null);
+                  setTempAffiliateId("");
+                }}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSaveButton}
+                onPress={saveAffiliateId}
+              >
+                <Text style={styles.modalSaveText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
