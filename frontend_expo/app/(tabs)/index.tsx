@@ -210,15 +210,32 @@ export default function PrescriptionsScreen() {
             <Text style={styles.emptySubtext}>
               {familyMembers.length === 0
                 ? "Add a family member first, then add prescriptions"
-                : "Tap the + button to add a prescription"}
+                : "Add your eyeglass or contact lens prescriptions"}
             </Text>
-            {familyMembers.length === 0 && (
+            {familyMembers.length === 0 ? (
               <TouchableOpacity
                 style={styles.emptyButton}
                 onPress={() => router.push("/add-member")}
               >
                 <Text style={styles.emptyButtonText}>Add Family Member</Text>
               </TouchableOpacity>
+            ) : (
+              <View style={styles.emptyButtonsRow}>
+                <TouchableOpacity
+                  style={styles.emptyButtonGlasses}
+                  onPress={() => router.push("/add-rx?type=eyeglass")}
+                >
+                  <Ionicons name="glasses-outline" size={20} color="#fff" />
+                  <Text style={styles.emptyButtonText}>Add Glasses Rx</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.emptyButtonContacts}
+                  onPress={() => router.push("/add-rx?type=contact")}
+                >
+                  <Ionicons name="eye-outline" size={20} color="#fff" />
+                  <Text style={styles.emptyButtonText}>Add Contacts Rx</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         ) : (
