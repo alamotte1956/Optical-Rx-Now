@@ -381,11 +381,15 @@ export default function ShopScreen() {
   };
 
   const filteredAffiliates = selectedCategory
-    ? AFFILIATES.filter((a) => a.category === selectedCategory)
-    : AFFILIATES;
+    ? affiliates.filter((a) => a.category === selectedCategory)
+    : affiliates;
 
-  // Sort by commission rank (Sam's Club always first)
-  const sortedAffiliates = [...filteredAffiliates].sort((a, b) => a.commissionRank - b.commissionRank);
+  // Sort: preferred first, then by commission (highest to lowest)
+  const sortedAffiliates = [...filteredAffiliates].sort((a, b) => {
+    if (a.isPreferred && !b.isPreferred) return -1;
+    if (!a.isPreferred && b.isPreferred) return 1;
+    return b.commission - a.commission;
+  });
 
   const categories = [
     { key: null, label: "All" },
