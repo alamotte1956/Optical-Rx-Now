@@ -15,23 +15,29 @@ app.use('/_expo', express.static(path.join(buildPath, '_expo')));
 // Serve assets
 app.use('/assets', express.static(path.join(buildPath, 'assets')));
 
-// Handle specific routes
+// Handle specific routes (without parentheses)
 const routes = [
-  '/', '/index', '/welcome', '/age-verify', '/shop', '/admin',
-  '/add-rx', '/add-member', '/rx-detail', '/family', 
-  '/find-optometrists', '/notification-settings',
-  '/(tabs)', '/(tabs)/family'
+  { path: '/', file: 'index.html' },
+  { path: '/index', file: 'index.html' },
+  { path: '/welcome', file: 'welcome.html' },
+  { path: '/age-verify', file: 'age-verify.html' },
+  { path: '/shop', file: 'shop.html' },
+  { path: '/admin', file: 'admin.html' },
+  { path: '/add-rx', file: 'add-rx.html' },
+  { path: '/add-member', file: 'add-member.html' },
+  { path: '/rx-detail', file: 'rx-detail.html' },
+  { path: '/family', file: 'family.html' },
+  { path: '/find-optometrists', file: 'find-optometrists.html' },
+  { path: '/notification-settings', file: 'notification-settings.html' },
+  { path: '/tabs', file: '(tabs)/index.html' },
+  { path: '/tabs/family', file: '(tabs)/family.html' },
 ];
 
 routes.forEach(route => {
-  const cleanRoute = route === '/' ? '/index' : route;
-  const htmlFile = cleanRoute.replace(/^\/(tabs)/, '(tabs)') + '.html';
-  const filePath = path.join(buildPath, htmlFile);
+  const filePath = path.join(buildPath, route.file);
   
-  app.get(route, (req, res) => {
-    if (route === '/') {
-      res.sendFile(path.join(buildPath, 'index.html'));
-    } else if (fs.existsSync(filePath)) {
+  app.get(route.path, (req, res) => {
+    if (fs.existsSync(filePath)) {
       res.sendFile(filePath);
     } else {
       res.sendFile(path.join(buildPath, 'index.html'));
