@@ -19,6 +19,7 @@ import {
   getFamilyMembers,
   FamilyMember,
 } from "../services/localStorage";
+import { extractExpirationDate, formatDateForDisplay } from "../services/ocrService";
 
 const RX_TYPES = [
   { value: "eyeglass", label: "Eyeglasses", icon: "glasses-outline" },
@@ -36,6 +37,9 @@ export default function AddRxScreen() {
   const [expiryInput, setExpiryInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [processingOCR, setProcessingOCR] = useState(false);
+  const [ocrAttempted, setOcrAttempted] = useState(false);
+  const [dateAutoDetected, setDateAutoDetected] = useState(false);
 
   // Set the Rx type from URL parameter
   useEffect(() => {
