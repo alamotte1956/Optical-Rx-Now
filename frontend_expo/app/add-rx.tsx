@@ -171,6 +171,7 @@ export default function AddRxScreen() {
   const handleRetake = () => {
     setImageUri("");
     setExpiryDate("");
+    setExpiryInput("");
     setShowPreview(false);
   };
 
