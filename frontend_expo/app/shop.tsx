@@ -537,7 +537,7 @@ export default function ShopScreen() {
               styles.affiliateCard,
               affiliate.isPreferred && styles.preferredCard,
             ]}
-            onPress={() => handleOpenLink(affiliate.url, affiliate.name)}
+            onPress={() => handleOpenLink(affiliate)}
           >
             {/* Preferred Banner */}
             {affiliate.isPreferred && (
