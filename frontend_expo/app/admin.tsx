@@ -9,6 +9,8 @@ import {
   Alert,
   Switch,
   TextInput,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +23,7 @@ import {
   getPrescriptions,
   getStats,
 } from "../services/localStorage";
+import { getAnalyticsStats, AnalyticsStats } from "../services/analytics";
 
 // Verified affiliate programs ordered by commission percentage (highest first)
 const DEFAULT_AFFILIATES = [
