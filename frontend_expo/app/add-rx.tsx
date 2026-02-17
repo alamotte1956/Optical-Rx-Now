@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
@@ -26,14 +26,22 @@ const RX_TYPES = [
 
 export default function AddRxScreen() {
   const router = useRouter();
+  const { type } = useLocalSearchParams<{ type?: "eyeglass" | "contact" }>();
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string>("");
-  const [rxType, setRxType] = useState<"eyeglass" | "contact">("eyeglass");
+  const [rxType, setRxType] = useState<"eyeglass" | "contact">(type || "eyeglass");
   const [imageUri, setImageUri] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [processingOCR, setProcessingOCR] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Set the Rx type from URL parameter
+  useEffect(() => {
+    if (type === "eyeglass" || type === "contact") {
+      setRxType(type);
+    }
+  }, [type]);
 
   useFocusEffect(
     useCallback(() => {
