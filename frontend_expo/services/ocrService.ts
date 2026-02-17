@@ -1,48 +1,68 @@
 /**
  * OCR Service for extracting expiration date from prescription images
  * 
- * HIPAA COMPLIANT: All processing happens ON-DEVICE only
- * No image data is sent to external servers
- * 
- * Currently uses manual date entry with future support for:
- * - react-native-mlkit-ocr (on-device ML)
- * - expo-ml-kit when available
+ * HIPAA COMPLIANT: All processing happens ON-DEVICE only using ML Kit
+ * No image data is ever sent to external servers
  */
+
+import { Platform } from "react-native";
 
 interface OCRResult {
   expiryDate: string | null;
   confidence: number;
   rawText?: string;
-  method: "manual" | "on-device-ocr";
+  method: "on-device-ocr" | "manual";
 }
 
 /**
- * Extract expiration date from prescription image
- * Currently returns null to prompt manual entry (HIPAA compliant)
- * 
- * Future: Will use on-device ML Kit OCR when integrated
+ * Extract expiration date from prescription image using on-device ML Kit OCR
+ * All processing happens locally on the device - HIPAA compliant
  */
 export const extractExpirationDate = async (
   imageUri: string
 ): Promise<OCRResult> => {
   try {
-    console.log("OCR: On-device processing only (HIPAA compliant)");
-    console.log("Image stored locally at:", imageUri);
+    console.log("OCR: Starting on-device text recognition (HIPAA compliant)");
     
-    // HIPAA COMPLIANCE: No external API calls
-    // User will manually enter expiration date
-    // This ensures NO prescription data leaves the device
+    // Dynamic import to handle web platform gracefully
+    let TextRecognition: any;
+    try {
+      TextRecognition = require("@react-native-ml-kit/text-recognition").default;
+    } catch (e) {
+      console.log("ML Kit not available on this platform, using manual entry");
+      return { expiryDate: null, confidence: 0, method: "manual" };
+    }
+
+    // Perform on-device OCR using ML Kit
+    const result = await TextRecognition.recognize(imageUri);
     
-    // Future implementation with on-device ML Kit:
-    // import MlkitOcr from 'react-native-mlkit-ocr';
-    // const result = await MlkitOcr.detectFromUri(imageUri);
-    // const text = result.map(block => block.text).join(' ');
-    // return parseExpirationDate(text);
+    if (!result || !result.text) {
+      console.log("OCR: No text detected in image");
+      return { expiryDate: null, confidence: 0, method: "on-device-ocr" };
+    }
+
+    const extractedText = result.text;
+    console.log("OCR: Extracted text length:", extractedText.length);
     
+    // Parse expiration date from the extracted text
+    const expiryDate = parseExpirationDate(extractedText);
+    
+    if (expiryDate) {
+      console.log("OCR: Found expiration date:", expiryDate);
+      return {
+        expiryDate,
+        confidence: 0.85,
+        rawText: extractedText,
+        method: "on-device-ocr",
+      };
+    }
+
+    console.log("OCR: No expiration date pattern found in text");
     return {
       expiryDate: null,
       confidence: 0,
-      method: "manual",
+      rawText: extractedText,
+      method: "on-device-ocr",
     };
   } catch (error) {
     console.log("OCR error:", error);
@@ -52,32 +72,53 @@ export const extractExpirationDate = async (
 
 /**
  * Parse expiration date from OCR text
- * Looks for common date patterns in prescription images
- * 
- * This runs entirely on-device when ML Kit OCR is used
+ * Looks for common date patterns found on optical prescriptions
  */
 export function parseExpirationDate(text: string): string | null {
-  // Common patterns for expiration dates on prescriptions
+  // Normalize text - handle line breaks and multiple spaces
+  const normalizedText = text.replace(/\s+/g, ' ').toLowerCase();
+  
+  // Common patterns for expiration dates on optical prescriptions
   const patterns = [
-    // Expiration: MM/DD/YYYY or Expires: MM/DD/YYYY
-    /(?:expir(?:ation|es|y)?|exp|valid\s+until|good\s+(?:until|through|thru))[:\s]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
-    // RX Exp or Rx Expiration
-    /(?:rx\s*exp(?:iration)?)[:\s]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i,
-    // Date formats near expiration keywords: MM/DD/YYYY, MM-DD-YYYY
-    /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/g,
-    // YYYY-MM-DD format
-    /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/g,
-    // Month Day, Year (e.g., "January 15, 2025")
-    /([A-Za-z]+\s+\d{1,2},?\s+\d{4})/i,
+    // Explicit expiration labels (highest priority)
+    /(?:expir(?:ation|es|y)?|exp\.?|valid\s+(?:until|thru|through)|good\s+(?:until|thru|through)|rx\s*exp(?:iration)?)[:\s]*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
+    
+    // "Expires" followed by date
+    /expires?\s*:?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
+    
+    // "Exp" or "EXP" followed by date
+    /\bexp\.?\s*:?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
+    
+    // "Valid until" or "Good until"
+    /(?:valid|good)\s+(?:until|thru|through)\s*:?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
+    
+    // Month name formats: "Expires January 15, 2026"
+    /(?:expir(?:ation|es|y)?|exp\.?|valid\s+until)[:\s]*(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i,
   ];
 
   for (const pattern of patterns) {
-    const matches = text.match(pattern);
-    if (matches) {
-      // Get the date part (group 1 or full match)
-      const dateStr = matches[1] || matches[0];
-      const normalized = normalizeDateFormat(dateStr);
+    const match = normalizedText.match(pattern);
+    if (match) {
+      const normalized = normalizeDateMatch(match);
       if (normalized && isValidPrescriptionDate(normalized)) {
+        return normalized;
+      }
+    }
+  }
+
+  // Fallback: look for any date that could be an expiration (future date)
+  const genericDatePatterns = [
+    // MM/DD/YYYY or MM-DD-YYYY or MM.DD.YYYY
+    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/g,
+    // MM/DD/YY
+    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})\b/g,
+  ];
+
+  for (const pattern of genericDatePatterns) {
+    const matches = text.matchAll(pattern);
+    for (const match of matches) {
+      const normalized = normalizeDateMatch(match);
+      if (normalized && isFutureDate(normalized)) {
         return normalized;
       }
     }
@@ -87,75 +128,101 @@ export function parseExpirationDate(text: string): string | null {
 }
 
 /**
- * Normalize date format to YYYY-MM-DD
+ * Normalize a regex date match to YYYY-MM-DD format
  */
-function normalizeDateFormat(dateStr: string): string | null {
+function normalizeDateMatch(match: RegExpMatchArray): string | null {
   try {
-    // Remove common prefixes
-    dateStr = dateStr.replace(/^(?:expir(?:ation|es|y)?|exp|valid\s+until|good\s+(?:until|through|thru)|rx\s*exp(?:iration)?)[:\s]*/i, "").trim();
+    // Check if it's a month name format
+    const monthNames: { [key: string]: number } = {
+      jan: 1, january: 1,
+      feb: 2, february: 2,
+      mar: 3, march: 3,
+      apr: 4, april: 4,
+      may: 5,
+      jun: 6, june: 6,
+      jul: 7, july: 7,
+      aug: 8, august: 8,
+      sep: 9, september: 9,
+      oct: 10, october: 10,
+      nov: 11, november: 11,
+      dec: 12, december: 12,
+    };
 
-    let date: Date | null = null;
+    let month: number, day: number, year: number;
 
-    // MM/DD/YYYY or MM-DD-YYYY
-    const mmddyyyyMatch = dateStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-    if (mmddyyyyMatch) {
-      const [, month, day, year] = mmddyyyyMatch;
-      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    }
-
-    // MM/DD/YY format
-    const mmddyyMatch = dateStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
-    if (!date && mmddyyMatch) {
-      const [, month, day, year] = mmddyyMatch;
-      const fullYear = parseInt(year) > 50 ? 1900 + parseInt(year) : 2000 + parseInt(year);
-      date = new Date(fullYear, parseInt(month) - 1, parseInt(day));
-    }
-
-    // YYYY-MM-DD or YYYY/MM/DD
-    const yyyymmddMatch = dateStr.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-    if (!date && yyyymmddMatch) {
-      const [, year, month, day] = yyyymmddMatch;
-      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    }
-
-    // Month Day, Year (e.g., "January 15, 2025")
-    if (!date) {
-      const parsed = Date.parse(dateStr);
-      if (!isNaN(parsed)) {
-        date = new Date(parsed);
+    // Check if first capture group is a month name
+    const monthKey = match[1]?.toLowerCase();
+    if (monthNames[monthKey]) {
+      month = monthNames[monthKey];
+      day = parseInt(match[2]);
+      year = parseInt(match[3]);
+    } else {
+      // Numeric format MM/DD/YYYY or MM/DD/YY
+      month = parseInt(match[1]);
+      day = parseInt(match[2]);
+      year = parseInt(match[3]);
+      
+      // Handle 2-digit year
+      if (year < 100) {
+        year = year > 50 ? 1900 + year : 2000 + year;
       }
     }
 
-    if (date && !isNaN(date.getTime())) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+    // Validate ranges
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+      return null;
     }
 
-    return null;
+    // Format as YYYY-MM-DD
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   } catch (error) {
-    console.log("Date normalization error:", error);
     return null;
   }
 }
 
 /**
- * Check if date is valid for a prescription
- * Prescriptions are usually valid for 1-2 years from issue date
+ * Check if date is valid for a prescription (within reasonable range)
  */
 function isValidPrescriptionDate(dateStr: string): boolean {
   try {
     const date = new Date(dateStr);
     const now = new Date();
-    const twoYearsAgo = new Date();
-    twoYearsAgo.setFullYear(now.getFullYear() - 2);
+    const threeYearsAgo = new Date();
+    threeYearsAgo.setFullYear(now.getFullYear() - 3);
     const fiveYearsFromNow = new Date();
     fiveYearsFromNow.setFullYear(now.getFullYear() + 5);
 
-    // Date should be between 2 years ago and 5 years from now
-    return date >= twoYearsAgo && date <= fiveYearsFromNow;
+    return date >= threeYearsAgo && date <= fiveYearsFromNow;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Check if date is in the future (likely expiration date)
+ */
+function isFutureDate(dateStr: string): boolean {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const fiveYearsFromNow = new Date();
+    fiveYearsFromNow.setFullYear(now.getFullYear() + 5);
+
+    // Date should be in the future but not too far
+    return date > now && date <= fiveYearsFromNow;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Format a date string for display (YYYY-MM-DD to MM/DD/YYYY)
+ */
+export function formatDateForDisplay(isoDate: string): string {
+  try {
+    const [year, month, day] = isoDate.split('-');
+    return `${month}/${day}/${year}`;
+  } catch {
+    return isoDate;
   }
 }
