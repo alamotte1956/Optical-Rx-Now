@@ -16,82 +16,177 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trackAffiliateClick } from "../services/analytics";
 
-// Static affiliate data - only stores with verified affiliate programs
-// Ordered by commission rate (highest to lowest)
-// Sam's Club is always first as preferred partner
-const AFFILIATES = [
+const AFFILIATES_STORAGE_KEY = "@optical_rx_affiliates";
+
+// Default affiliate data - will be overridden by admin settings
+const DEFAULT_AFFILIATES = [
   {
-    id: "1",
+    id: "sams-club",
     name: "Sam's Club Optical",
     description: "Quality eyewear at warehouse club prices. Members save on frames, lenses, and contacts.",
-    url: "https://www.samsclub.com/b/optical/1990005",
+    baseUrl: "https://www.samsclub.com/b/optical/1990005",
     category: "retail",
     isPreferred: true,
-    commissionRank: 0, // Always first
+    commission: 5,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "2",
+    id: "zenni",
     name: "Zenni Optical",
     description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
-    url: "https://www.zennioptical.com",
+    baseUrl: "https://www.zennioptical.com",
     category: "online",
     isPreferred: false,
-    commissionRank: 1,
+    commission: 10,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "3",
+    id: "eyeglasses-com",
     name: "Eyeglasses.com",
-    description: "Over 200,000 frames from 300+ brands. Up to 15% affiliate commission.",
-    url: "https://www.eyeglasses.com",
+    description: "Over 200,000 frames from 300+ brands. Wide selection.",
+    baseUrl: "https://www.eyeglasses.com",
     category: "online",
     isPreferred: false,
-    commissionRank: 2,
+    commission: 15,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "4",
+    id: "designer-optics",
     name: "Designer Optics",
-    description: "400+ designer brands including Gucci, Ray-Ban, Prada. 15% commission.",
-    url: "https://www.designeroptics.com",
+    description: "400+ designer brands including Gucci, Ray-Ban, Prada.",
+    baseUrl: "https://www.designeroptics.com",
     category: "online",
     isPreferred: false,
-    commissionRank: 3,
+    commission: 15,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "5",
+    id: "glasses-usa",
+    name: "GlassesUSA",
+    description: "Top-rated online eyewear retailer with virtual try-on.",
+    baseUrl: "https://www.glassesusa.com",
+    category: "online",
+    isPreferred: false,
+    commission: 12,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "clearly",
     name: "Clearly",
-    description: "Quality contacts, eyeglasses & sunglasses. Up to 12% commission.",
-    url: "https://www.clearly.ca/en-ca",
+    description: "Quality contacts, eyeglasses & sunglasses.",
+    baseUrl: "https://www.clearly.ca/en-ca",
     category: "contacts",
     isPreferred: false,
-    commissionRank: 4,
+    commission: 12,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "6",
+    id: "1800contacts",
+    name: "1-800 Contacts",
+    description: "America's #1 contact lens retailer. Fast delivery.",
+    baseUrl: "https://www.1800contacts.com",
+    category: "contacts",
+    isPreferred: false,
+    commission: 9,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "lens-com",
+    name: "Lens.com",
+    description: "Contact lenses at wholesale prices.",
+    baseUrl: "https://www.lens.com",
+    category: "contacts",
+    isPreferred: false,
+    commission: 12,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "target-optical",
     name: "Target Optical",
-    description: "Designer eyewear at Target. Ray-Ban, Oakley & more. Up to 8% commission.",
-    url: "https://www.targetoptical.com",
+    description: "Designer eyewear at Target. Ray-Ban, Oakley & more.",
+    baseUrl: "https://www.targetoptical.com",
     category: "retail",
     isPreferred: false,
-    commissionRank: 5,
+    commission: 8,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "7",
+    id: "eyeconic",
     name: "Eyeconic",
-    description: "VSP/MetLife integration, virtual try-on, doctor network. Competitive rates.",
-    url: "https://www.eyeconic.com",
+    description: "VSP/MetLife integration, virtual try-on, doctor network.",
+    baseUrl: "https://www.eyeconic.com",
     category: "online",
     isPreferred: false,
-    commissionRank: 6,
+    commission: 8,
+    enabled: true,
+    affiliateId: "",
   },
   {
-    id: "8",
-    name: "SportRx",
-    description: "Premium sports eyewear and prescription sunglasses. High average order value.",
-    url: "https://www.sportrx.com",
+    id: "warby-parker",
+    name: "Warby Parker",
+    description: "Stylish frames with free home try-on program.",
+    baseUrl: "https://www.warbyparker.com",
     category: "online",
     isPreferred: false,
-    commissionRank: 7,
+    commission: 10,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "eyebuydirect",
+    name: "EyeBuyDirect",
+    description: "Affordable prescription glasses & sunglasses.",
+    baseUrl: "https://www.eyebuydirect.com",
+    category: "online",
+    isPreferred: false,
+    commission: 10,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "sportrx",
+    name: "SportRx",
+    description: "Premium sports eyewear and prescription sunglasses.",
+    baseUrl: "https://www.sportrx.com",
+    category: "online",
+    isPreferred: false,
+    commission: 7,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "costco-optical",
+    name: "Costco Optical",
+    description: "Premium quality eyewear at Costco member prices.",
+    baseUrl: "https://www.costco.com/optical.html",
+    category: "retail",
+    isPreferred: false,
+    commission: 4,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "americas-best",
+    name: "America's Best",
+    description: "2 pairs of glasses for $79.95 including eye exam.",
+    baseUrl: "https://www.americasbest.com",
+    category: "retail",
+    isPreferred: false,
+    commission: 4,
+    enabled: true,
+    affiliateId: "",
   },
 ];
 
@@ -99,10 +194,12 @@ interface Affiliate {
   id: string;
   name: string;
   description: string;
-  url: string;
+  baseUrl: string;
   category: string;
-  isPreferred: boolean;
-  commissionRank: number;
+  isPreferred?: boolean;
+  commission: number;
+  enabled: boolean;
+  affiliateId: string;
 }
 
 export default function ShopScreen() {
