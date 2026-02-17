@@ -1,25 +1,47 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
+const buildPath = path.join(__dirname, 'build');
 
 // Serve static files from the Expo web build
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(buildPath));
 
-// Handle all routes by serving the appropriate HTML file or index.html
-app.get('*', (req, res) => {
-  const requestPath = req.path;
+// Serve _expo static files
+app.use('/_expo', express.static(path.join(buildPath, '_expo')));
+
+// Serve assets
+app.use('/assets', express.static(path.join(buildPath, 'assets')));
+
+// Handle specific routes
+const routes = [
+  '/', '/index', '/welcome', '/age-verify', '/shop', '/admin',
+  '/add-rx', '/add-member', '/rx-detail', '/family', 
+  '/find-optometrists', '/notification-settings',
+  '/(tabs)', '/(tabs)/family'
+];
+
+routes.forEach(route => {
+  const cleanRoute = route === '/' ? '/index' : route;
+  const htmlFile = cleanRoute.replace(/^\/(tabs)/, '(tabs)') + '.html';
+  const filePath = path.join(buildPath, htmlFile);
   
-  // Try to serve the exact HTML file
-  const htmlFile = path.join(__dirname, 'build', requestPath.endsWith('.html') ? requestPath : `${requestPath}.html`);
-  
-  res.sendFile(htmlFile, (err) => {
-    if (err) {
-      // Fallback to index.html for client-side routing
-      res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  app.get(route, (req, res) => {
+    if (route === '/') {
+      res.sendFile(path.join(buildPath, 'index.html'));
+    } else if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.sendFile(path.join(buildPath, 'index.html'));
     }
   });
+});
+
+// Catch-all: serve index.html for client-side routing
+app.use((req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
