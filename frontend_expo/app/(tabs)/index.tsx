@@ -133,12 +133,20 @@ export default function PrescriptionsScreen() {
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Prescriptions</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push("/add-rx")}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.addButtonsContainer}>
+          <TouchableOpacity
+            style={styles.addButtonGlasses}
+            onPress={() => router.push("/add-rx?type=eyeglass")}
+          >
+            <Ionicons name="glasses-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButtonContacts}
+            onPress={() => router.push("/add-rx?type=contact")}
+          >
+            <Ionicons name="eye-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Member Filter */}
