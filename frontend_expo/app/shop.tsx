@@ -207,6 +207,7 @@ export default function ShopScreen() {
   const [zipCode, setZipCode] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [hasEnteredZip, setHasEnteredZip] = useState(false);
+  const [affiliates, setAffiliates] = useState<Affiliate[]>(DEFAULT_AFFILIATES);
   
   // Location state
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -217,10 +218,57 @@ export default function ShopScreen() {
 
   const isValidZip = /^\d{5}$/.test(zipCode);
 
-  // Request location on mount
+  // Load affiliates from admin settings and request location on mount
   useEffect(() => {
+    loadAffiliates();
     requestLocationPermission();
   }, []);
+
+  const loadAffiliates = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(AFFILIATES_STORAGE_KEY);
+      if (stored) {
+        const adminAffiliates = JSON.parse(stored);
+        // Filter to only enabled affiliates and map to shop format
+        const enabledAffiliates = adminAffiliates
+          .filter((a: any) => a.enabled)
+          .map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            description: a.description,
+            baseUrl: a.baseUrl || a.url,
+            category: a.category || "online",
+            isPreferred: a.isPreferred || false,
+            commission: a.commission,
+            enabled: a.enabled,
+            affiliateId: a.affiliateId || "",
+          }));
+        
+        if (enabledAffiliates.length > 0) {
+          setAffiliates(enabledAffiliates);
+        }
+      }
+    } catch (error) {
+      console.log("Error loading affiliates:", error);
+    }
+  };
+
+  // Build affiliate URL with tracking ID if available
+  const buildAffiliateUrl = (affiliate: Affiliate): string => {
+    let url = affiliate.baseUrl;
+    
+    // If affiliate ID is set, append it based on the network/partner
+    if (affiliate.affiliateId) {
+      // Common affiliate URL patterns
+      if (url.includes("?")) {
+        url += `&ref=${affiliate.affiliateId}`;
+      } else {
+        url += `?ref=${affiliate.affiliateId}`;
+      }
+    }
+    
+    return url;
+  };
 
   const requestLocationPermission = async () => {
     setLoading(true);
