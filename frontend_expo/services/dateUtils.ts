@@ -116,3 +116,48 @@ export function isUpcoming(date: Date | string | null): boolean {
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   return validDate > now && validDate <= sevenDaysFromNow;
 }
+
+/**
+ * Formats a date for display (ISO to readable format)
+ * Example: "2024-01-15" -> "Jan 15, 2024"
+ */
+export function formatDateForDisplay(dateString: string | null | undefined): string {
+  if (!dateString) return 'No date';
+  
+  const validDate = parseDate(dateString);
+  if (!validDate) return 'Invalid date';
+  
+  return format(validDate, 'MMM d, yyyy');
+}
+
+/**
+ * Checks if a prescription date is expired
+ */
+export function isDateExpired(dateString: string | null | undefined): boolean {
+  if (!dateString) return false;
+  
+  const validDate = parseDate(dateString);
+  if (!validDate) return false;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return validDate < today;
+}
+
+/**
+ * Checks if a prescription date is expiring soon (within 30 days)
+ */
+export function isDateExpiringSoon(dateString: string | null | undefined): boolean {
+  if (!dateString) return false;
+  
+  const validDate = parseDate(dateString);
+  if (!validDate) return false;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const thirtyDaysFromNow = new Date(today);
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+  
+  return validDate >= today && validDate <= thirtyDaysFromNow;
+}
