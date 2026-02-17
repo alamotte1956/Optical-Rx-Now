@@ -335,17 +335,17 @@ export default function AddRxScreen() {
               </View>
             </View>
 
-            {/* Expiration Date - Auto-detected or Manual Entry */}
-            <View style={[styles.infoCard, !expiryDate && ocrAttempted && styles.requiredCard]}>
+            {/* Expiration Date - Auto-detected or Manual Entry - ALWAYS REQUIRED */}
+            <View style={[styles.infoCard, !expiryDate && styles.requiredCard]}>
               <Ionicons 
                 name="calendar" 
                 size={20} 
-                color={expiryDate ? "#4CAF50" : (ocrAttempted ? "#FF9800" : "#4a9eff")} 
+                color={expiryDate ? "#4CAF50" : "#FF9800"} 
               />
               <View style={styles.infoContent}>
                 <View style={styles.labelRow}>
                   <Text style={styles.infoLabel}>
-                    Expiration Date {!expiryDate && ocrAttempted && <Text style={styles.requiredLabel}>(Required)</Text>}
+                    Expiration Date {!expiryDate && <Text style={styles.requiredLabel}>(Required)</Text>}
                   </Text>
                   {dateAutoDetected && (
                     <View style={styles.autoDetectedBadge}>
@@ -359,7 +359,7 @@ export default function AddRxScreen() {
                     style={[
                       styles.dateInput,
                       expiryDate && styles.dateInputValid,
-                      !expiryDate && ocrAttempted && styles.dateInputRequired,
+                      !expiryDate && styles.dateInputRequired,
                     ]}
                     placeholder="MM/DD/YYYY"
                     placeholderTextColor="#6b7c8f"
@@ -375,9 +375,9 @@ export default function AddRxScreen() {
                     <ActivityIndicator size="small" color="#4a9eff" />
                   ) : null}
                 </View>
-                {!expiryDate && ocrAttempted && !processingOCR && (
+                {!expiryDate && !processingOCR && (
                   <Text style={styles.dateHelp}>
-                    Please enter the expiration date from your prescription
+                    Enter the expiration date from your prescription
                   </Text>
                 )}
               </View>
