@@ -631,7 +631,7 @@ export default function AdminScreen() {
           {expandedSection === "affiliates" && (
             <View style={styles.sectionContent}>
               <Text style={styles.affiliateNote}>
-                ✓ Verified affiliates • Ordered by commission %
+                ✓ Verified affiliates • Ordered by commission % • Tap to edit affiliate ID
               </Text>
 
               {affiliates.map((affiliate) => (
@@ -649,6 +649,11 @@ export default function AdminScreen() {
                         {affiliate.verified && (
                           <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
                         )}
+                        {affiliate.isPreferred && (
+                          <View style={styles.preferredBadge}>
+                            <Text style={styles.preferredBadgeText}>PREFERRED</Text>
+                          </View>
+                        )}
                       </View>
                       <Text style={styles.affiliateCommission}>
                         {affiliate.commission}% Commission • {affiliate.network}
@@ -656,6 +661,16 @@ export default function AdminScreen() {
                       <Text style={styles.affiliateDescription}>
                         {affiliate.description}
                       </Text>
+                      {/* Affiliate ID Display */}
+                      <View style={styles.affiliateIdRow}>
+                        <Text style={styles.affiliateIdLabel}>Affiliate ID: </Text>
+                        <Text style={[
+                          styles.affiliateIdValue,
+                          !affiliate.affiliateId && styles.affiliateIdMissing
+                        ]}>
+                          {affiliate.affiliateId || "Not set"}
+                        </Text>
+                      </View>
                     </View>
                     <Switch
                       value={affiliate.enabled}
@@ -665,23 +680,34 @@ export default function AdminScreen() {
                     />
                   </View>
 
-                  {affiliate.enabled && (
+                  <View style={styles.affiliateButtons}>
                     <TouchableOpacity
-                      style={styles.affiliateButton}
-                      onPress={() => openLink(affiliate.url)}
+                      style={styles.editIdButton}
+                      onPress={() => openEditModal(affiliate)}
                     >
-                      <Text style={styles.affiliateButtonText}>Open Affiliate Program</Text>
-                      <Ionicons name="open-outline" size={16} color="#4a9eff" />
+                      <Ionicons name="key" size={16} color="#FF9800" />
+                      <Text style={styles.editIdButtonText}>
+                        {affiliate.affiliateId ? "Edit ID" : "Add ID"}
+                      </Text>
                     </TouchableOpacity>
-                  )}
+
+                    {affiliate.enabled && (
+                      <TouchableOpacity
+                        style={styles.affiliateButton}
+                        onPress={() => openLink(affiliate.url)}
+                      >
+                        <Text style={styles.affiliateButtonText}>Open Program</Text>
+                        <Ionicons name="open-outline" size={16} color="#4a9eff" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               ))}
 
               <View style={styles.infoBox}>
                 <Ionicons name="information-circle" size={20} color="#4a9eff" />
                 <Text style={styles.infoText}>
-                  Toggle affiliates on/off to customize which programs appear in the app.
-                  They're automatically sorted by commission percentage.
+                  Add your affiliate IDs to track commissions. Links will automatically include your ID when users click through to shop.
                 </Text>
               </View>
             </View>
