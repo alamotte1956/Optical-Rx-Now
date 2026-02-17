@@ -109,7 +109,36 @@ export default function AddRxScreen() {
       const uri = result.assets[0].uri;
       setImageUri(uri);
       setShowPreview(true);
-      // No external OCR - user enters date manually (HIPAA compliant)
+      // Run on-device OCR to detect expiration date (HIPAA compliant)
+      await processImageWithOCR(uri);
+    }
+  };
+
+  // On-device OCR processing (HIPAA compliant - no server calls)
+  const processImageWithOCR = async (uri: string) => {
+    setProcessingOCR(true);
+    setOcrAttempted(false);
+    setDateAutoDetected(false);
+    
+    try {
+      console.log("Starting on-device OCR...");
+      const result = await extractExpirationDate(uri);
+      
+      setOcrAttempted(true);
+      
+      if (result.expiryDate) {
+        setExpiryDate(result.expiryDate);
+        setExpiryInput(formatDateForDisplay(result.expiryDate));
+        setDateAutoDetected(true);
+        console.log("OCR detected expiration date:", result.expiryDate);
+      } else {
+        console.log("OCR could not detect expiration date - manual entry required");
+      }
+    } catch (error) {
+      console.log("OCR processing error:", error);
+      setOcrAttempted(true);
+    } finally {
+      setProcessingOCR(false);
     }
   };
 
@@ -126,6 +155,7 @@ export default function AddRxScreen() {
     }
     
     setExpiryInput(formatted);
+    setDateAutoDetected(false); // User is manually editing
     
     // Validate and set if complete date
     if (formatted.length === 10) {
@@ -152,6 +182,15 @@ export default function AddRxScreen() {
       return;
     }
 
+    // Expiration date is REQUIRED
+    if (!expiryDate) {
+      Alert.alert(
+        "Expiration Date Required",
+        "Please enter the expiration date from your prescription. This is needed to send you reminders before it expires."
+      );
+      return;
+    }
+
     setSaving(true);
     try {
       await savePrescription({
@@ -160,7 +199,7 @@ export default function AddRxScreen() {
         imageBase64: imageUri,
         notes: "",
         dateTaken: new Date().toISOString(),
-        expiryDate: expiryDate || null,
+        expiryDate: expiryDate,
       });
       Alert.alert("Success", "Prescription saved successfully!");
       router.back();
@@ -177,6 +216,8 @@ export default function AddRxScreen() {
     setExpiryDate("");
     setExpiryInput("");
     setShowPreview(false);
+    setOcrAttempted(false);
+    setDateAutoDetected(false);
   };
 
   if (familyMembers.length === 0) {
