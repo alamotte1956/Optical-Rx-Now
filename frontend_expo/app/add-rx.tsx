@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  TextInput,
+  Platform,
 } from "react-native";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,7 +19,6 @@ import {
   getFamilyMembers,
   FamilyMember,
 } from "../services/localStorage";
-import { extractExpirationDate } from "../services/ocrService";
 
 const RX_TYPES = [
   { value: "eyeglass", label: "Eyeglasses", icon: "glasses-outline" },
@@ -32,8 +33,8 @@ export default function AddRxScreen() {
   const [rxType, setRxType] = useState<"eyeglass" | "contact">(type || "eyeglass");
   const [imageUri, setImageUri] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState("");
+  const [expiryInput, setExpiryInput] = useState("");
   const [saving, setSaving] = useState(false);
-  const [processingOCR, setProcessingOCR] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   // Set the Rx type from URL parameter
