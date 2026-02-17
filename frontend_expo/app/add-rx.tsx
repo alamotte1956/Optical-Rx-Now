@@ -105,25 +105,35 @@ export default function AddRxScreen() {
       const uri = result.assets[0].uri;
       setImageUri(uri);
       setShowPreview(true);
-      await processImageWithOCR(uri);
+      // No external OCR - user enters date manually (HIPAA compliant)
     }
   };
 
-  const processImageWithOCR = async (uri: string) => {
-    setProcessingOCR(true);
-    try {
-      console.log("Starting OCR processing...");
-      const result = await extractExpirationDate(uri);
-      
-      if (result.expiryDate) {
-        setExpiryDate(result.expiryDate);
+  // Parse and validate date input (MM/DD/YYYY format)
+  const handleExpiryInput = (text: string) => {
+    // Auto-format as user types
+    let formatted = text.replace(/\D/g, ''); // Remove non-digits
+    
+    if (formatted.length > 2) {
+      formatted = formatted.slice(0, 2) + '/' + formatted.slice(2);
+    }
+    if (formatted.length > 5) {
+      formatted = formatted.slice(0, 5) + '/' + formatted.slice(5, 9);
+    }
+    
+    setExpiryInput(formatted);
+    
+    // Validate and set if complete date
+    if (formatted.length === 10) {
+      const [month, day, year] = formatted.split('/').map(Number);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2020 && year <= 2035) {
+        const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        setExpiryDate(isoDate);
       } else {
-        console.log("No expiration date found in image");
+        setExpiryDate('');
       }
-    } catch (error) {
-      console.log("OCR processing error:", error);
-    } finally {
-      setProcessingOCR(false);
+    } else {
+      setExpiryDate('');
     }
   };
 
