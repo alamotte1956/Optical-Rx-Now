@@ -551,6 +551,14 @@ export default function ShopScreen() {
               </View>
             )}
             
+            {/* Location Badge for Retail Stores */}
+            {affiliate.category === "retail" && (usingLocation || zipCode) && (
+              <View style={styles.locationBadge}>
+                <Ionicons name="navigate" size={12} color="#4CAF50" />
+                <Text style={styles.locationBadgeText}>Find Nearest</Text>
+              </View>
+            )}
+            
             <View style={styles.affiliateIcon}>
               <Ionicons
                 name={getCategoryIcon(affiliate.category) as any}
