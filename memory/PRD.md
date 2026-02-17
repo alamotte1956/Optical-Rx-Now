@@ -13,9 +13,10 @@
 
 ### Prescription Management
 - ✅ Photo capture of prescriptions (camera + gallery)
-- ✅ OCR for automatic expiration date detection
+- ✅ **On-device OCR** for automatic expiration date detection (ML Kit - HIPAA compliant)
+- ✅ **Required** expiration date entry (auto-detected or manual fallback)
 - ✅ Family member management with relationships
-- ✅ Prescription types: Eyeglasses & Contact Lenses
+- ✅ Prescription types: Eyeglasses & Contact Lenses (separate buttons)
 - ✅ Expiration tracking with color-coded status
 
 ### Notifications
