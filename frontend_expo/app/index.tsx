@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trackAppOpen } from "../services/analytics";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
@@ -10,6 +11,9 @@ export default function IndexScreen() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    // Track app open
+    trackAppOpen();
+    
     // Small delay to ensure AsyncStorage is ready on mobile
     const timer = setTimeout(() => {
       checkAgeVerification();
