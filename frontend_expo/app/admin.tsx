@@ -287,10 +287,30 @@ const ADMIN_LINKS = [
 
 const AFFILIATES_STORAGE_KEY = "@optical_rx_affiliates";
 
+interface AffiliateType {
+  id: string;
+  name: string;
+  url: string;
+  baseUrl: string;
+  commission: number;
+  verified: boolean;
+  enabled: boolean;
+  description: string;
+  network: string;
+  affiliateId: string;
+  category: string;
+  isPreferred?: boolean;
+}
+
 export default function AdminScreen() {
   const router = useRouter();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const [affiliates, setAffiliates] = useState(DEFAULT_AFFILIATES);
+  const [affiliates, setAffiliates] = useState<AffiliateType[]>(DEFAULT_AFFILIATES);
+  const [editingAffiliate, setEditingAffiliate] = useState<AffiliateType | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [tempAffiliateId, setTempAffiliateId] = useState("");
+  const [analyticsStats, setAnalyticsStats] = useState<AnalyticsStats | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [analytics, setAnalytics] = useState({
     totalUsers: 0,
     totalPrescriptions: 0,
