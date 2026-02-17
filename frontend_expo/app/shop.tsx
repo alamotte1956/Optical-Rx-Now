@@ -332,28 +332,43 @@ export default function ShopScreen() {
     setHasEnteredZip(true);
   };
 
-  const handleOpenLink = async (url: string, name: string) => {
-    let finalUrl = url;
+  const handleOpenLink = async (affiliate: Affiliate) => {
+    let finalUrl = buildAffiliateUrl(affiliate);
+    
+    // Track the click
+    await trackAffiliateClick(affiliate.id, affiliate.name);
     
     // For Sam's Club, use store locator
-    if (url.includes("samsclub.com")) {
+    if (affiliate.baseUrl.includes("samsclub.com")) {
       if (usingLocation && location) {
-        // Use coordinates for location-based search
         const { latitude, longitude } = location.coords;
         finalUrl = `https://www.google.com/maps/search/Sam's+Club+Optical/@${latitude},${longitude},12z`;
-      } else {
-        // Use ZIP code
+      } else if (zipCode) {
         finalUrl = `https://www.samsclub.com/locator?filters=%7B%22services%22%3A%5B%22Optical%22%5D%7D&zip=${zipCode}`;
       }
     }
     // For Target Optical
-    else if (url.includes("targetoptical.com")) {
+    else if (affiliate.baseUrl.includes("targetoptical.com")) {
       if (usingLocation && location) {
         const { latitude, longitude } = location.coords;
         finalUrl = `https://www.google.com/maps/search/Target+Optical/@${latitude},${longitude},12z`;
-      } else {
+      } else if (zipCode) {
         const searchQuery = encodeURIComponent(`Target Optical near ${zipCode}`);
         finalUrl = `https://www.google.com/search?q=${searchQuery}`;
+      }
+    }
+    // For Costco Optical
+    else if (affiliate.baseUrl.includes("costco.com")) {
+      if (usingLocation && location) {
+        const { latitude, longitude } = location.coords;
+        finalUrl = `https://www.google.com/maps/search/Costco+Optical/@${latitude},${longitude},12z`;
+      }
+    }
+    // For America's Best
+    else if (affiliate.baseUrl.includes("americasbest.com")) {
+      if (usingLocation && location) {
+        const { latitude, longitude } = location.coords;
+        finalUrl = `https://www.google.com/maps/search/America's+Best+Eyeglasses/@${latitude},${longitude},12z`;
       }
     }
     
