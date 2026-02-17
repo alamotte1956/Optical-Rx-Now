@@ -558,6 +558,63 @@ export default function AdminScreen() {
                 </View>
               </View>
 
+              {/* Click Analytics */}
+              {loadingAnalytics ? (
+                <View style={styles.analyticsCard}>
+                  <ActivityIndicator color="#4a9eff" />
+                  <Text style={styles.loadingText}>Loading click analytics...</Text>
+                </View>
+              ) : analyticsStats && (
+                <View style={styles.analyticsCard}>
+                  <Text style={styles.analyticsCardTitle}>Click Analytics (This Device)</Text>
+                  <View style={styles.analyticsRow}>
+                    <View style={styles.analyticsItem}>
+                      <Ionicons name="link" size={20} color="#4CAF50" />
+                      <Text style={styles.analyticsLabel}>Affiliate Clicks:</Text>
+                      <Text style={styles.analyticsValue}>{analyticsStats.totalAffiliateClicks}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.analyticsRow}>
+                    <View style={styles.analyticsItem}>
+                      <Ionicons name="megaphone" size={20} color="#FF9800" />
+                      <Text style={styles.analyticsLabel}>Ad Clicks:</Text>
+                      <Text style={styles.analyticsValue}>{analyticsStats.totalAdClicks}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.analyticsRow}>
+                    <View style={styles.analyticsItem}>
+                      <Ionicons name="phone-portrait" size={20} color="#2196F3" />
+                      <Text style={styles.analyticsLabel}>App Opens:</Text>
+                      <Text style={styles.analyticsValue}>{analyticsStats.totalAppOpens}</Text>
+                    </View>
+                  </View>
+                  
+                  {/* Top Affiliate Partners */}
+                  {analyticsStats.clicksByPartner && Object.keys(analyticsStats.clicksByPartner).length > 0 && (
+                    <View style={styles.topPartnersSection}>
+                      <Text style={styles.topPartnersTitle}>Top Affiliate Partners:</Text>
+                      {Object.entries(analyticsStats.clicksByPartner)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 5)
+                        .map(([partner, clicks]) => (
+                          <View key={partner} style={styles.partnerRow}>
+                            <Text style={styles.partnerName}>{partner}</Text>
+                            <Text style={styles.partnerClicks}>{clicks} clicks</Text>
+                          </View>
+                        ))}
+                    </View>
+                  )}
+                  
+                  <TouchableOpacity 
+                    style={styles.refreshButton}
+                    onPress={loadAnalyticsStats}
+                  >
+                    <Ionicons name="refresh" size={16} color="#4a9eff" />
+                    <Text style={styles.refreshButtonText}>Refresh</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               {/* Activity Breakdown */}
               <View style={styles.analyticsCard}>
                 <Text style={styles.analyticsCardTitle}>Recent Activity (30 days)</Text>
