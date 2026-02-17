@@ -128,6 +128,29 @@ export default function WelcomeScreen() {
             )}
           </TouchableOpacity>
 
+          {/* Quick Add Prescription Buttons */}
+          {stats.familyMembers > 0 && (
+            <View style={styles.quickAddContainer}>
+              <Text style={styles.quickAddLabel}>Quick Add:</Text>
+              <View style={styles.quickAddButtons}>
+                <TouchableOpacity 
+                  style={styles.quickAddButtonGlasses}
+                  onPress={() => router.push("/add-rx?type=eyeglass")}
+                >
+                  <Ionicons name="glasses-outline" size={20} color="#fff" />
+                  <Text style={styles.quickAddButtonText}>Glasses Rx</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.quickAddButtonContacts}
+                  onPress={() => router.push("/add-rx?type=contact")}
+                >
+                  <Ionicons name="eye-outline" size={20} color="#fff" />
+                  <Text style={styles.quickAddButtonText}>Contacts Rx</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
           {/* Find Optical Stores Button - Links to shop */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
