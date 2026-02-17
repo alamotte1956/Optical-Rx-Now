@@ -342,6 +342,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
+  addButtonsContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  addButtonGlasses: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#4a9eff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButtonContacts: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#4CAF50",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   addButton: {
     width: 40,
     height: 40,
