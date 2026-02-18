@@ -1,131 +1,126 @@
 # Optical Rx Now - Product Requirements Document
 
-## Overview
-**App Name:** Optical Rx Now  
-**Platform:** iOS & Android (React Native/Expo)  
-**Business Model:** Free app with affiliate marketing commissions and banner ads from optical goods manufacturers
+## Original Problem Statement
+Build a mobile app (React Native/Expo) for managing optical prescriptions. The app must:
+- Be free, monetized through affiliate marketing and banner ads
+- Be HIPAA compliant with all data stored locally on device (no backend communication)
+- Allow users to manage family members and their prescriptions
+- Automatically read prescription expiration dates from photos using on-device OCR
+- Send notifications before prescriptions expire
+- Allow sharing/printing prescriptions as PDF
 
 ## User Personas
-1. **Primary Users:** Families managing multiple prescriptions for eyeglasses and contact lenses
-2. **Target Demographics:** Adults 25-65 managing their own and family members' vision care
+- Primary: Adults managing their own and family members' optical prescriptions
+- Secondary: Parents tracking children's prescriptions, caregivers for elderly
 
-## Core Features (Implemented)
+## Core Requirements
+1. **Family Management**: Add, view, delete family members
+2. **Prescription Management**: Add, view, delete prescriptions with photos
+3. **OCR Detection**: On-device text recognition to auto-detect expiration dates
+4. **PDF Generation**: Share/print prescriptions as PDF with embedded images
+5. **Notifications**: Reminders at 30, 14, 7, 2, and 0 days before expiry
+6. **HIPAA Compliance**: 100% on-device storage, no cloud communication
+7. **Affiliate Shop**: Links to optical retailers with location-based search
 
-### Prescription Management
-- ✅ Photo capture of prescriptions (camera + gallery)
-- ✅ **On-device OCR** for automatic expiration date detection (ML Kit - HIPAA compliant)
-- ✅ **Required** expiration date entry (auto-detected or manual fallback)
-- ✅ Family member management with relationships
-- ✅ Prescription types: Eyeglasses & Contact Lenses (separate buttons)
-- ✅ Expiration tracking with color-coded status
+## Technical Stack
+- **Framework**: React Native with Expo SDK 54
+- **Routing**: expo-router (file-based)
+- **Storage**: AsyncStorage + FileSystem for images
+- **OCR**: @react-native-ml-kit/text-recognition (on-device)
+- **Build**: Expo Application Services (EAS)
 
-### Notifications
-- ✅ Push notifications for expiring prescriptions
-- ✅ Alerts at 30, 14, 7, 2 days, and day of expiration
-- ✅ Customizable notification settings
+## What's Been Implemented (Feb 2026)
 
-### Shop & Affiliates
-- ✅ 18 affiliate optical partners integrated
-- ✅ Partners sorted by commission rate (4-15%)
-- ✅ Categories: Online, Retail, Contacts
-- ✅ Location-based retail store finder
-- ✅ "Preferred Partner" highlighting (Sam's Club)
+### Completed Features
+- ✅ Family member CRUD operations with delete confirmation modal
+- ✅ Prescription CRUD with image capture/gallery import
+- ✅ On-device OCR for expiration date detection
+- ✅ Manual expiration date entry (required field)
+- ✅ PDF generation with embedded prescription images
+- ✅ Print functionality
+- ✅ Share PDF functionality
+- ✅ Expiry notifications scheduling
+- ✅ Separate "Add Glasses Rx" and "Add Contacts Rx" buttons
+- ✅ Admin panel for affiliate management
+- ✅ Analytics dashboard (local tracking)
+- ✅ Location-based retail store search
+- ✅ Delete buttons for family members and prescriptions
+- ✅ Age verification screen
+- ✅ HIPAA-compliant local storage
 
-### Find Optometrists
-- ✅ Google Maps integration
-- ✅ Healthgrades integration
-- ✅ Yelp integration
-- ✅ Location-based search
+### Bug Fixes Applied (Latest)
+- Fixed PDF/print not showing images (added base64 conversion)
+- Fixed delete family member not working (proper cleanup of associated prescriptions)
+- Fixed app crashes when viewing prescriptions (null safety checks)
+- Fixed app.json configuration issues (androidStatusBar placement, splash colors)
+- Fixed dependency version mismatches for EAS build
+- Added react-native-worklets for reanimated compatibility
 
-### Admin Panel (Long-press logo to access)
-- ✅ Analytics dashboard with metrics
-- ✅ Affiliate management with enable/disable
-- ✅ Affiliate ID input for each partner
-- ✅ Click tracking analytics
-- ✅ Data management tools
+## File Structure
+```
+/app/frontend_expo/
+├── app/
+│   ├── (tabs)/
+│   │   ├── index.tsx      # Home/Dashboard
+│   │   ├── family.tsx     # Family members list with delete
+│   │   └── ...
+│   ├── rx-detail.tsx      # View/share/print/delete prescription
+│   ├── add-rx.tsx         # Add new prescription
+│   ├── add-member.tsx     # Add family member
+│   ├── admin.tsx          # Admin panel
+│   ├── shop.tsx           # Affiliate shop
+│   └── ...
+├── services/
+│   ├── localStorage.ts    # All data storage operations
+│   ├── ocrService.ts      # On-device OCR
+│   ├── analytics.ts       # Local analytics
+│   └── dateUtils.ts       # Date formatting utilities
+├── app.json               # Expo configuration
+├── eas.json               # EAS build configuration
+└── package.json           # Dependencies
+```
 
-## Monetization Infrastructure (Implemented)
+## Prioritized Backlog
 
-### Affiliate Partners (18 total)
-| Partner | Commission | Network | Category |
-|---------|------------|---------|----------|
-| Designer Optics | 15% | Partnerize | Online |
-| Eyeglasses.com | 15% | IMPACT.com | Online |
-| GlassesUSA | 12% | CJ | Online |
-| Clearly | 12% | Direct | Contacts |
-| Lens.com | 12% | CJ | Contacts |
-| ContactsDirect | 11% | ShareASale | Contacts |
-| Zenni Optical | 10% | Impact Radius | Online |
-| EyeBuyDirect | 10% | ShareASale | Online |
-| Warby Parker | 10% | Rakuten | Online |
-| 1-800 Contacts | 9% | CJ | Contacts |
-| Target Optical | 8% | CJ | Retail |
-| Eyeconic | 8% | VSP | Online |
-| Coastal | 8% | ShareASale | Online |
-| SportRx | 7% | Direct | Online |
-| FramesDirect | 7% | CJ | Online |
-| Sam's Club | 5% | Direct | Retail |
-| Costco Optical | 4% | Direct | Retail |
-| America's Best | 4% | Direct | Retail |
+### P0 (Critical)
+- [x] Fix PDF sharing with images
+- [x] Fix delete family member functionality
+- [x] Fix app stability issues
 
-### Analytics Tracking
-- ✅ App opens tracked
-- ✅ Ad clicks tracked
-- ✅ Affiliate clicks tracked with partner attribution
-- ✅ Stats viewable in Admin panel
-- ✅ Local storage for privacy
-
-### Ad Placements
-- ✅ Welcome screen banner placeholder
-- ✅ Shop page banner placeholder
-- ✅ Find Optometrists banner placeholder
-- ✅ "Advertise with us" CTAs with email link
-
-## Technical Architecture
-
-### Frontend (Expo/React Native)
-- Expo SDK 54
-- expo-router for navigation
-- AsyncStorage for local data
-- expo-image-picker for photos
-- expo-location for geolocation
-- expo-notifications for push
-
-### Backend (FastAPI)
-- Minimal health check endpoints
-- All user data stored locally on device
-- No server-side storage (privacy-focused)
-
-## App Store Readiness
-- ✅ app.json configured for iOS & Android
-- ✅ Bundle IDs: com.opticalrxnow.app
-- ✅ Privacy permissions configured
-- ✅ EAS Build configuration (eas.json)
-- ✅ Deployment guide created
-
-## Next Steps / Backlog
-
-### P0 (Before Launch)
-- [ ] Add actual affiliate IDs in Admin panel
-- [ ] Create Privacy Policy page
-- [ ] Set up App Store Connect account
-- [ ] Set up Google Play Console account
-- [ ] Build production APK/IPA
-
-### P1 (Post-Launch)
+### P1 (High Priority)
 - [ ] Integrate Google AdMob for banner ads
-- [ ] Add more manufacturer banner ad slots
-- [ ] Implement deep linking for affiliate URLs
-- [ ] Add analytics export functionality
+- [ ] iOS build and testing
+- [ ] App store submission preparation
 
-### P2 (Future Enhancements)
-- [ ] Firebase Analytics for cross-device tracking
-- [ ] A/B testing for affiliate placement
-- [ ] Revenue dashboard
-- [ ] Push notification campaigns
+### P2 (Medium Priority)
+- [ ] Add HIPAA compliance notice in settings
+- [ ] Enhanced error messages for users
+- [ ] Offline indicator
 
-## Changelog
-- **Jan 2026**: Added affiliate ID management in Admin panel
-- **Jan 2026**: Expanded to 18 affiliate partners
-- **Jan 2026**: Implemented click tracking analytics
-- **Jan 2026**: GitHub import and deployment setup
+### P3 (Future)
+- [ ] Multiple prescription images per Rx
+- [ ] Prescription history/versioning
+- [ ] Export all data feature
+- [ ] Dark/light theme toggle
+
+## Build Instructions
+```bash
+# Navigate to frontend_expo folder
+cd frontend_expo
+
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Build Android APK
+eas build --platform android --profile preview
+
+# Build iOS
+eas build --platform ios --profile preview
+```
+
+## Next Steps
+1. User to clone fresh from GitHub
+2. Run `npm install --legacy-peer-deps`
+3. Build APK: `eas build --platform android --profile preview`
+4. Test all functionality on device
+5. Report any remaining issues
