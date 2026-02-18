@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.opticalrxnow.app",
+      "buildNumber": "111",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": []
       },
@@ -23,11 +24,11 @@
       },
       "config": {
         "usesNonExemptEncryption": false
-      },
-      "associatedDomains": ["applinks:opticalrxnow.com"]
+      }
     },
     "android": {
       "package": "com.opticalrxnow.app",
+      "versionCode": 111,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -44,7 +45,8 @@
         "android.permission.INTERNET",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.SCHEDULE_EXACT_ALARM"
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "androidStatusBar": {
@@ -64,7 +66,7 @@
           "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#0A1628"
         }
       ],
       [
@@ -80,7 +82,8 @@
           "locationWhenInUsePermission": "Find nearby optical stores for eyewear shopping"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -88,7 +91,12 @@
     "extra": {
       "privacyPolicyUrl": "https://opticalrxnow.com/privacy",
       "supportEmail": "support@OpticalRxNow.com",
-      "websiteUrl": "https://opticalrxnow.com"
-    }
+      "websiteUrl": "https://opticalrxnow.com",
+      "router": {},
+      "eas": {
+        "projectId": "3f66043f-24e3-41b5-b596-4cd63fd1e5e1"
+      }
+    },
+    "owner": "alamotte1956"
   }
 }
