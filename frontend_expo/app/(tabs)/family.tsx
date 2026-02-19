@@ -146,31 +146,29 @@ export default function FamilyScreen() {
                 backgroundColor: '#1a2d45',
                 borderRadius: 12,
                 padding: 16,
-                marginBottom: 12,
+                marginBottom: 16,
+                minHeight: 160,
               }}>
                 {/* Member Info */}
                 <TouchableOpacity 
                   onPress={() => router.push(`/member/${member.id}`)}
+                  style={{ marginBottom: 12 }}
                 >
-                  <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
-                  <Text style={{ fontSize: 14, color: '#8899a6', marginTop: 4 }}>{member.relationship}</Text>
-                  <Text style={{ fontSize: 12, color: '#4a9eff', marginTop: 4 }}>
-                    {prescriptionCounts[member.id] || 0} prescriptions
-                  </Text>
+                  <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#8899a6', marginTop: 2 }}>{member.relationship} • {prescriptionCounts[member.id] || 0} Rx</Text>
                 </TouchableOpacity>
                 
-                {/* DELETE BUTTON - Below member info */}
+                {/* DELETE BUTTON */}
                 <TouchableOpacity 
                   style={{
                     backgroundColor: '#ff5c5c',
-                    paddingVertical: 14,
-                    borderRadius: 8,
-                    marginTop: 16,
+                    paddingVertical: 16,
+                    borderRadius: 10,
                     alignItems: 'center',
                   }}
                   onPress={() => confirmDelete(member)}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>🗑️ DELETE {member.name.toUpperCase()}</Text>
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 18 }}>DELETE</Text>
                 </TouchableOpacity>
               </View>
             ))}
