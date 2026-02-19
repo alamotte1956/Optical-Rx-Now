@@ -44,9 +44,20 @@ export default function FamilyScreen() {
   const loadData = async () => {
     try {
       console.log("Family: Loading data...");
-      const membersData = await getFamilyMembers();
-      console.log("Family: Loaded members:", membersData?.length, membersData);
+      
+      // Retry a few times in case AsyncStorage isn't ready
+      let membersData: FamilyMember[] = [];
+      for (let i = 0; i < 3; i++) {
+        membersData = await getFamilyMembers();
+        console.log("Family: Attempt", i + 1, "loaded members:", membersData?.length);
+        if (membersData.length > 0) break;
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      console.log("Family: Final members:", membersData?.length, membersData);
       setMembers(membersData);
+      
       const counts: {[key: string]: number} = {};
       for (const member of membersData) {
         const rxs = await getPrescriptionsByMember(member.id);
