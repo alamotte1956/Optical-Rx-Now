@@ -141,34 +141,38 @@ export default function FamilyScreen() {
           </View>
         ) : (
           <>
+            <Text style={{ color: '#ff5c5c', fontSize: 16, marginBottom: 10, textAlign: 'center' }}>
+              Found {members.length} member(s) - Scroll down to see DELETE button
+            </Text>
             {members.map((member) => (
               <View key={member.id} style={{
                 backgroundColor: '#1a2d45',
                 borderRadius: 12,
-                padding: 16,
-                marginBottom: 16,
-                minHeight: 160,
+                padding: 20,
+                marginBottom: 20,
               }}>
-                {/* Member Info */}
-                <TouchableOpacity 
-                  onPress={() => router.push(`/member/${member.id}`)}
-                  style={{ marginBottom: 12 }}
-                >
-                  <Text style={{ fontSize: 22, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
-                  <Text style={{ fontSize: 14, color: '#8899a6', marginTop: 2 }}>{member.relationship} • {prescriptionCounts[member.id] || 0} Rx</Text>
-                </TouchableOpacity>
-                
-                {/* DELETE BUTTON */}
+                {/* DELETE BUTTON - AT THE TOP */}
                 <TouchableOpacity 
                   style={{
                     backgroundColor: '#ff5c5c',
-                    paddingVertical: 16,
+                    paddingVertical: 18,
                     borderRadius: 10,
                     alignItems: 'center',
+                    marginBottom: 16,
                   }}
                   onPress={() => confirmDelete(member)}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 18 }}>DELETE</Text>
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>🗑️ TAP TO DELETE</Text>
+                </TouchableOpacity>
+
+                {/* Member Info */}
+                <TouchableOpacity 
+                  onPress={() => router.push(`/member/${member.id}`)}
+                >
+                  <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
+                  <Text style={{ fontSize: 16, color: '#8899a6', marginTop: 6 }}>{member.relationship}</Text>
+                  <Text style={{ fontSize: 14, color: '#4a9eff', marginTop: 6 }}>{prescriptionCounts[member.id] || 0} prescriptions</Text>
+                  <Text style={{ fontSize: 12, color: '#6b7c8f', marginTop: 8 }}>Tap name to view details →</Text>
                 </TouchableOpacity>
               </View>
             ))}
