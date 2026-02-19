@@ -602,6 +602,77 @@ const styles = StyleSheet.create({
   previewContainer: {
     flex: 1,
   },
+  expiryCard: {
+    backgroundColor: "#1a2d45",
+    margin: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  expiryCardRequired: {
+    borderWidth: 2,
+    borderColor: "#FF9800",
+    backgroundColor: "rgba(255, 152, 0, 0.08)",
+  },
+  expiryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  expiryTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    flex: 1,
+  },
+  expiryInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  expiryInput: {
+    flex: 1,
+    backgroundColor: "#0f1d2f",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+    borderWidth: 2,
+    borderColor: "#3a4d63",
+    textAlign: "center",
+    letterSpacing: 2,
+  },
+  expiryInputValid: {
+    borderColor: "#4CAF50",
+    backgroundColor: "rgba(76, 175, 80, 0.1)",
+  },
+  expiryInputRequired: {
+    borderColor: "#FF9800",
+  },
+  expiryHelp: {
+    fontSize: 13,
+    color: "#FF9800",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  checkIcon: {
+    width: 32,
+  },
+  imagePreviewSmall: {
+    height: 180,
+    marginHorizontal: 16,
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+  previewImageSmall: {
+    width: "100%",
+    height: "100%",
+  },
   imagePreview: {
     height: 300,
     backgroundColor: "#1a2d45",
