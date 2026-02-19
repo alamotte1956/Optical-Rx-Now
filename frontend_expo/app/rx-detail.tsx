@@ -78,20 +78,9 @@ const escapeHtml = (text: string | null | undefined): string => {
 
 const getImageAsBase64 = async (imageUri: string): Promise<string> => {
   try {
-    if (!imageUri) {
-      console.log("getImageAsBase64: No image URI provided");
-      return "";
-    }
+    if (!imageUri) return "";
+    if (imageUri.startsWith("data:")) return imageUri;
     
-    console.log("getImageAsBase64: Processing URI:", imageUri.substring(0, 100));
-    
-    // Already a data URI - return as is
-    if (imageUri.startsWith("data:")) {
-      console.log("getImageAsBase64: Already a data URI");
-      return imageUri;
-    }
-    
-    // Try multiple path variations
     const pathsToTry = [
       imageUri,
       imageUri.startsWith("file://") ? imageUri : `file://${imageUri}`,
@@ -101,34 +90,28 @@ const getImageAsBase64 = async (imageUri: string): Promise<string> => {
     for (const filePath of pathsToTry) {
       try {
         const fileInfo = await FileSystem.getInfoAsync(filePath);
-        console.log("getImageAsBase64: Checking path:", filePath, "exists:", fileInfo.exists);
-        
         if (fileInfo.exists) {
           const base64 = await FileSystem.readAsStringAsync(filePath, {
             encoding: FileSystem.EncodingType.Base64,
           });
           
           if (base64) {
-            // Determine MIME type from extension
             const extension = filePath.split('.').pop()?.toLowerCase() || 'jpg';
             let mimeType = 'image/jpeg';
             if (extension === 'png') mimeType = 'image/png';
             else if (extension === 'gif') mimeType = 'image/gif';
             else if (extension === 'webp') mimeType = 'image/webp';
             
-            console.log("getImageAsBase64: Successfully converted, length:", base64.length);
             return `data:${mimeType};base64,${base64}`;
           }
         }
       } catch (pathError) {
-        console.log("getImageAsBase64: Error with path", filePath, pathError);
+        // Try next path
       }
     }
     
-    console.log("getImageAsBase64: Could not find image at any path");
     return "";
   } catch (error) {
-    console.log("getImageAsBase64: Error:", error);
     return "";
   }
 };
