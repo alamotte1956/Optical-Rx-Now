@@ -250,6 +250,7 @@ export default function AddRxScreen() {
     );
   }
 
+  // Preview screen - Expiration date at TOP for easy access
   if (showPreview && imageUri) {
     return (
       <SafeAreaView style={styles.container}>
@@ -261,7 +262,7 @@ export default function AddRxScreen() {
           <View style={styles.placeholder} />
         </View>
 
-        <View style={styles.previewContainer}>
+        <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent}>
           {/* Expiration Date - FIRST and MOST PROMINENT */}
           <View style={[styles.expiryCard, !expiryDate && styles.expiryCardRequired]}>
             <View style={styles.expiryHeader}>
