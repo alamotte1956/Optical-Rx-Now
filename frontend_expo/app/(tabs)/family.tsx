@@ -136,17 +136,27 @@ export default function FamilyScreen() {
         ) : (
           members.map((member) => (
             <View key={member.id} style={styles.memberCard}>
-              <View style={styles.memberIcon}>
-                <Ionicons name={getRelationshipIcon(member.relationship) as any} size={28} color="#4a9eff" />
-              </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{member.name}</Text>
-                <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                <Text style={styles.memberRxCount}>
-                  {prescriptionCounts[member.id] || 0} prescription{prescriptionCounts[member.id] !== 1 ? "s" : ""}
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(member)}>
+              <TouchableOpacity 
+                style={styles.memberTouchable}
+                onPress={() => router.push(`/member/${member.id}`)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.memberIcon}>
+                  <Ionicons name={getRelationshipIcon(member.relationship) as any} size={28} color="#4a9eff" />
+                </View>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>{member.name}</Text>
+                  <Text style={styles.memberRelationship}>{member.relationship}</Text>
+                  <Text style={styles.memberRxCount}>
+                    {prescriptionCounts[member.id] || 0} prescription{prescriptionCounts[member.id] !== 1 ? "s" : ""}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.deleteButton} 
+                onPress={() => confirmDelete(member)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <Ionicons name="trash-outline" size={22} color="#ff5c5c" />
               </TouchableOpacity>
             </View>
