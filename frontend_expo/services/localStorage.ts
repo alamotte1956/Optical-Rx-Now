@@ -135,15 +135,20 @@ export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
 };
 
 export const saveFamilyMember = async (name: string, relationship: string): Promise<FamilyMember> => {
-  // Retry getting members to handle AsyncStorage timing issues
+  // Read directly from AsyncStorage to avoid any caching issues
   let members: FamilyMember[] = [];
-  for (let i = 0; i < 3; i++) {
-    members = await getFamilyMembers();
-    if (members.length > 0 || i === 2) break;
-    await new Promise(resolve => setTimeout(resolve, 200));
+  
+  try {
+    const data = await AsyncStorage.getItem(KEYS.FAMILY_MEMBERS);
+    console.log("saveFamilyMember: Raw data from storage:", data);
+    if (data) {
+      members = JSON.parse(data);
+    }
+  } catch (error) {
+    console.log("saveFamilyMember: Error reading members:", error);
   }
   
-  console.log("saveFamilyMember: Current members before save:", members.length);
+  console.log("saveFamilyMember: Current members before save:", members.length, members.map(m => m.name));
   
   const newMember: FamilyMember = {
     id: generateId(),
@@ -151,10 +156,13 @@ export const saveFamilyMember = async (name: string, relationship: string): Prom
     relationship,
     createdAt: new Date().toISOString(),
   };
-  members.push(newMember);
-  await AsyncStorage.setItem(KEYS.FAMILY_MEMBERS, JSON.stringify(members));
   
-  console.log("saveFamilyMember: Saved members count:", members.length);
+  members.push(newMember);
+  
+  const newData = JSON.stringify(members);
+  await AsyncStorage.setItem(KEYS.FAMILY_MEMBERS, newData);
+  
+  console.log("saveFamilyMember: Saved members count:", members.length, "Data:", newData);
   return newMember;
 };
 
