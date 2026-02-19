@@ -603,6 +603,12 @@ const styles = StyleSheet.create({
   previewContainer: {
     flex: 1,
   },
+  previewScroll: {
+    flex: 1,
+  },
+  previewScrollContent: {
+    paddingBottom: 20,
+  },
   expiryCard: {
     backgroundColor: "#1a2d45",
     margin: 16,
