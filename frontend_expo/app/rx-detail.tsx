@@ -261,6 +261,7 @@ export default function RxDetailScreen() {
         return;
       }
 
+      console.log("Generating PDF HTML...");
       const html = await generatePdfHtml();
       if (!html) {
         Alert.alert("Error", "Could not generate PDF content");
@@ -268,16 +269,20 @@ export default function RxDetailScreen() {
         return;
       }
       
+      console.log("Creating PDF file...");
       const { uri } = await Print.printToFileAsync({ html, base64: false });
-      const safeName = (member.name || "Unknown").replace(/\s+/g, '_');
+      console.log("PDF created at:", uri);
+      
+      const safeName = (member.name || "Unknown").replace(/[^a-zA-Z0-9]/g, '_');
       const filename = `Prescription_${safeName}_${new Date().toISOString().split('T')[0]}.pdf`;
       const newUri = `${FileSystem.cacheDirectory}${filename}`;
       
       await FileSystem.moveAsync({ from: uri, to: newUri });
+      console.log("Sharing PDF from:", newUri);
       await Sharing.shareAsync(newUri, { mimeType: 'application/pdf', dialogTitle: `Share Prescription` });
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error sharing PDF:", error);
-      Alert.alert("Error", "Failed to create PDF. Please try again.");
+      Alert.alert("Error", `Failed to create PDF: ${error?.message || 'Unknown error'}`);
     } finally {
       setSharing(false);
     }
