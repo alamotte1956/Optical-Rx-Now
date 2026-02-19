@@ -273,13 +273,12 @@ export default function RxDetailScreen() {
       const { uri } = await Print.printToFileAsync({ html, base64: false });
       console.log("PDF created at:", uri);
       
-      const safeName = (member.name || "Unknown").replace(/[^a-zA-Z0-9]/g, '_');
-      const filename = `Prescription_${safeName}_${new Date().toISOString().split('T')[0]}.pdf`;
-      const newUri = `${FileSystem.cacheDirectory}${filename}`;
-      
-      await FileSystem.moveAsync({ from: uri, to: newUri });
-      console.log("Sharing PDF from:", newUri);
-      await Sharing.shareAsync(newUri, { mimeType: 'application/pdf', dialogTitle: `Share Prescription` });
+      // Share directly from the generated URI (no move needed)
+      console.log("Sharing PDF...");
+      await Sharing.shareAsync(uri, { 
+        mimeType: 'application/pdf', 
+        dialogTitle: `Share Prescription for ${member.name}` 
+      });
     } catch (error: any) {
       console.log("Error sharing PDF:", error);
       Alert.alert("Error", `Failed to create PDF: ${error?.message || 'Unknown error'}`);
