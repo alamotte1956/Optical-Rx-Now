@@ -143,37 +143,34 @@ export default function FamilyScreen() {
           <>
             {members.map((member) => (
               <View key={member.id} style={{
-                flexDirection: 'row',
                 backgroundColor: '#1a2d45',
                 borderRadius: 12,
                 padding: 16,
                 marginBottom: 12,
-                alignItems: 'center',
               }}>
-                {/* Member Info - Left Side */}
+                {/* Member Info */}
                 <TouchableOpacity 
-                  style={{ flex: 1 }}
                   onPress={() => router.push(`/member/${member.id}`)}
                 >
-                  <Text style={{ fontSize: 18, fontWeight: '600', color: '#fff' }}>{member.name}</Text>
+                  <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
                   <Text style={{ fontSize: 14, color: '#8899a6', marginTop: 4 }}>{member.relationship}</Text>
                   <Text style={{ fontSize: 12, color: '#4a9eff', marginTop: 4 }}>
                     {prescriptionCounts[member.id] || 0} prescriptions
                   </Text>
                 </TouchableOpacity>
                 
-                {/* DELETE BUTTON - Right Side */}
+                {/* DELETE BUTTON - Below member info */}
                 <TouchableOpacity 
                   style={{
                     backgroundColor: '#ff5c5c',
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
+                    paddingVertical: 14,
                     borderRadius: 8,
-                    marginLeft: 12,
+                    marginTop: 16,
+                    alignItems: 'center',
                   }}
                   onPress={() => confirmDelete(member)}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>DELETE</Text>
+                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>🗑️ DELETE {member.name.toUpperCase()}</Text>
                 </TouchableOpacity>
               </View>
             ))}
