@@ -701,6 +701,7 @@ const styles = StyleSheet.create({
   infoSection: {
     flex: 1,
     padding: 16,
+    paddingTop: 12,
   },
   infoCard: {
     flexDirection: "row",
@@ -708,8 +709,8 @@ const styles = StyleSheet.create({
     gap: 12,
     backgroundColor: "#1a2d45",
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 10,
   },
   infoContent: {
     flex: 1,
