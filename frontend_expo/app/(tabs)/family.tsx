@@ -30,11 +30,6 @@ export default function FamilyScreen() {
   const [memberToDelete, setMemberToDelete] = useState<FamilyMember | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const goToHome = () => {
-    router.dismissAll();
-    router.replace("/welcome");
-  };
-
   useFocusEffect(
     useCallback(() => {
       loadData();
