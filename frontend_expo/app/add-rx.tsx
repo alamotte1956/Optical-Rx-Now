@@ -262,18 +262,67 @@ export default function AddRxScreen() {
         </View>
 
         <View style={styles.previewContainer}>
-          <View style={styles.imagePreview}>
-            <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="contain" />
+          {/* Expiration Date - FIRST and MOST PROMINENT */}
+          <View style={[styles.expiryCard, !expiryDate && styles.expiryCardRequired]}>
+            <View style={styles.expiryHeader}>
+              <Ionicons 
+                name="calendar" 
+                size={24} 
+                color={expiryDate ? "#4CAF50" : "#FF9800"} 
+              />
+              <Text style={styles.expiryTitle}>
+                Expiration Date {!expiryDate && <Text style={styles.requiredLabel}>*</Text>}
+              </Text>
+              {dateAutoDetected && (
+                <View style={styles.autoDetectedBadge}>
+                  <Ionicons name="scan" size={12} color="#4CAF50" />
+                  <Text style={styles.autoDetectedText}>Auto-detected</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.expiryInputRow}>
+              <TextInput
+                style={[
+                  styles.expiryInput,
+                  expiryDate && styles.expiryInputValid,
+                  !expiryDate && styles.expiryInputRequired,
+                ]}
+                placeholder="MM/DD/YYYY"
+                placeholderTextColor="#6b7c8f"
+                value={expiryInput}
+                onChangeText={handleExpiryInput}
+                keyboardType="numeric"
+                maxLength={10}
+                editable={!processingOCR}
+              />
+              {expiryDate ? (
+                <View style={styles.checkIcon}>
+                  <Ionicons name="checkmark-circle" size={28} color="#4CAF50" />
+                </View>
+              ) : processingOCR ? (
+                <ActivityIndicator size="small" color="#4a9eff" style={styles.checkIcon} />
+              ) : null}
+            </View>
+            {!expiryDate && !processingOCR && (
+              <Text style={styles.expiryHelp}>
+                Enter the expiration date from your prescription
+              </Text>
+            )}
+          </View>
+
+          {/* Image Preview - Smaller */}
+          <View style={styles.imagePreviewSmall}>
+            <Image source={{ uri: imageUri }} style={styles.previewImageSmall} resizeMode="contain" />
             {processingOCR && (
               <View style={styles.ocrOverlay}>
                 <ActivityIndicator size="large" color="#4a9eff" />
                 <Text style={styles.ocrText}>Reading expiration date...</Text>
-                <Text style={styles.ocrSubtext}>Processing on device only</Text>
               </View>
             )}
           </View>
 
           <View style={styles.infoSection}>
+            {/* Family Member Selector */}
             <View style={styles.infoCard}>
               <Ionicons name="person" size={20} color="#4a9eff" />
               <View style={styles.infoContent}>
@@ -302,6 +351,7 @@ export default function AddRxScreen() {
               </View>
             </View>
 
+            {/* Type Selector */}
             <View style={styles.infoCard}>
               <Ionicons name="glasses-outline" size={20} color="#4a9eff" />
               <View style={styles.infoContent}>
@@ -335,59 +385,11 @@ export default function AddRxScreen() {
               </View>
             </View>
 
-            {/* Expiration Date - Auto-detected or Manual Entry - ALWAYS REQUIRED */}
-            <View style={[styles.infoCard, !expiryDate && styles.requiredCard]}>
-              <Ionicons 
-                name="calendar" 
-                size={20} 
-                color={expiryDate ? "#4CAF50" : "#FF9800"} 
-              />
-              <View style={styles.infoContent}>
-                <View style={styles.labelRow}>
-                  <Text style={styles.infoLabel}>
-                    Expiration Date {!expiryDate && <Text style={styles.requiredLabel}>(Required)</Text>}
-                  </Text>
-                  {dateAutoDetected && (
-                    <View style={styles.autoDetectedBadge}>
-                      <Ionicons name="scan" size={12} color="#4CAF50" />
-                      <Text style={styles.autoDetectedText}>Auto-detected</Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.dateInputContainer}>
-                  <TextInput
-                    style={[
-                      styles.dateInput,
-                      expiryDate && styles.dateInputValid,
-                      !expiryDate && styles.dateInputRequired,
-                    ]}
-                    placeholder="MM/DD/YYYY"
-                    placeholderTextColor="#6b7c8f"
-                    value={expiryInput}
-                    onChangeText={handleExpiryInput}
-                    keyboardType="numeric"
-                    maxLength={10}
-                    editable={!processingOCR}
-                  />
-                  {expiryDate ? (
-                    <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-                  ) : processingOCR ? (
-                    <ActivityIndicator size="small" color="#4a9eff" />
-                  ) : null}
-                </View>
-                {!expiryDate && !processingOCR && (
-                  <Text style={styles.dateHelp}>
-                    Enter the expiration date from your prescription
-                  </Text>
-                )}
-              </View>
-            </View>
-
             {/* HIPAA Notice */}
             <View style={styles.hipaaNotice}>
               <Ionicons name="shield-checkmark" size={16} color="#4CAF50" />
               <Text style={styles.hipaaText}>
-                Your data stays on this device only - never sent to any server
+                Your data stays on this device only
               </Text>
             </View>
           </View>
@@ -396,7 +398,7 @@ export default function AddRxScreen() {
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
             <Ionicons name="camera-reverse" size={20} color="#8899a6" />
-            <Text style={styles.retakeButtonText}>Retake Photo</Text>
+            <Text style={styles.retakeButtonText}>Retake</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
