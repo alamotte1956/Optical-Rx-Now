@@ -123,9 +123,7 @@ export default function FamilyScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.homeButton} onPress={goToHome}>
-          <Ionicons name="home-outline" size={22} color="#4a9eff" />
-        </TouchableOpacity>
+        <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Family Members</Text>
         <TouchableOpacity style={styles.addButton} onPress={() => router.push("/add-member")}>
           <Ionicons name="add" size={24} color="#fff" />
