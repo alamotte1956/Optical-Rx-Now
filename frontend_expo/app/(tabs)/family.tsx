@@ -37,11 +37,9 @@ export default function FamilyScreen() {
 
   const loadData = async () => {
     try {
-      console.log("Family: Loading data...");
       let membersData: FamilyMember[] = [];
       for (let i = 0; i < 5; i++) {
         membersData = await getFamilyMembers();
-        console.log("Family: Attempt", i + 1, "loaded members:", membersData?.length);
         if (membersData.length > 0) break;
         await new Promise(resolve => setTimeout(resolve, 300));
       }
