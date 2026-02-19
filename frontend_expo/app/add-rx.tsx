@@ -394,7 +394,7 @@ export default function AddRxScreen() {
               </Text>
             </View>
           </View>
-        </View>
+        </ScrollView>
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
