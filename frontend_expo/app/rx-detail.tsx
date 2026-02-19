@@ -78,44 +78,57 @@ const escapeHtml = (text: string | null | undefined): string => {
 
 const getImageAsBase64 = async (imageUri: string): Promise<string> => {
   try {
-    if (!imageUri) return "";
-    
-    // Already a data URI
-    if (imageUri.startsWith("data:")) return imageUri;
-    
-    // Handle file:// URIs and regular file paths
-    let filePath = imageUri;
-    if (!filePath.startsWith("file://") && !filePath.startsWith("/")) {
-      // If it's a relative path, try to resolve it
-      filePath = `${FileSystem.documentDirectory}${imageUri}`;
+    if (!imageUri) {
+      console.log("getImageAsBase64: No image URI provided");
+      return "";
     }
     
-    const fileInfo = await FileSystem.getInfoAsync(filePath);
-    if (!fileInfo.exists) {
-      console.log("Image file not found at path:", filePath);
-      // Try the original URI as fallback
-      const fallbackInfo = await FileSystem.getInfoAsync(imageUri);
-      if (!fallbackInfo.exists) {
-        console.log("Image file not found at original URI either:", imageUri);
-        return "";
+    console.log("getImageAsBase64: Processing URI:", imageUri.substring(0, 100));
+    
+    // Already a data URI - return as is
+    if (imageUri.startsWith("data:")) {
+      console.log("getImageAsBase64: Already a data URI");
+      return imageUri;
+    }
+    
+    // Try multiple path variations
+    const pathsToTry = [
+      imageUri,
+      imageUri.startsWith("file://") ? imageUri : `file://${imageUri}`,
+      `${FileSystem.documentDirectory}prescription_images/${imageUri.split('/').pop()}`,
+    ];
+    
+    for (const filePath of pathsToTry) {
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(filePath);
+        console.log("getImageAsBase64: Checking path:", filePath, "exists:", fileInfo.exists);
+        
+        if (fileInfo.exists) {
+          const base64 = await FileSystem.readAsStringAsync(filePath, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          
+          if (base64) {
+            // Determine MIME type from extension
+            const extension = filePath.split('.').pop()?.toLowerCase() || 'jpg';
+            let mimeType = 'image/jpeg';
+            if (extension === 'png') mimeType = 'image/png';
+            else if (extension === 'gif') mimeType = 'image/gif';
+            else if (extension === 'webp') mimeType = 'image/webp';
+            
+            console.log("getImageAsBase64: Successfully converted, length:", base64.length);
+            return `data:${mimeType};base64,${base64}`;
+          }
+        }
+      } catch (pathError) {
+        console.log("getImageAsBase64: Error with path", filePath, pathError);
       }
-      filePath = imageUri;
     }
     
-    const base64 = await FileSystem.readAsStringAsync(filePath, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    
-    // Determine MIME type from extension
-    const extension = filePath.split('.').pop()?.toLowerCase() || 'jpg';
-    let mimeType = 'image/jpeg';
-    if (extension === 'png') mimeType = 'image/png';
-    else if (extension === 'gif') mimeType = 'image/gif';
-    else if (extension === 'webp') mimeType = 'image/webp';
-    
-    return `data:${mimeType};base64,${base64}`;
+    console.log("getImageAsBase64: Could not find image at any path");
+    return "";
   } catch (error) {
-    console.log("Error converting image to base64:", error);
+    console.log("getImageAsBase64: Error:", error);
     return "";
   }
 };
