@@ -292,16 +292,18 @@ export default function RxDetailScreen() {
     if (!prescription || !member) return;
     setPrinting(true);
     try {
+      console.log("Generating print HTML...");
       const html = await generatePdfHtml();
       if (!html) {
         Alert.alert("Error", "Could not generate print content");
         setPrinting(false);
         return;
       }
+      console.log("Sending to printer...");
       await Print.printAsync({ html });
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error printing:", error);
-      Alert.alert("Print Error", "Unable to print. Please try again.");
+      Alert.alert("Print Error", `Unable to print: ${error?.message || 'Unknown error'}`);
     } finally {
       setPrinting(false);
     }
