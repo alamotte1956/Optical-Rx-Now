@@ -92,10 +92,7 @@
       "privacyPolicyUrl": "https://opticalrxnow.com/privacy",
       "supportEmail": "support@OpticalRxNow.com",
       "websiteUrl": "https://opticalrxnow.com",
-      "router": {},
-      "eas": {
-        "projectId": "cae3bc16-120c-4492-8765-c9c4d74e392f"
-      }
+      "router": {}
     },
     "owner": "alamotte1956"
   }
