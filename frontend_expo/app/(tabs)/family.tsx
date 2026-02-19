@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -39,18 +38,14 @@ export default function FamilyScreen() {
   const loadData = async () => {
     try {
       console.log("Family: Loading data...");
-      
-      // Retry a few times in case AsyncStorage isn't ready
       let membersData: FamilyMember[] = [];
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         membersData = await getFamilyMembers();
         console.log("Family: Attempt", i + 1, "loaded members:", membersData?.length);
         if (membersData.length > 0) break;
-        // Wait a bit before retrying
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
       
-      console.log("Family: Final members:", membersData?.length, membersData);
       setMembers(membersData);
       
       const counts: {[key: string]: number} = {};
@@ -81,14 +76,11 @@ export default function FamilyScreen() {
     if (!memberToDelete) return;
     setDeleting(true);
     try {
-      const success = await deleteFamilyMember(memberToDelete.id);
-      if (success) {
-        setDeleteModalVisible(false);
-        setMemberToDelete(null);
-        loadData();
-      } else {
-        Alert.alert("Error", "Failed to delete family member");
-      }
+      await deleteFamilyMember(memberToDelete.id);
+      setDeleteModalVisible(false);
+      setMemberToDelete(null);
+      loadData();
+      Alert.alert("Deleted", `${memberToDelete.name} has been removed.`);
     } catch (error) {
       Alert.alert("Error", "Failed to delete family member");
     } finally {
@@ -96,106 +88,112 @@ export default function FamilyScreen() {
     }
   };
 
-  const getRelationshipIcon = (relationship: string): string => {
-    const rel = relationship.toLowerCase();
-    if (rel.includes("self") || rel.includes("me")) return "person";
-    if (rel.includes("spouse") || rel.includes("wife") || rel.includes("husband")) return "heart";
-    if (rel.includes("child") || rel.includes("son") || rel.includes("daughter")) return "happy";
-    if (rel.includes("parent") || rel.includes("mother") || rel.includes("father")) return "people";
-    return "person-outline";
-  };
-
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4a9eff" />
-        </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#0a1628", justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#4a9eff" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <View style={styles.header}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>Family Members</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => router.push("/add-member")}>
-          <Ionicons name="add" size={24} color="#fff" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a1628" }} edges={["top"]}>
+      {/* Header */}
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16, borderBottomWidth: 1, borderBottomColor: "#1a2d45" }}>
+        <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff" }}>Family Members</Text>
+        <TouchableOpacity 
+          style={{ backgroundColor: "#4a9eff", width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center" }}
+          onPress={() => router.push("/add-member")}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4a9eff" />}
       >
         {members.length === 0 ? (
-          <View style={styles.emptyContainer}>
+          <View style={{ alignItems: "center", paddingVertical: 60 }}>
             <Ionicons name="people-outline" size={64} color="#3a4d63" />
-            <Text style={styles.emptyText}>No family members yet</Text>
-            <Text style={styles.emptySubtext}>Add family members to organize prescriptions</Text>
-            <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/add-member")}>
-              <Text style={styles.emptyButtonText}>Add First Member</Text>
+            <Text style={{ fontSize: 18, color: "#8899a6", marginTop: 16 }}>No family members yet</Text>
+            <TouchableOpacity 
+              style={{ marginTop: 24, backgroundColor: "#4a9eff", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 }}
+              onPress={() => router.push("/add-member")}
+            >
+              <Text style={{ color: "#fff", fontWeight: "600" }}>Add First Member</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <>
-            <Text style={{ color: '#ff5c5c', fontSize: 16, marginBottom: 10, textAlign: 'center' }}>
-              Found {members.length} member(s) - Scroll down to see DELETE button
+          <View>
+            <Text style={{ color: "#4a9eff", fontSize: 14, marginBottom: 16 }}>
+              {members.length} family member(s) found:
             </Text>
+            
             {members.map((member) => (
-              <View key={member.id} style={{
-                backgroundColor: '#1a2d45',
-                borderRadius: 12,
-                padding: 20,
-                marginBottom: 20,
-              }}>
-                {/* DELETE BUTTON - AT THE TOP */}
+              <View 
+                key={member.id} 
+                style={{ 
+                  backgroundColor: "#1a2d45", 
+                  borderRadius: 12, 
+                  marginBottom: 16,
+                  overflow: "hidden",
+                }}
+              >
+                {/* RED DELETE BUTTON - FULL WIDTH AT TOP */}
                 <TouchableOpacity 
                   style={{
-                    backgroundColor: '#ff5c5c',
-                    paddingVertical: 18,
-                    borderRadius: 10,
-                    alignItems: 'center',
-                    marginBottom: 16,
+                    backgroundColor: "#ff5c5c",
+                    paddingVertical: 16,
+                    alignItems: "center",
                   }}
                   onPress={() => confirmDelete(member)}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>🗑️ TAP TO DELETE</Text>
+                  <Text style={{ color: "#fff", fontWeight: "700", fontSize: 18 }}>
+                    🗑️ DELETE {member.name.toUpperCase()}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Member Info */}
                 <TouchableOpacity 
+                  style={{ padding: 16 }}
                   onPress={() => router.push(`/member/${member.id}`)}
                 >
-                  <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>{member.name}</Text>
-                  <Text style={{ fontSize: 16, color: '#8899a6', marginTop: 6 }}>{member.relationship}</Text>
-                  <Text style={{ fontSize: 14, color: '#4a9eff', marginTop: 6 }}>{prescriptionCounts[member.id] || 0} prescriptions</Text>
-                  <Text style={{ fontSize: 12, color: '#6b7c8f', marginTop: 8 }}>Tap name to view details →</Text>
+                  <Text style={{ fontSize: 22, fontWeight: "700", color: "#fff" }}>{member.name}</Text>
+                  <Text style={{ fontSize: 14, color: "#8899a6", marginTop: 4 }}>{member.relationship}</Text>
+                  <Text style={{ fontSize: 12, color: "#4a9eff", marginTop: 4 }}>
+                    {prescriptionCounts[member.id] || 0} prescriptions • Tap to view
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))}
-          </>
+          </View>
         )}
       </ScrollView>
 
+      {/* Delete Confirmation Modal */}
       <Modal visible={deleteModalVisible} transparent animationType="fade" onRequestClose={() => setDeleteModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalIcon}>
-              <Ionicons name="warning" size={40} color="#ff5c5c" />
-            </View>
-            <Text style={styles.modalTitle}>Delete Family Member?</Text>
-            <Text style={styles.modalText}>
-              This will also delete all prescriptions for {memberToDelete?.name}. This action cannot be undone.
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", alignItems: "center", padding: 24 }}>
+          <View style={{ width: "100%", backgroundColor: "#1a2d45", borderRadius: 20, padding: 24, alignItems: "center" }}>
+            <Ionicons name="warning" size={48} color="#ff5c5c" />
+            <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff", marginTop: 16 }}>Delete {memberToDelete?.name}?</Text>
+            <Text style={{ fontSize: 14, color: "#8899a6", textAlign: "center", marginTop: 12, marginBottom: 24 }}>
+              This will delete all their prescriptions too. This cannot be undone.
             </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalCancelButton} onPress={() => { setDeleteModalVisible(false); setMemberToDelete(null); }}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
+            <View style={{ flexDirection: "row", gap: 12, width: "100%" }}>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: "#2a3d55", alignItems: "center" }}
+                onPress={() => { setDeleteModalVisible(false); setMemberToDelete(null); }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600" }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalDeleteButton} onPress={handleDelete} disabled={deleting}>
-                {deleting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.modalDeleteText}>Delete</Text>}
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: "#ff5c5c", alignItems: "center" }}
+                onPress={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: "#fff", fontWeight: "600" }}>Delete</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -204,39 +202,3 @@ export default function FamilyScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a1628" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#1a2d45" },
-  headerSpacer: { width: 40 },
-  headerTitle: { fontSize: 20, fontWeight: "bold", color: "#fff" },
-  addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#4a9eff", justifyContent: "center", alignItems: "center" },
-  scrollView: { flex: 1 },
-  scrollContent: { padding: 16 },
-  emptyContainer: { alignItems: "center", paddingVertical: 60 },
-  emptyText: { fontSize: 18, color: "#8899a6", marginTop: 16 },
-  emptySubtext: { fontSize: 14, color: "#6b7c8f", marginTop: 8, textAlign: "center" },
-  emptyButton: { marginTop: 24, backgroundColor: "#4a9eff", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
-  emptyButtonText: { color: "#fff", fontWeight: "600" },
-  memberCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#1a2d45", borderRadius: 12, padding: 12, marginBottom: 12 },
-  memberTouchable: { flex: 1, flexDirection: "row", alignItems: "center" },
-  memberIcon: { width: 50, height: 50, borderRadius: 25, backgroundColor: "rgba(74, 158, 255, 0.15)", justifyContent: "center", alignItems: "center" },
-  memberInfo: { flex: 1, marginLeft: 12 },
-  memberName: { fontSize: 17, fontWeight: "600", color: "#fff" },
-  memberRelationship: { fontSize: 13, color: "#8899a6", marginTop: 2 },
-  memberRxCount: { fontSize: 12, color: "#4a9eff", marginTop: 3 },
-  deleteButtonContainer: { alignItems: "center", marginLeft: 8 },
-  deleteButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#ff5c5c", justifyContent: "center", alignItems: "center" },
-  deleteButtonLabel: { fontSize: 10, color: "#ff5c5c", fontWeight: "600", marginTop: 4 },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)", justifyContent: "center", alignItems: "center", padding: 24 },
-  modalContent: { width: "100%", backgroundColor: "#1a2d45", borderRadius: 20, padding: 24, alignItems: "center" },
-  modalIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: "rgba(255, 92, 92, 0.15)", justifyContent: "center", alignItems: "center", marginBottom: 16 },
-  modalTitle: { fontSize: 20, fontWeight: "bold", color: "#fff", marginBottom: 12 },
-  modalText: { fontSize: 15, color: "#8899a6", textAlign: "center", marginBottom: 24, lineHeight: 22 },
-  modalButtons: { flexDirection: "row", gap: 12, width: "100%" },
-  modalCancelButton: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: "#2a3d55", alignItems: "center" },
-  modalCancelText: { fontSize: 16, fontWeight: "600", color: "#fff" },
-  modalDeleteButton: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: "#ff5c5c", alignItems: "center" },
-  modalDeleteText: { fontSize: 16, fontWeight: "600", color: "#fff" },
-});
