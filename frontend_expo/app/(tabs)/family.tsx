@@ -157,7 +157,8 @@ export default function FamilyScreen() {
                 onPress={() => confirmDelete(member)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="trash-outline" size={22} color="#ff5c5c" />
+                <Ionicons name="trash" size={24} color="#ff5c5c" />
+                <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
           ))
