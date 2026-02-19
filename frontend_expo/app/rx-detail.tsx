@@ -244,7 +244,6 @@ export default function RxDetailScreen() {
         return;
       }
 
-      console.log("Generating PDF HTML...");
       const html = await generatePdfHtml();
       if (!html) {
         Alert.alert("Error", "Could not generate PDF content");
@@ -252,18 +251,12 @@ export default function RxDetailScreen() {
         return;
       }
       
-      console.log("Creating PDF file...");
       const { uri } = await Print.printToFileAsync({ html, base64: false });
-      console.log("PDF created at:", uri);
-      
-      // Share directly from the generated URI (no move needed)
-      console.log("Sharing PDF...");
       await Sharing.shareAsync(uri, { 
         mimeType: 'application/pdf', 
         dialogTitle: `Share Prescription for ${member.name}` 
       });
     } catch (error: any) {
-      console.log("Error sharing PDF:", error);
       Alert.alert("Error", `Failed to create PDF: ${error?.message || 'Unknown error'}`);
     } finally {
       setSharing(false);
