@@ -135,7 +135,16 @@ export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
 };
 
 export const saveFamilyMember = async (name: string, relationship: string): Promise<FamilyMember> => {
-  const members = await getFamilyMembers();
+  // Retry getting members to handle AsyncStorage timing issues
+  let members: FamilyMember[] = [];
+  for (let i = 0; i < 3; i++) {
+    members = await getFamilyMembers();
+    if (members.length > 0 || i === 2) break;
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+  
+  console.log("saveFamilyMember: Current members before save:", members.length);
+  
   const newMember: FamilyMember = {
     id: generateId(),
     name,
@@ -144,6 +153,8 @@ export const saveFamilyMember = async (name: string, relationship: string): Prom
   };
   members.push(newMember);
   await AsyncStorage.setItem(KEYS.FAMILY_MEMBERS, JSON.stringify(members));
+  
+  console.log("saveFamilyMember: Saved members count:", members.length);
   return newMember;
 };
 
