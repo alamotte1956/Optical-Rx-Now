@@ -43,7 +43,9 @@ export default function FamilyScreen() {
 
   const loadData = async () => {
     try {
+      console.log("Family: Loading data...");
       const membersData = await getFamilyMembers();
+      console.log("Family: Loaded members:", membersData?.length, membersData);
       setMembers(membersData);
       const counts: {[key: string]: number} = {};
       for (const member of membersData) {
