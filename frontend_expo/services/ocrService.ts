@@ -76,7 +76,9 @@ export const extractExpirationDate = async (
  */
 export function parseExpirationDate(text: string): string | null {
   // Normalize text - handle line breaks and multiple spaces
-  const normalizedText = text.replace(/\s+/g, ' ').toLowerCase();
+  const normalizedText = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+  
+  console.log("OCR: Parsing text for expiration date, length:", normalizedText.length);
   
   // Common patterns for expiration dates on optical prescriptions
   const patterns = [
@@ -92,15 +94,23 @@ export function parseExpirationDate(text: string): string | null {
     // "Valid until" or "Good until"
     /(?:valid|good)\s+(?:until|thru|through)\s*:?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
     
+    // "Rx expiration" or "prescription expiration"
+    /(?:rx|prescription)\s*(?:expir(?:ation|es)?)\s*:?\s*(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/i,
+    
     // Month name formats: "Expires January 15, 2026"
     /(?:expir(?:ation|es|y)?|exp\.?|valid\s+until)[:\s]*(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i,
+    
+    // Month name formats: "January 15, 2026" near expiration keywords
+    /(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2}),?\s+(\d{4})/i,
   ];
 
   for (const pattern of patterns) {
     const match = normalizedText.match(pattern);
     if (match) {
+      console.log("OCR: Found pattern match:", match[0]);
       const normalized = normalizeDateMatch(match);
       if (normalized && isValidPrescriptionDate(normalized)) {
+        console.log("OCR: Valid prescription date found:", normalized);
         return normalized;
       }
     }
@@ -112,18 +122,35 @@ export function parseExpirationDate(text: string): string | null {
     /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/g,
     // MM/DD/YY
     /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})\b/g,
+    // YYYY-MM-DD (ISO format)
+    /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/g,
   ];
 
   for (const pattern of genericDatePatterns) {
-    const matches = text.matchAll(pattern);
+    const matches = [...normalizedText.matchAll(pattern)];
     for (const match of matches) {
-      const normalized = normalizeDateMatch(match);
+      // Check if it's ISO format (year first)
+      let normalized: string | null = null;
+      if (match[1].length === 4) {
+        // ISO format: YYYY-MM-DD
+        const year = parseInt(match[1]);
+        const month = parseInt(match[2]);
+        const day = parseInt(match[3]);
+        if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+          normalized = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+      } else {
+        normalized = normalizeDateMatch(match);
+      }
+      
       if (normalized && isFutureDate(normalized)) {
+        console.log("OCR: Found future date (likely expiration):", normalized);
         return normalized;
       }
     }
   }
 
+  console.log("OCR: No expiration date pattern found in text");
   return null;
 }
 
