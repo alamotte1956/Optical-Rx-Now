@@ -140,35 +140,44 @@ export default function FamilyScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          members.map((member) => (
-            <View key={member.id} style={styles.memberCard}>
-              <TouchableOpacity 
-                style={styles.memberTouchable}
-                onPress={() => router.push(`/member/${member.id}`)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.memberIcon}>
-                  <Ionicons name={getRelationshipIcon(member.relationship) as any} size={28} color="#4a9eff" />
-                </View>
-                <View style={styles.memberInfo}>
-                  <Text style={styles.memberName}>{member.name}</Text>
-                  <Text style={styles.memberRelationship}>{member.relationship}</Text>
-                  <Text style={styles.memberRxCount}>
-                    {prescriptionCounts[member.id] || 0} prescription{prescriptionCounts[member.id] !== 1 ? "s" : ""}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-              <View style={styles.deleteButtonContainer}>
+          <>
+            {members.map((member) => (
+              <View key={member.id} style={{
+                flexDirection: 'row',
+                backgroundColor: '#1a2d45',
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 12,
+                alignItems: 'center',
+              }}>
+                {/* Member Info - Left Side */}
                 <TouchableOpacity 
-                  style={styles.deleteButton} 
+                  style={{ flex: 1 }}
+                  onPress={() => router.push(`/member/${member.id}`)}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: '600', color: '#fff' }}>{member.name}</Text>
+                  <Text style={{ fontSize: 14, color: '#8899a6', marginTop: 4 }}>{member.relationship}</Text>
+                  <Text style={{ fontSize: 12, color: '#4a9eff', marginTop: 4 }}>
+                    {prescriptionCounts[member.id] || 0} prescriptions
+                  </Text>
+                </TouchableOpacity>
+                
+                {/* DELETE BUTTON - Right Side */}
+                <TouchableOpacity 
+                  style={{
+                    backgroundColor: '#ff5c5c',
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    borderRadius: 8,
+                    marginLeft: 12,
+                  }}
                   onPress={() => confirmDelete(member)}
                 >
-                  <Ionicons name="trash" size={22} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>DELETE</Text>
                 </TouchableOpacity>
-                <Text style={styles.deleteButtonLabel}>Delete</Text>
               </View>
-            </View>
-          ))
+            ))}
+          </>
         )}
       </ScrollView>
 
