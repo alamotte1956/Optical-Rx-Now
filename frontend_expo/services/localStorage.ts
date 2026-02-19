@@ -124,10 +124,7 @@ const deleteImageFile = async (filePath: string): Promise<void> => {
 export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.FAMILY_MEMBERS);
-    console.log("getFamilyMembers: Raw data from AsyncStorage:", data);
-    const parsed = data ? JSON.parse(data) : [];
-    console.log("getFamilyMembers: Parsed members:", parsed?.length, parsed);
-    return parsed;
+    return data ? JSON.parse(data) : [];
   } catch (error) {
     console.log("Error getting family members:", error);
     return [];
