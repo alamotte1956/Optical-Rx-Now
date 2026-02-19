@@ -158,14 +158,15 @@ export default function FamilyScreen() {
                   </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.deleteButton} 
-                onPress={() => confirmDelete(member)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="trash" size={24} color="#ff5c5c" />
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
+              <View style={styles.deleteButtonContainer}>
+                <TouchableOpacity 
+                  style={styles.deleteButton} 
+                  onPress={() => confirmDelete(member)}
+                >
+                  <Ionicons name="trash" size={22} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.deleteButtonLabel}>Delete</Text>
+              </View>
             </View>
           ))
         )}
