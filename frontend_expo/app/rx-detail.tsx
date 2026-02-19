@@ -79,20 +79,39 @@ const escapeHtml = (text: string | null | undefined): string => {
 const getImageAsBase64 = async (imageUri: string): Promise<string> => {
   try {
     if (!imageUri) return "";
+    
+    // Already a data URI
     if (imageUri.startsWith("data:")) return imageUri;
     
-    const fileInfo = await FileSystem.getInfoAsync(imageUri);
-    if (!fileInfo.exists) {
-      console.log("Image file not found:", imageUri);
-      return "";
+    // Handle file:// URIs and regular file paths
+    let filePath = imageUri;
+    if (!filePath.startsWith("file://") && !filePath.startsWith("/")) {
+      // If it's a relative path, try to resolve it
+      filePath = `${FileSystem.documentDirectory}${imageUri}`;
     }
     
-    const base64 = await FileSystem.readAsStringAsync(imageUri, {
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+    if (!fileInfo.exists) {
+      console.log("Image file not found at path:", filePath);
+      // Try the original URI as fallback
+      const fallbackInfo = await FileSystem.getInfoAsync(imageUri);
+      if (!fallbackInfo.exists) {
+        console.log("Image file not found at original URI either:", imageUri);
+        return "";
+      }
+      filePath = imageUri;
+    }
+    
+    const base64 = await FileSystem.readAsStringAsync(filePath, {
       encoding: FileSystem.EncodingType.Base64,
     });
     
-    const extension = imageUri.split('.').pop()?.toLowerCase() || 'jpg';
-    const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
+    // Determine MIME type from extension
+    const extension = filePath.split('.').pop()?.toLowerCase() || 'jpg';
+    let mimeType = 'image/jpeg';
+    if (extension === 'png') mimeType = 'image/png';
+    else if (extension === 'gif') mimeType = 'image/gif';
+    else if (extension === 'webp') mimeType = 'image/webp';
     
     return `data:${mimeType};base64,${base64}`;
   } catch (error) {
