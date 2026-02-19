@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a1628" },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#1a2d45" },
-  homeButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(74, 158, 255, 0.15)", justifyContent: "center", alignItems: "center" },
+  headerSpacer: { width: 40 },
   headerTitle: { fontSize: 20, fontWeight: "bold", color: "#fff" },
   addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#4a9eff", justifyContent: "center", alignItems: "center" },
   scrollView: { flex: 1 },
