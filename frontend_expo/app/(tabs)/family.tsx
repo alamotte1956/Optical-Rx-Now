@@ -98,6 +98,13 @@ export default function FamilyScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0a1628" }} edges={["top"]}>
+      {/* TEST - This should ALWAYS show */}
+      <View style={{ backgroundColor: "#ff0000", padding: 20 }}>
+        <Text style={{ color: "#ffffff", fontSize: 24, fontWeight: "bold", textAlign: "center" }}>
+          === TEST: IF YOU SEE THIS RED BOX, CODE IS UPDATING ===
+        </Text>
+      </View>
+
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16, borderBottomWidth: 1, borderBottomColor: "#1a2d45" }}>
         <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff" }}>Family Members</Text>
