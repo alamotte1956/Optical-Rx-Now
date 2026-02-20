@@ -37,13 +37,7 @@ export default function FamilyScreen() {
 
   const loadData = async () => {
     try {
-      let membersData: FamilyMember[] = [];
-      for (let i = 0; i < 5; i++) {
-        membersData = await getFamilyMembers();
-        if (membersData.length > 0) break;
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-      
+      const membersData = await getFamilyMembers();
       setMembers(membersData);
       
       const counts: {[key: string]: number} = {};
@@ -53,7 +47,8 @@ export default function FamilyScreen() {
       }
       setPrescriptionCounts(counts);
     } catch (error) {
-      console.log("Error loading family members:", error);
+      console.error("Error loading family members:", error);
+      Alert.alert("Error", "Failed to load family members");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -72,13 +67,15 @@ export default function FamilyScreen() {
 
   const handleDelete = async () => {
     if (!memberToDelete) return;
+    const deletedName = memberToDelete.name;
     setDeleting(true);
     try {
-      await deleteFamilyMember(memberToDelete.id);
+      const success = await deleteFamilyMember(memberToDelete.id);
+      if (!success) throw new Error("Delete returned false");
       setDeleteModalVisible(false);
       setMemberToDelete(null);
-      loadData();
-      Alert.alert("Deleted", `${memberToDelete.name} has been removed.`);
+      await loadData();
+      Alert.alert("Deleted", `${deletedName} has been removed.`);
     } catch (error) {
       Alert.alert("Error", "Failed to delete family member");
     } finally {

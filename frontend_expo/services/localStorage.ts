@@ -124,7 +124,9 @@ const deleteImageFile = async (filePath: string): Promise<void> => {
 export const getFamilyMembers = async (): Promise<FamilyMember[]> => {
   try {
     const data = await AsyncStorage.getItem(KEYS.FAMILY_MEMBERS);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.log("Error getting family members:", error);
     return [];
@@ -137,10 +139,12 @@ export const saveFamilyMember = async (name: string, relationship: string): Prom
   try {
     const data = await AsyncStorage.getItem(KEYS.FAMILY_MEMBERS);
     if (data) {
-      members = JSON.parse(data);
+      const parsed = JSON.parse(data);
+      members = Array.isArray(parsed) ? parsed : [];
     }
   } catch (error) {
-    console.log("Error reading members:", error);
+    console.warn("Error reading members, starting fresh:", error);
+    members = [];
   }
   
   const newMember: FamilyMember = {
