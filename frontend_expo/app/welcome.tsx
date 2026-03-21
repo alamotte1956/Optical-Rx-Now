@@ -178,6 +178,27 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Expiry Alert Settings</Text>
           </TouchableOpacity>
 
+          {/* Family Management Section */}
+          <View style={styles.familySection}>
+            <Text style={styles.sectionTitle}>Family Management</Text>
+            <View style={styles.familyButtons}>
+              <TouchableOpacity 
+                style={styles.familyButton}
+                onPress={() => router.push("/add-member")}
+              >
+                <Ionicons name="person-add" size={24} color="#4CAF50" />
+                <Text style={styles.familyButtonText}>Add Family Member</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.familyButton}
+                onPress={() => router.push("/(tabs)/family")}
+              >
+                <Ionicons name="people" size={24} color="#4a9eff" />
+                <Text style={styles.familyButtonText}>View & Delete Members</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
             style={styles.adPlaceholder}
@@ -359,5 +380,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6b7c8f",
     textDecorationLine: "underline",
+  },
+  familySection: {
+    width: "100%",
+    backgroundColor: "rgba(74, 158, 255, 0.08)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  familyButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  familyButton: {
+    flex: 1,
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    gap: 8,
+  },
+  familyButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "center",
   },
 });
