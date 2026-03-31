@@ -766,14 +766,13 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   preferredCard: {
-    borderWidth: 2,
-    borderColor: "#c41e3a",
+    // No special border - regular card style
   },
   preferredBanner: {
     position: "absolute",
     top: 8,
     right: -35,
-    backgroundColor: "#8B0000",
+    backgroundColor: "#4a9eff",
     paddingVertical: 4,
     paddingHorizontal: 40,
     transform: [{ rotate: "45deg" }],
