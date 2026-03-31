@@ -23,10 +23,10 @@ export default function AgeVerificationScreen() {
       setVerifying(true);
       try {
         await AsyncStorage.setItem(AGE_VERIFIED_KEY, "true");
-        router.replace("/welcome");
+        router.replace("/onboarding");
       } catch (error) {
         console.log("Error saving age verification:", error);
-        router.replace("/welcome");
+        router.replace("/onboarding");
       }
     } else {
       Alert.alert(

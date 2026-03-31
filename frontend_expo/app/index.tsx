@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trackAppOpen } from "../services/analytics";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
+const ONBOARDING_COMPLETE_KEY = "@optical_rx_onboarding_complete";
 
 export default function IndexScreen() {
   const router = useRouter();
@@ -16,27 +17,37 @@ export default function IndexScreen() {
     
     // Small delay to ensure AsyncStorage is ready on mobile
     const timer = setTimeout(() => {
-      checkAgeVerification();
+      checkAppState();
     }, 100);
     
     return () => clearTimeout(timer);
   }, []);
 
-  const checkAgeVerification = async () => {
+  const checkAppState = async () => {
     try {
       const verified = await AsyncStorage.getItem(AGE_VERIFIED_KEY);
-      console.log("Age verification status:", verified);
+      const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
       
-      // Explicit check for the string "true"
-      if (verified !== null && verified === "true") {
-        router.replace("/welcome");
-      } else {
-        // Not verified or null - show age verification
+      console.log("Age verification status:", verified);
+      console.log("Onboarding status:", onboardingComplete);
+      
+      // First check age verification
+      if (verified !== "true") {
         router.replace("/age-verify");
+        return;
       }
+      
+      // Then check onboarding
+      if (onboardingComplete !== "true") {
+        router.replace("/onboarding");
+        return;
+      }
+      
+      // Both complete - go to welcome
+      router.replace("/welcome");
     } catch (error) {
-      console.log("Error checking age verification:", error);
-      // On error, always show age verification
+      console.log("Error checking app state:", error);
+      // On error, show age verification
       router.replace("/age-verify");
     } finally {
       setChecking(false);

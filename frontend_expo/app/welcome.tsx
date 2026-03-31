@@ -199,6 +199,34 @@ export default function WelcomeScreen() {
             </View>
           </View>
 
+          {/* Feedback Button */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => router.push("/feedback")}
+          >
+            <Ionicons name="chatbubble-ellipses" size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>Send Feedback</Text>
+          </TouchableOpacity>
+
+          {/* Legal Section */}
+          <View style={styles.legalSection}>
+            <TouchableOpacity 
+              style={styles.legalButton}
+              onPress={() => router.push("/privacy-policy")}
+            >
+              <Ionicons name="shield-checkmark" size={18} color="#6b7c8f" />
+              <Text style={styles.legalButtonText}>Privacy Policy</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalDivider}>|</Text>
+            <TouchableOpacity 
+              style={styles.legalButton}
+              onPress={() => router.push("/terms-of-service")}
+            >
+              <Ionicons name="document-text" size={18} color="#6b7c8f" />
+              <Text style={styles.legalButtonText}>Terms of Service</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
             style={styles.adPlaceholder}
@@ -412,5 +440,26 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
     textAlign: "center",
+  },
+  legalSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  legalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  legalButtonText: {
+    fontSize: 14,
+    color: "#6b7c8f",
+  },
+  legalDivider: {
+    color: "#3a4d63",
   },
 });

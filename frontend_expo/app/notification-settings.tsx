@@ -19,11 +19,20 @@ import {
   requestNotificationPermissions,
 } from "../services/localStorage";
 
+const REMINDER_OPTIONS = [
+  { days: 30, label: "30 days before", enabled: true },
+  { days: 14, label: "14 days before", enabled: true },
+  { days: 7, label: "7 days before", enabled: true },
+  { days: 2, label: "2 days before", enabled: true },
+  { days: 0, label: "Day of expiration", enabled: true },
+];
+
 export default function NotificationSettingsScreen() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [scheduledCount, setScheduledCount] = useState(0);
+  const [reminderSettings, setReminderSettings] = useState(REMINDER_OPTIONS);
 
   useEffect(() => {
     loadSettings();
@@ -34,6 +43,9 @@ export default function NotificationSettingsScreen() {
   const loadSettings = async () => {
     const settings = await getSettings();
     setNotificationsEnabled(settings.notificationsEnabled);
+    if (settings.reminderDays) {
+      setReminderSettings(settings.reminderDays);
+    }
   };
 
   const checkPermissions = async () => {
@@ -65,7 +77,15 @@ export default function NotificationSettingsScreen() {
     }
 
     setNotificationsEnabled(value);
-    await saveSettings({ notificationsEnabled: value, email: null });
+    await saveSettings({ notificationsEnabled: value, email: null, reminderDays: reminderSettings });
+  };
+
+  const handleToggleReminder = async (days: number) => {
+    const updated = reminderSettings.map((r) =>
+      r.days === days ? { ...r, enabled: !r.enabled } : r
+    );
+    setReminderSettings(updated);
+    await saveSettings({ notificationsEnabled, email: null, reminderDays: updated });
   };
 
   const handleRequestPermission = async () => {
@@ -103,31 +123,27 @@ export default function NotificationSettingsScreen() {
           </View>
         </View>
 
-        {/* Alert Schedule */}
+        {/* Alert Schedule - Now Customizable */}
         <View style={styles.scheduleCard}>
-          <Text style={styles.scheduleTitle}>Alert Schedule</Text>
-          <Text style={styles.scheduleText}>You'll receive notifications at 8 AM:</Text>
+          <Text style={styles.scheduleTitle}>Customize Alert Schedule</Text>
+          <Text style={styles.scheduleText}>Choose when to receive reminders (at 8 AM):</Text>
           <View style={styles.scheduleList}>
-            <View style={styles.scheduleItem}>
-              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>30 days before expiration</Text>
-            </View>
-            <View style={styles.scheduleItem}>
-              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>14 days before expiration</Text>
-            </View>
-            <View style={styles.scheduleItem}>
-              <Ionicons name="calendar-outline" size={18} color="#4a9eff" />
-              <Text style={styles.scheduleItemText}>7 days before expiration</Text>
-            </View>
-            <View style={styles.scheduleItem}>
-              <Ionicons name="time-outline" size={18} color="#ff9500" />
-              <Text style={styles.scheduleItemText}>2 days before expiration</Text>
-            </View>
-            <View style={styles.scheduleItem}>
-              <Ionicons name="alert-circle-outline" size={18} color="#ff5c5c" />
-              <Text style={styles.scheduleItemText}>Morning of expiration day</Text>
-            </View>
+            {reminderSettings.map((reminder) => (
+              <TouchableOpacity
+                key={reminder.days}
+                style={styles.scheduleItem}
+                onPress={() => handleToggleReminder(reminder.days)}
+              >
+                <Ionicons
+                  name={reminder.enabled ? "checkbox" : "square-outline"}
+                  size={22}
+                  color={reminder.enabled ? "#4a9eff" : "#6b7c8f"}
+                />
+                <Text style={[styles.scheduleItemText, !reminder.enabled && styles.scheduleItemDisabled]}>
+                  {reminder.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -281,11 +297,15 @@ const styles = StyleSheet.create({
   scheduleItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
+    paddingVertical: 8,
   },
   scheduleItemText: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#fff",
+  },
+  scheduleItemDisabled: {
+    color: "#6b7c8f",
   },
   permissionCard: {
     flexDirection: "row",
