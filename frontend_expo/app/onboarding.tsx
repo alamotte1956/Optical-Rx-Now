@@ -7,15 +7,25 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveSettings } from "../services/localStorage";
 
 const { width } = Dimensions.get("window");
 
 const ONBOARDING_COMPLETE_KEY = "@optical_rx_onboarding_complete";
+
+const DEFAULT_REMINDERS = [
+  { days: 30, label: "30 days before", enabled: true },
+  { days: 14, label: "14 days before", enabled: true },
+  { days: 7, label: "7 days before", enabled: true },
+  { days: 2, label: "2 days before", enabled: true },
+  { days: 0, label: "Day of expiration", enabled: true },
+];
 
 const slides = [
   {
@@ -24,6 +34,7 @@ const slides = [
     title: "Snap & Save",
     description: "Take a photo of your prescription and save it instantly. Our smart technology detects expiration dates automatically.",
     color: "#4a9eff",
+    isReminderSlide: false,
   },
   {
     id: "2",
@@ -31,13 +42,15 @@ const slides = [
     title: "Family Management",
     description: "Add unlimited family members and keep everyone's eyeglass and contact lens prescriptions organized in one place.",
     color: "#4CAF50",
+    isReminderSlide: false,
   },
   {
     id: "3",
     icon: "notifications",
-    title: "Expiry Reminders",
-    description: "Get automatic reminders before your prescriptions expire. Customize when you receive alerts - 30, 14, 7, or 2 days before.",
+    title: "Customize Your Reminders",
+    description: "Choose when to receive alerts before your prescriptions expire. You can change these anytime in settings.",
     color: "#FF9800",
+    isReminderSlide: true,
   },
   {
     id: "4",
@@ -45,6 +58,7 @@ const slides = [
     title: "Share & Print",
     description: "Easily share prescriptions as PDFs with your optometrist or optical store. Print directly from the app when needed.",
     color: "#9C27B0",
+    isReminderSlide: false,
   },
   {
     id: "5",
@@ -52,6 +66,7 @@ const slides = [
     title: "Private & Secure",
     description: "Your data stays on YOUR device. We never upload your prescriptions to any server. Complete privacy, always.",
     color: "#00BCD4",
+    isReminderSlide: false,
   },
 ];
 
@@ -60,6 +75,7 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef<FlatList>(null);
+  const [reminderSettings, setReminderSettings] = useState(DEFAULT_REMINDERS);
 
   const viewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -69,7 +85,18 @@ export default function OnboardingScreen() {
 
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
-  const scrollToNext = () => {
+  const toggleReminder = (days: number) => {
+    setReminderSettings(prev => 
+      prev.map(r => r.days === days ? { ...r, enabled: !r.enabled } : r)
+    );
+  };
+
+  const scrollToNext = async () => {
+    // Save reminder settings when leaving the reminder slide
+    if (slides[currentIndex].isReminderSlide) {
+      await saveSettings({ notificationsEnabled: true, email: null, reminderDays: reminderSettings });
+    }
+    
     if (currentIndex < slides.length - 1) {
       slidesRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
@@ -79,6 +106,7 @@ export default function OnboardingScreen() {
 
   const completeOnboarding = async () => {
     try {
+      await saveSettings({ notificationsEnabled: true, email: null, reminderDays: reminderSettings });
       await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
     } catch (error) {
       console.log("Error saving onboarding state:", error);
@@ -97,6 +125,27 @@ export default function OnboardingScreen() {
       </View>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
+      
+      {item.isReminderSlide && (
+        <View style={styles.reminderOptions}>
+          {reminderSettings.map((reminder) => (
+            <TouchableOpacity
+              key={reminder.days}
+              style={styles.reminderRow}
+              onPress={() => toggleReminder(reminder.days)}
+            >
+              <Ionicons 
+                name={reminder.enabled ? "checkbox" : "square-outline"} 
+                size={24} 
+                color={reminder.enabled ? "#FF9800" : "#6b7c8f"} 
+              />
+              <Text style={[styles.reminderLabel, reminder.enabled && styles.reminderLabelActive]}>
+                {reminder.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 
@@ -242,5 +291,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#fff",
+  },
+  reminderOptions: {
+    marginTop: 24,
+    width: "100%",
+    backgroundColor: "rgba(255, 152, 0, 0.1)",
+    borderRadius: 16,
+    padding: 16,
+  },
+  reminderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+  },
+  reminderLabel: {
+    fontSize: 16,
+    color: "#8899a6",
+  },
+  reminderLabelActive: {
+    color: "#fff",
+    fontWeight: "500",
   },
 });

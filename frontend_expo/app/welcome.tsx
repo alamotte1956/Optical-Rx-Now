@@ -1,22 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking, Pressable, Vibration } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getStats, requestNotificationPermissions } from "../services/localStorage";
+import { getStats, requestNotificationPermissions, getSettings, ReminderSetting } from "../services/localStorage";
 import * as Haptics from "expo-haptics";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
+
+const DEFAULT_REMINDERS = [
+  { days: 30, label: "30 days", enabled: true },
+  { days: 14, label: "14 days", enabled: true },
+  { days: 7, label: "7 days", enabled: true },
+  { days: 2, label: "2 days", enabled: true },
+  { days: 0, label: "Same day", enabled: true },
+];
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
+  const [reminderSettings, setReminderSettings] = useState<ReminderSetting[]>(DEFAULT_REMINDERS);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+      loadReminderSettings();
+    }, [])
+  );
 
   useEffect(() => {
-    loadStats();
-    // Request notification permissions on first load
     requestNotificationPermissions();
   }, []);
 
@@ -29,6 +45,26 @@ export default function WelcomeScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadReminderSettings = async () => {
+    try {
+      const settings = await getSettings();
+      setNotificationsEnabled(settings.notificationsEnabled);
+      if (settings.reminderDays) {
+        setReminderSettings(settings.reminderDays);
+      }
+    } catch (error) {
+      console.log("Error loading reminder settings:", error);
+    }
+  };
+
+  const getActiveRemindersText = () => {
+    const activeReminders = reminderSettings.filter(r => r.enabled);
+    if (!notificationsEnabled || activeReminders.length === 0) {
+      return "Off";
+    }
+    return activeReminders.map(r => r.label).join(", ");
   };
 
   const handleGetStarted = () => {
@@ -169,13 +205,33 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Optometrists Near Me</Text>
           </TouchableOpacity>
 
-          {/* Notification Settings Button */}
+          {/* Reminder Settings Section - More Prominent */}
           <TouchableOpacity 
-            style={styles.secondaryButton} 
+            style={styles.reminderSection}
             onPress={() => router.push("/notification-settings")}
           >
-            <Ionicons name="notifications" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>Expiry Alert Settings</Text>
+            <View style={styles.reminderHeader}>
+              <View style={styles.reminderIconContainer}>
+                <Ionicons name="alarm" size={28} color="#FF9800" />
+              </View>
+              <View style={styles.reminderInfo}>
+                <Text style={styles.reminderTitle}>Expiry Reminders</Text>
+                <Text style={styles.reminderSubtitle}>
+                  {notificationsEnabled ? "Tap to customize when you get alerts" : "Tap to enable reminders"}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
+            </View>
+            <View style={styles.reminderStatus}>
+              <Ionicons 
+                name={notificationsEnabled ? "notifications" : "notifications-off"} 
+                size={16} 
+                color={notificationsEnabled ? "#4CAF50" : "#ff5c5c"} 
+              />
+              <Text style={[styles.reminderStatusText, !notificationsEnabled && styles.reminderStatusOff]}>
+                {notificationsEnabled ? `Active: ${getActiveRemindersText()}` : "Reminders are off"}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           {/* Family Management Section */}
@@ -461,5 +517,57 @@ const styles = StyleSheet.create({
   },
   legalDivider: {
     color: "#3a4d63",
+  },
+  reminderSection: {
+    width: "100%",
+    backgroundColor: "rgba(255, 152, 0, 0.1)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 152, 0, 0.3)",
+  },
+  reminderHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  reminderIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(255, 152, 0, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reminderInfo: {
+    flex: 1,
+  },
+  reminderTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  reminderSubtitle: {
+    fontSize: 13,
+    color: "#8899a6",
+  },
+  reminderStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 152, 0, 0.2)",
+  },
+  reminderStatusText: {
+    fontSize: 13,
+    color: "#4CAF50",
+    fontWeight: "500",
+  },
+  reminderStatusOff: {
+    color: "#ff5c5c",
   },
 });
