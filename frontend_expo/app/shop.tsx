@@ -167,17 +167,6 @@ const DEFAULT_AFFILIATES = [
     affiliateId: "",
   },
   {
-    id: "costco-optical",
-    name: "Costco Optical",
-    description: "Premium quality eyewear at Costco member prices.",
-    baseUrl: "https://www.costco.com/optical.html",
-    category: "retail",
-    isPreferred: false,
-    commission: 4,
-    enabled: true,
-    affiliateId: "",
-  },
-  {
     id: "americas-best",
     name: "America's Best",
     description: "2 pairs of glasses for $79.95 including eye exam.",
