@@ -812,7 +812,7 @@ export default function AdminScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionHeaderLeft}>
-              <Ionicons name="database" size={24} color="#4a9eff" />
+              <Ionicons name="server" size={24} color="#4a9eff" />
               <Text style={styles.sectionTitle}>Data Management</Text>
             </View>
           </View>

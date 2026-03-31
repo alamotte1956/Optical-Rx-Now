@@ -842,23 +842,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#4CAF50",
   },
-  ocrOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(10, 22, 40, 0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-  },
-  ocrText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-    marginTop: 12,
-  },
   hipaaNotice: {
     flexDirection: "row",
     alignItems: "center",

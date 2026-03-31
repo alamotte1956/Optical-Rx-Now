@@ -40,9 +40,16 @@ interface PrescriptionStorage {
   createdAt: string;
 }
 
+export interface ReminderSetting {
+  days: number;
+  label: string;
+  enabled: boolean;
+}
+
 export interface Settings {
   notificationsEnabled: boolean;
   email: string | null;
+  reminderDays?: ReminderSetting[];
 }
 
 export interface ScheduledNotification {
@@ -58,6 +65,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -343,7 +352,12 @@ export const scheduleExpiryNotifications = async (prescription: Prescription): P
   }
   if (isNaN(expiryDate.getTime())) return;
 
-  const alertDays = [30, 14, 7, 2, 0];
+  // Use custom reminder settings if available, otherwise default
+  const defaultAlertDays = [30, 14, 7, 2, 0];
+  const alertDays = settings.reminderDays 
+    ? settings.reminderDays.filter(r => r.enabled).map(r => r.days)
+    : defaultAlertDays;
+    
   const member = await getFamilyMemberById(prescription.familyMemberId);
   const memberName = member?.name || "Family member";
   const scheduledNotifications: ScheduledNotification[] = [];
