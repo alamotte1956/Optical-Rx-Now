@@ -32,7 +32,7 @@ const slides = [
     id: "1",
     icon: "camera",
     title: "Snap & Save",
-    description: "Take a photo of your prescription and save it instantly. Our smart technology detects expiration dates automatically.",
+    description: "Take a photo of your prescription and save it instantly. Enter the expiration date to get timely reminders.",
     color: "#4a9eff",
     isReminderSlide: false,
   },

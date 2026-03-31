@@ -37,9 +37,6 @@ export default function AddRxScreen() {
   const [expiryInput, setExpiryInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [processingOCR, setProcessingOCR] = useState(false);
-  const [ocrAttempted, setOcrAttempted] = useState(false);
-  const [dateAutoDetected, setDateAutoDetected] = useState(false);
 
   // Set the Rx type from URL parameter
   useEffect(() => {
@@ -88,7 +85,6 @@ export default function AddRxScreen() {
       const uri = result.assets[0].uri;
       setImageUri(uri);
       setShowPreview(true);
-      await processImageWithOCR(uri);
     }
   };
 
@@ -109,36 +105,6 @@ export default function AddRxScreen() {
       const uri = result.assets[0].uri;
       setImageUri(uri);
       setShowPreview(true);
-      // Run on-device OCR to detect expiration date (HIPAA compliant)
-      await processImageWithOCR(uri);
-    }
-  };
-
-  // On-device OCR processing (HIPAA compliant - no server calls)
-  const processImageWithOCR = async (uri: string) => {
-    setProcessingOCR(true);
-    setOcrAttempted(false);
-    setDateAutoDetected(false);
-    
-    try {
-      console.log("Starting on-device OCR...");
-      const result = await extractExpirationDate(uri);
-      
-      setOcrAttempted(true);
-      
-      if (result.expiryDate) {
-        setExpiryDate(result.expiryDate);
-        setExpiryInput(formatDateForDisplay(result.expiryDate));
-        setDateAutoDetected(true);
-        console.log("OCR detected expiration date:", result.expiryDate);
-      } else {
-        console.log("OCR could not detect expiration date - manual entry required");
-      }
-    } catch (error) {
-      console.log("OCR processing error:", error);
-      setOcrAttempted(true);
-    } finally {
-      setProcessingOCR(false);
     }
   };
 
@@ -155,7 +121,6 @@ export default function AddRxScreen() {
     }
     
     setExpiryInput(formatted);
-    setDateAutoDetected(false); // User is manually editing
     
     // Validate and set if complete date
     if (formatted.length === 10) {
@@ -216,8 +181,6 @@ export default function AddRxScreen() {
     setExpiryDate("");
     setExpiryInput("");
     setShowPreview(false);
-    setOcrAttempted(false);
-    setDateAutoDetected(false);
   };
 
   if (familyMembers.length === 0) {
@@ -274,12 +237,6 @@ export default function AddRxScreen() {
               <Text style={styles.expiryTitle}>
                 Expiration Date {!expiryDate && <Text style={styles.requiredLabel}>*</Text>}
               </Text>
-              {dateAutoDetected && (
-                <View style={styles.autoDetectedBadge}>
-                  <Ionicons name="scan" size={12} color="#4CAF50" />
-                  <Text style={styles.autoDetectedText}>Auto-detected</Text>
-                </View>
-              )}
             </View>
             <View style={styles.expiryInputRow}>
               <TextInput
@@ -294,17 +251,14 @@ export default function AddRxScreen() {
                 onChangeText={handleExpiryInput}
                 keyboardType="numeric"
                 maxLength={10}
-                editable={!processingOCR}
               />
-              {expiryDate ? (
+              {expiryDate && (
                 <View style={styles.checkIcon}>
                   <Ionicons name="checkmark-circle" size={28} color="#4CAF50" />
                 </View>
-              ) : processingOCR ? (
-                <ActivityIndicator size="small" color="#4a9eff" style={styles.checkIcon} />
-              ) : null}
+              )}
             </View>
-            {!expiryDate && !processingOCR && (
+            {!expiryDate && (
               <Text style={styles.expiryHelp}>
                 Enter the expiration date from your prescription
               </Text>
@@ -314,12 +268,6 @@ export default function AddRxScreen() {
           {/* Image Preview - Smaller */}
           <View style={styles.imagePreviewSmall}>
             <Image source={{ uri: imageUri }} style={styles.previewImageSmall} resizeMode="contain" />
-            {processingOCR && (
-              <View style={styles.ocrOverlay}>
-                <ActivityIndicator size="large" color="#4a9eff" />
-                <Text style={styles.ocrText}>Reading expiration date...</Text>
-              </View>
-            )}
           </View>
 
           <View style={styles.infoSection}>
@@ -405,10 +353,10 @@ export default function AddRxScreen() {
           <TouchableOpacity
             style={[
               styles.saveButton, 
-              (saving || !selectedMemberId || !expiryDate || processingOCR) && styles.saveButtonDisabled
+              (saving || !selectedMemberId || !expiryDate) && styles.saveButtonDisabled
             ]}
             onPress={handleSave}
-            disabled={saving || !selectedMemberId || !expiryDate || processingOCR}
+            disabled={saving || !selectedMemberId || !expiryDate}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#fff" />
@@ -439,7 +387,7 @@ export default function AddRxScreen() {
           <Ionicons name="camera" size={80} color="#4a9eff" />
           <Text style={styles.captureTitle}>Take a Photo of Your Prescription</Text>
           <Text style={styles.captureSubtitle}>
-            We'll automatically detect the expiration date
+            You'll enter the expiration date manually
           </Text>
 
           <View style={styles.captureButtons}>
