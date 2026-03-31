@@ -544,13 +544,6 @@ export default function ShopScreen() {
             ]}
             onPress={() => handleOpenLink(affiliate)}
           >
-            {/* Preferred Banner */}
-            {affiliate.isPreferred && (
-              <View style={styles.preferredBanner}>
-                <Text style={styles.preferredBannerText}>PREFERRED</Text>
-              </View>
-            )}
-            
             {/* Location Badge for Retail Stores */}
             {affiliate.category === "retail" && (usingLocation || zipCode) && (
               <View style={styles.locationBadge}>
