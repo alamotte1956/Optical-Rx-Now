@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStats, requestNotificationPermissions, getSettings, ReminderSetting } from "../services/localStorage";
+import { openStoreForReview } from "../services/asoService";
 import * as Haptics from "expo-haptics";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
@@ -282,6 +283,15 @@ export default function WelcomeScreen() {
               <Text style={styles.legalButtonText}>Terms of Service</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Rate App Button */}
+          <TouchableOpacity 
+            style={styles.rateButton}
+            onPress={openStoreForReview}
+          >
+            <Ionicons name="star" size={20} color="#FFD700" />
+            <Text style={styles.rateButtonText}>Rate Optical Rx Now</Text>
+          </TouchableOpacity>
 
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
@@ -569,5 +579,24 @@ const styles = StyleSheet.create({
   },
   reminderStatusOff: {
     color: "#ff5c5c",
+  },
+  rateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginBottom: 12,
+    width: "100%",
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.3)",
+  },
+  rateButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFD700",
   },
 });

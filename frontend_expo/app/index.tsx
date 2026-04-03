@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trackAppOpen } from "../services/analytics";
+import { trackAppOpenForASO } from "../services/asoService";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 const ONBOARDING_COMPLETE_KEY = "@optical_rx_onboarding_complete";
@@ -12,8 +13,9 @@ export default function IndexScreen() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Track app open
+    // Track app open for analytics and ASO
     trackAppOpen();
+    trackAppOpenForASO();
     
     // Small delay to ensure AsyncStorage is ready on mobile
     const timer = setTimeout(() => {

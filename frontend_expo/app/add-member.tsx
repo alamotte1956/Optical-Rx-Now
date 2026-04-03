@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { saveFamilyMember } from "../services/localStorage";
+import { trackMemberForASO } from "../services/asoService";
 
 const RELATIONSHIP_OPTIONS = [
   "Self",
@@ -49,6 +50,10 @@ export default function AddMemberScreen() {
     setSaving(true);
     try {
       await saveFamilyMember(name.trim(), finalRelationship);
+      
+      // Track for ASO
+      await trackMemberForASO();
+      
       router.back();
     } catch (error) {
       Alert.alert("Error", "Failed to add family member");

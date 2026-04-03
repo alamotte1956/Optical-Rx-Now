@@ -20,6 +20,7 @@ import {
   FamilyMember,
 } from "../services/localStorage";
 import { extractExpirationDate, formatDateForDisplay } from "../services/ocrService";
+import { trackPrescriptionForASO } from "../services/asoService";
 
 const RX_TYPES = [
   { value: "eyeglass", label: "Eyeglasses", icon: "glasses-outline" },
@@ -166,6 +167,10 @@ export default function AddRxScreen() {
         dateTaken: new Date().toISOString(),
         expiryDate: expiryDate,
       });
+      
+      // Track for ASO (may trigger review prompt)
+      await trackPrescriptionForASO();
+      
       Alert.alert("Success", "Prescription saved successfully!");
       router.back();
     } catch (error) {
