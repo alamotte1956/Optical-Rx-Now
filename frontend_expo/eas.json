@@ -18,6 +18,9 @@
     "preview": {
       "extends": "base",
       "distribution": "internal",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
       "ios": {
         "simulator": false
       },
@@ -27,6 +30,9 @@
     },
     "production": {
       "extends": "base",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
       "ios": {
         "autoIncrement": "buildNumber"
       },
