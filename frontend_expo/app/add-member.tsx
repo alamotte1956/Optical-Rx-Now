@@ -141,6 +141,26 @@ export default function AddMemberScreen() {
             </>
           )}
 
+          {/* Helpful Tips Card */}
+          <View style={styles.tipsCard}>
+            <View style={styles.tipsHeader}>
+              <Ionicons name="bulb" size={20} color="#FF9800" />
+              <Text style={styles.tipsTitle}>Quick Tips</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+              <Text style={styles.tipText}>Add yourself first as &quot;Self&quot; to track your own prescriptions</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+              <Text style={styles.tipText}>Each family member can have multiple prescriptions</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+              <Text style={styles.tipText}>You can delete members later from the Family tab</Text>
+            </View>
+          </View>
+
           {/* Info Card */}
           <View style={styles.infoCard}>
             <Ionicons name="information-circle" size={24} color="#4a9eff" />
@@ -252,5 +272,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#8899a6",
     lineHeight: 20,
+  },
+  tipsCard: {
+    backgroundColor: "rgba(255, 152, 0, 0.1)",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255, 152, 0, 0.3)",
+  },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  tipsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FF9800",
+  },
+  tipItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginBottom: 8,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#8899a6",
+    lineHeight: 18,
   },
 });

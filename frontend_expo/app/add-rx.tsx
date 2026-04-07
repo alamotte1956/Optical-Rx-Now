@@ -19,7 +19,6 @@ import {
   getFamilyMembers,
   FamilyMember,
 } from "../services/localStorage";
-import { extractExpirationDate, formatDateForDisplay } from "../services/ocrService";
 import { trackPrescriptionForASO } from "../services/asoService";
 
 const RX_TYPES = [
@@ -392,7 +391,7 @@ export default function AddRxScreen() {
           <Ionicons name="camera" size={80} color="#4a9eff" />
           <Text style={styles.captureTitle}>Take a Photo of Your Prescription</Text>
           <Text style={styles.captureSubtitle}>
-            You'll enter the expiration date manually
+            You&apos;ll enter the expiration date manually
           </Text>
 
           <View style={styles.captureButtons}>
@@ -408,11 +407,32 @@ export default function AddRxScreen() {
           </View>
 
           <View style={styles.tipsCard}>
-            <Text style={styles.tipsTitle}>📸 Tips for best results:</Text>
-            <Text style={styles.tipText}>• Ensure good lighting</Text>
-            <Text style={styles.tipText}>• Capture the full prescription</Text>
-            <Text style={styles.tipText}>• Keep the image steady and clear</Text>
-            <Text style={styles.tipText}>• Make sure expiration date is visible</Text>
+            <View style={styles.tipsHeader}>
+              <Ionicons name="camera" size={20} color="#4a9eff" />
+              <Text style={styles.tipsTitle}>Tips for best results</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="sunny" size={16} color="#FF9800" />
+              <Text style={styles.tipItemText}>Ensure good lighting - natural light works best</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="expand" size={16} color="#4CAF50" />
+              <Text style={styles.tipItemText}>Capture the full prescription in frame</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="hand-left" size={16} color="#9C27B0" />
+              <Text style={styles.tipItemText}>Hold steady - avoid blurry images</Text>
+            </View>
+            <View style={styles.tipItem}>
+              <Ionicons name="calendar" size={16} color="#f44336" />
+              <Text style={styles.tipItemText}>Make sure expiration date is visible - you&apos;ll enter it manually</Text>
+            </View>
+          </View>
+
+          {/* First-time user hint */}
+          <View style={styles.hintCard}>
+            <Ionicons name="information-circle" size={20} color="#4a9eff" />
+            <Text style={styles.hintText}>After taking a photo, you&apos;ll enter the expiration date from your prescription. We&apos;ll remind you before it expires!</Text>
           </View>
         </View>
       </View>
@@ -540,18 +560,53 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     width: "100%",
+    borderWidth: 1,
+    borderColor: "rgba(74, 158, 255, 0.2)",
+  },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 16,
   },
   tipsTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#fff",
+  },
+  tipItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
     marginBottom: 12,
+  },
+  tipItemText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#8899a6",
+    lineHeight: 20,
   },
   tipText: {
     fontSize: 14,
     color: "#8899a6",
     marginBottom: 8,
     lineHeight: 20,
+  },
+  hintCard: {
+    marginTop: 16,
+    backgroundColor: "rgba(74, 158, 255, 0.08)",
+    borderRadius: 12,
+    padding: 16,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  hintText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#8899a6",
+    lineHeight: 19,
   },
   previewContainer: {
     flex: 1,

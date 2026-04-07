@@ -256,10 +256,21 @@ export default function WelcomeScreen() {
             </View>
           </View>
 
+          {/* Vision Tips & FAQ Button */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => router.push("/vision-tips")}
+            data-testid="vision-tips-btn"
+          >
+            <Ionicons name="bulb" size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>Vision Care Tips & FAQ</Text>
+          </TouchableOpacity>
+
           {/* Feedback Button */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
             onPress={() => router.push("/feedback")}
+            data-testid="feedback-btn"
           >
             <Ionicons name="chatbubble-ellipses" size={22} color="#4a9eff" />
             <Text style={styles.secondaryButtonText}>Send Feedback</Text>
