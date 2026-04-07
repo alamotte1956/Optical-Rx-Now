@@ -20,7 +20,8 @@
         "NSPhotoLibraryUsageDescription": "Import prescription photos from your gallery",
         "NSPhotoLibraryAddUsageDescription": "Save prescription images to your gallery",
         "NSLocationWhenInUseUsageDescription": "Find nearby optical stores for eyewear shopping",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["mailto", "maps", "tel"]
       },
       "config": {
         "usesNonExemptEncryption": false
