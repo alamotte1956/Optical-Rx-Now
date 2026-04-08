@@ -276,11 +276,11 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Send Feedback</Text>
           </TouchableOpacity>
 
-          {/* Legal Section */}
+          {/* Legal Section - Opens Website URLs */}
           <View style={styles.legalSection}>
             <TouchableOpacity 
               style={styles.legalButton}
-              onPress={() => router.push("/privacy-policy")}
+              onPress={() => Linking.openURL("https://www.opticalrxnow.com/privacy-policy")}
             >
               <Ionicons name="shield-checkmark" size={18} color="#6b7c8f" />
               <Text style={styles.legalButtonText}>Privacy Policy</Text>
@@ -288,7 +288,7 @@ export default function WelcomeScreen() {
             <Text style={styles.legalDivider}>|</Text>
             <TouchableOpacity 
               style={styles.legalButton}
-              onPress={() => router.push("/terms-of-service")}
+              onPress={() => Linking.openURL("https://www.opticalrxnow.com/terms-of-service")}
             >
               <Ionicons name="document-text" size={18} color="#6b7c8f" />
               <Text style={styles.legalButtonText}>Terms of Service</Text>
@@ -320,6 +320,9 @@ export default function WelcomeScreen() {
           >
             <Text style={styles.resetButtonText}>Reset Age Verification</Text>
           </TouchableOpacity>
+
+          {/* Version Number */}
+          <Text style={styles.versionText}>Version 1.0.1</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -479,12 +482,18 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     paddingVertical: 12,
-    marginBottom: 24,
+    marginBottom: 8,
   },
   resetButtonText: {
     fontSize: 12,
     color: "#6b7c8f",
     textDecorationLine: "underline",
+  },
+  versionText: {
+    fontSize: 12,
+    color: "#4a5568",
+    textAlign: "center",
+    marginBottom: 24,
   },
   familySection: {
     width: "100%",
