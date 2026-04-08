@@ -2,7 +2,7 @@
   "expo": {
     "name": "Optical Rx Now",
     "slug": "optical-rx-now",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "opticalrxnow",
@@ -29,7 +29,7 @@
     },
     "android": {
       "package": "com.opticalrxnow.mobile.v2",
-      "versionCode": 1,
+      "versionCode": 3,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v2",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
