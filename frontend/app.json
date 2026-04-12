@@ -2,6 +2,7 @@
   "expo": {
     "name": "Optical Rx Now",
     "slug": "optical-rx-now",
+    "owner": "alamotte1956",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,10 +11,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.opticalrxnow.mobile.v2",
+      "buildNumber": "4",
       "infoPlist": {
         "NSCameraUsageDescription": "Take photos of your prescriptions",
-        "NSPhotoLibraryUsageDescription": "Select prescription photos from your library",
-        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you"
+        "NSPhotoLibraryUsageDescription": "Select prescription photos from your library"
       }
     },
     "android": {
@@ -22,6 +24,7 @@
         "backgroundColor": "#000"
       },
       "edgeToEdgeEnabled": true,
+      "package": "com.opticalrxnow.mobile.v2",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -47,6 +50,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7ba6b704-7a7c-495c-937c-22e42ea9f2de"
+      }
     }
   }
 }
