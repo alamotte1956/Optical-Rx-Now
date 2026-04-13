@@ -65,19 +65,6 @@
     "plugins": [
       "expo-router",
       [
-        "expo-build-properties",
-        {
-          "ios": {
-            "deploymentTarget": "16.0",
-            "newArchEnabled": false
-          },
-          "android": {
-            "minSdkVersion": 24,
-            "newArchEnabled": false
-          }
-        }
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-image.png",

@@ -7,7 +7,9 @@
     "base": {
       "node": "20.18.0",
       "cache": {
-        "disabled": true
+        "key": "v3-fresh-build",
+        "cacheDefaultPaths": false,
+        "paths": []
       }
     },
     "development": {
@@ -26,7 +28,7 @@
       },
       "ios": {
         "simulator": false,
-        "image": "macos-sonoma-14.5-xcode-15.4"
+        "image": "macos-ventura-13.6-xcode-15.2"
       },
       "android": {
         "buildType": "apk"
@@ -39,7 +41,7 @@
       },
       "ios": {
         "autoIncrement": "buildNumber",
-        "image": "macos-sonoma-14.5-xcode-15.4"
+        "image": "macos-ventura-13.6-xcode-15.2"
       },
       "android": {
         "autoIncrement": "versionCode"
