@@ -5,7 +5,10 @@
   },
   "build": {
     "base": {
-      "node": "20.18.0"
+      "node": "20.18.0",
+      "cache": {
+        "disabled": true
+      }
     },
     "development": {
       "extends": "base",
@@ -22,7 +25,8 @@
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       },
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "image": "macos-sonoma-14.5-xcode-15.4"
       },
       "android": {
         "buildType": "apk"
@@ -34,7 +38,8 @@
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       },
       "ios": {
-        "autoIncrement": "buildNumber"
+        "autoIncrement": "buildNumber",
+        "image": "macos-sonoma-14.5-xcode-15.4"
       },
       "android": {
         "autoIncrement": "versionCode"
