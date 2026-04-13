@@ -21,7 +21,11 @@
         "NSPhotoLibraryAddUsageDescription": "Save prescription images to your gallery",
         "NSLocationWhenInUseUsageDescription": "Find nearby optical stores for eyewear shopping",
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["mailto", "maps", "tel"]
+        "LSApplicationQueriesSchemes": [
+          "mailto",
+          "maps",
+          "tel"
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -96,7 +100,8 @@
         }
       ],
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "expo-mail-composer"
     ],
     "experiments": {
       "typedRoutes": true
