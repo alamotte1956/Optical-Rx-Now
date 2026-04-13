@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.opticalrxnow.mobile.v2",
+      "bundleIdentifier": "com.opticalrxnow.mobile.v1",
       "buildNumber": "1",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": []
@@ -28,9 +28,9 @@
       }
     },
     "android": {
-      "package": "com.opticalrxnow.mobile.v2",
+      "package": "com.opticalrxnow.mobile.v1",
       "versionCode": 3,
-      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v2",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A1628"
