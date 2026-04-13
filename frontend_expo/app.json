@@ -60,15 +60,20 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/withFollyFix.js",
       [
         "expo-build-properties",
         {
           "ios": {
             "deploymentTarget": "16.0",
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "ccacheEnabled": false,
+            "extraPods": [],
+            "newArchEnabled": false
           },
           "android": {
-            "minSdkVersion": 24
+            "minSdkVersion": 24,
+            "newArchEnabled": false
           }
         }
       ],
