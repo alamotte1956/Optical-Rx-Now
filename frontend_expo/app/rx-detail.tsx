@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 import {
   getPrescriptionById,
   getFamilyMemberById,
