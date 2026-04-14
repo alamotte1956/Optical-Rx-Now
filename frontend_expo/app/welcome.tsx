@@ -75,7 +75,7 @@ export default function WelcomeScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: "Check out Optical Rx Now - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now.",
+        message: "Check out Optical Rx Now - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now: https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
         title: "Optical Rx Now",
       });
     } catch (error) {
