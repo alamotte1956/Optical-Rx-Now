@@ -33,7 +33,7 @@
     },
     "android": {
       "package": "com.opticalrxnow.mobile.v1",
-      "versionCode": 3,
+      "versionCode": 4,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -42,9 +42,6 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_IMAGES",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.INTERNET",
@@ -76,7 +73,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Import prescription photos from your gallery",
+          "photosPermission": false,
           "cameraPermission": "Take photos of your prescriptions to store them"
         }
       ],
