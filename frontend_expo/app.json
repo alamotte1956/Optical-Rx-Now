@@ -33,7 +33,7 @@
     },
     "android": {
       "package": "com.opticalrxnow.mobile.v1",
-      "versionCode": 7,
+      "versionCode": 8,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -83,6 +83,7 @@
         "expo-image-picker",
         {
           "photosPermission": false,
+          "microphonePermission": false,
           "cameraPermission": "Take photos of your prescriptions to store them"
         }
       ],
