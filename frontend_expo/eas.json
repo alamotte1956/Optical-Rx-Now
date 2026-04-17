@@ -28,7 +28,7 @@
       },
       "ios": {
         "simulator": false,
-        "image": "macos-ventura-13.6-xcode-15.2"
+        "image": "macos-sequoia-15.3-xcode-16.2"
       },
       "android": {
         "buildType": "apk"
@@ -41,7 +41,7 @@
       },
       "ios": {
         "autoIncrement": "buildNumber",
-        "image": "macos-ventura-13.6-xcode-15.2"
+        "image": "macos-sequoia-15.3-xcode-16.2"
       },
       "android": {
         "autoIncrement": "versionCode"
