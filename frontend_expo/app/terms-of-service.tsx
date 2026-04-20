@@ -25,8 +25,8 @@ export default function TermsOfServiceScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.lastUpdated}>Effective Date: January 1, 2025</Text>
-        <Text style={styles.lastUpdated}>Last Updated: January 1, 2025</Text>
+        <Text style={styles.lastUpdated}>Effective Date: April 17, 2026</Text>
+        <Text style={styles.lastUpdated}>Last Updated: April 17, 2026</Text>
 
         {/* Section 1 */}
         <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
