@@ -24,7 +24,7 @@ const withRemovePermissions = (config) => {
       );
     }
 
-    // Also add tools:node="remove" entries to block library-injected permissions
+    // Add tools:node="remove" entries to block library-injected permissions
     if (!manifest.$) {
       manifest.$ = {};
     }
@@ -38,6 +38,16 @@ const withRemovePermissions = (config) => {
         },
       });
     });
+
+    // Remove screenOrientation restrictions from all activities (fixes large screen warning)
+    const application = manifest.application?.[0];
+    if (application?.activity) {
+      application.activity.forEach((activity) => {
+        if (activity.$?.["android:screenOrientation"]) {
+          delete activity.$["android:screenOrientation"];
+        }
+      });
+    }
 
     return config;
   });
