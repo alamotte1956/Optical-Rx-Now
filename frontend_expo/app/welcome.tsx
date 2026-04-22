@@ -217,16 +217,6 @@ export default function WelcomeScreen() {
             </View>
           </View>
 
-          {/* Feedback Button */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => router.push("/feedback")}
-            data-testid="feedback-btn"
-          >
-            <Ionicons name="chatbubble-ellipses" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>Send Feedback</Text>
-          </TouchableOpacity>
-
           {/* Legal Section - Opens Website URLs */}
           <View style={styles.legalSection}>
             <TouchableOpacity 
