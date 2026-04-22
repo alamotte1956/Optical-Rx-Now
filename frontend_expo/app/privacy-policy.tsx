@@ -30,16 +30,16 @@ export default function PrivacyPolicyScreen() {
         {/* Section 1 */}
         <Text style={styles.sectionTitle}>1. Introduction</Text>
         <Text style={styles.paragraph}>
-          Optical Rx Now (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how our mobile application (&quot;App&quot;), available on the Apple App Store and Google Play Store, handles your information. By downloading, installing, or using the App, you acknowledge that you have read and understood this Privacy Policy.
+          My Optical Wallet (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how our mobile application (&quot;App&quot;), available on the Apple App Store and Google Play Store, handles your information. By downloading, installing, or using the App, you acknowledge that you have read and understood this Privacy Policy.
         </Text>
         <Text style={styles.paragraph}>
-          This policy applies to all users of the Optical Rx Now mobile application, regardless of location, and is designed to comply with applicable privacy laws including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), the California Privacy Rights Act (CPRA), and other applicable data protection regulations.
+          This policy applies to all users of the My Optical Wallet mobile application, regardless of location, and is designed to comply with applicable privacy laws including the General Data Protection Regulation (GDPR), the California Consumer Privacy Act (CCPA), the California Privacy Rights Act (CPRA), and other applicable data protection regulations.
         </Text>
 
         {/* Section 2 */}
         <Text style={styles.sectionTitle}>2. Information We Collect</Text>
         <Text style={styles.paragraph}>
-          Optical Rx Now is a local-only utility. We do not require account creation or registration. The only information processed by the app consists of the prescription photos and family names you choose to save locally on your device.
+          My Optical Wallet is a local-only utility. We do not require account creation or registration. The only information processed by the app consists of the prescription photos and family names you choose to save locally on your device.
         </Text>
         <Text style={styles.subSectionTitle}>Data we do NOT collect:</Text>
         <Text style={styles.bulletPoint}>• Personal identifiers (name, email address, phone number, mailing address)</Text>
@@ -69,7 +69,7 @@ export default function PrivacyPolicyScreen() {
         {/* Section 4 */}
         <Text style={styles.sectionTitle}>4. Data Storage and Security</Text>
         <Text style={styles.paragraph}>
-          All prescription data, including photos and names, is stored exclusively on your device&apos;s local storage. Optical Rx Now does not transmit, store, or access this data on any external servers or cloud infrastructure. Your data never leaves your device.
+          All prescription data, including photos and names, is stored exclusively on your device&apos;s local storage. My Optical Wallet does not transmit, store, or access this data on any external servers or cloud infrastructure. Your data never leaves your device.
         </Text>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>Security measures:</Text> Your data is protected by your device&apos;s built-in security features, including device encryption, passcode/biometric lock, and operating system sandboxing. We recommend that you keep your device&apos;s operating system up to date and use a strong passcode or biometric authentication to protect access to your stored prescriptions.
@@ -123,7 +123,7 @@ export default function PrivacyPolicyScreen() {
         {/* Section 8 */}
         <Text style={styles.sectionTitle}>8. Tracking and Advertising</Text>
         <Text style={styles.paragraph}>
-          Optical Rx Now does not track you across other apps or websites. We do not use advertising identifiers (IDFA on iOS or Advertising ID on Android). We do not display advertisements within the App. We do not engage in cross-app or cross-site tracking of any kind.
+          My Optical Wallet does not track you across other apps or websites. We do not use advertising identifiers (IDFA on iOS or Advertising ID on Android). We do not display advertisements within the App. We do not engage in cross-app or cross-site tracking of any kind.
         </Text>
 
         {/* Section 9 */}
@@ -153,7 +153,7 @@ export default function PrivacyPolicyScreen() {
           <Text style={styles.contactLink}>support@opticalrxnow.com</Text>
         </TouchableOpacity>
         <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Optical Rx Now</Text>
+          <Text style={styles.bold}>My Optical Wallet</Text>
         </Text>
         <TouchableOpacity onPress={handleWebsitePress}>
           <Text style={styles.contactLink}>www.opticalrxnow.com</Text>
@@ -164,7 +164,7 @@ export default function PrivacyPolicyScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2026 Optical Rx Now. All rights reserved.</Text>
+          <Text style={styles.footerText}>© 2026 My Optical Wallet. All rights reserved.</Text>
           <TouchableOpacity onPress={handleEmailPress}>
             <Text style={styles.footerLink}>support@opticalrxnow.com</Text>
           </TouchableOpacity>

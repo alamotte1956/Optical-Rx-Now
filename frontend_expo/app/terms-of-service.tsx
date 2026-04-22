@@ -31,7 +31,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 1 */}
         <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
         <Text style={styles.paragraph}>
-          By downloading, installing, or using the Optical Rx Now mobile application (&quot;App&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not download, install, or use the App. These Terms constitute a legally binding agreement between you (&quot;User,&quot; &quot;you,&quot; or &quot;your&quot;) and Optical Rx Now (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;).
+          By downloading, installing, or using the My Optical Wallet mobile application (&quot;App&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not download, install, or use the App. These Terms constitute a legally binding agreement between you (&quot;User,&quot; &quot;you,&quot; or &quot;your&quot;) and My Optical Wallet (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;).
         </Text>
         <Text style={styles.paragraph}>
           These Terms apply in addition to any terms and conditions imposed by the platform from which you downloaded the App (Apple App Store or Google Play Store). In the event of a conflict between these Terms and the applicable platform terms, the platform terms shall prevail to the extent of the conflict.
@@ -40,7 +40,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 2 */}
         <Text style={styles.sectionTitle}>2. Description of Service</Text>
         <Text style={styles.paragraph}>
-          Optical Rx Now is a local-only prescription storage application that allows users to upload, save, and access photos of their eyeglass and contact lens prescriptions directly on their device. The App is designed for personal convenience and organization purposes only. No account creation or registration is required. All data is stored exclusively on your device and is never transmitted to external servers.
+          My Optical Wallet is a local-only prescription storage application that allows users to upload, save, and access photos of their eyeglass and contact lens prescriptions directly on their device. The App is designed for personal convenience and organization purposes only. No account creation or registration is required. All data is stored exclusively on your device and is never transmitted to external servers.
         </Text>
         <Text style={styles.paragraph}>
           The App is provided as a utility tool and is not a medical device, healthcare service, or medical records system. The App does not interpret, validate, or verify the accuracy of any prescription information you store.
@@ -67,7 +67,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 5 */}
         <Text style={styles.sectionTitle}>5. Medical Disclaimer</Text>
         <Text style={styles.disclaimerBox}>
-          Optical Rx Now is not a medical service, medical device, or healthcare provider and does not provide medical advice, diagnosis, or treatment. The App is solely a storage and organization tool for your prescription information. The App does not replace professional eye care services.
+          My Optical Wallet is not a medical service, medical device, or healthcare provider and does not provide medical advice, diagnosis, or treatment. The App is solely a storage and organization tool for your prescription information. The App does not replace professional eye care services.
         </Text>
         <Text style={styles.paragraph}>
           Always consult with a qualified eye care professional for any questions regarding your vision, eye health, or prescriptions. Never disregard professional medical advice or delay seeking it because of information stored in or accessed through the App. We make no representations or warranties regarding the accuracy, completeness, or timeliness of any prescription information you store in the App.
@@ -76,7 +76,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 6 */}
         <Text style={styles.sectionTitle}>6. Intellectual Property</Text>
         <Text style={styles.paragraph}>
-          All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, images, software, and the overall design and arrangement thereof, are the exclusive property of Optical Rx Now and are protected by United States and international copyright, trademark, patent, trade secret, and other intellectual property laws.
+          All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, images, software, and the overall design and arrangement thereof, are the exclusive property of My Optical Wallet and are protected by United States and international copyright, trademark, patent, trade secret, and other intellectual property laws.
         </Text>
         <Text style={styles.paragraph}>
           We grant you a limited, non-exclusive, non-transferable, revocable license to use the App for your personal, non-commercial use in accordance with these Terms. This license does not include the right to sublicense, sell, resell, or commercially exploit the App or any content therein.
@@ -115,7 +115,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 9 */}
         <Text style={styles.sectionTitle}>9. Indemnification</Text>
         <Text style={styles.paragraph}>
-          You agree to indemnify, defend, and hold harmless Optical Rx Now and its officers, directors, employees, agents, and affiliates from and against any and all claims, damages, obligations, losses, liabilities, costs, and expenses (including reasonable attorney&apos;s fees) arising from: (a) your use of the App; (b) your violation of these Terms; (c) your violation of any third-party right, including any intellectual property or privacy right; or (d) any claim that your use of the App caused damage to a third party.
+          You agree to indemnify, defend, and hold harmless My Optical Wallet and its officers, directors, employees, agents, and affiliates from and against any and all claims, damages, obligations, losses, liabilities, costs, and expenses (including reasonable attorney&apos;s fees) arising from: (a) your use of the App; (b) your violation of these Terms; (c) your violation of any third-party right, including any intellectual property or privacy right; or (d) any claim that your use of the App caused damage to a third party.
         </Text>
 
         {/* Section 10 */}
@@ -125,11 +125,11 @@ export default function TermsOfServiceScreen() {
         </Text>
         <Text style={styles.subSectionTitle}>Apple App Store</Text>
         <Text style={styles.paragraph}>
-          If you downloaded the App from the Apple App Store, you acknowledge that these Terms are between you and Optical Rx Now, not Apple. Apple has no obligation to furnish any maintenance or support services with respect to the App. Apple is not responsible for any product warranties or claims relating to the App. You acknowledge that Apple and its subsidiaries are third-party beneficiaries of these Terms, and Apple will have the right to enforce these Terms against you.
+          If you downloaded the App from the Apple App Store, you acknowledge that these Terms are between you and My Optical Wallet, not Apple. Apple has no obligation to furnish any maintenance or support services with respect to the App. Apple is not responsible for any product warranties or claims relating to the App. You acknowledge that Apple and its subsidiaries are third-party beneficiaries of these Terms, and Apple will have the right to enforce these Terms against you.
         </Text>
         <Text style={styles.subSectionTitle}>Google Play Store</Text>
         <Text style={styles.paragraph}>
-          If you downloaded the App from the Google Play Store, you acknowledge that Google has no obligation or liability to you with respect to the App or these Terms. You acknowledge that Optical Rx Now, not Google, is responsible for addressing any claims relating to the App.
+          If you downloaded the App from the Google Play Store, you acknowledge that Google has no obligation or liability to you with respect to the App or these Terms. You acknowledge that My Optical Wallet, not Google, is responsible for addressing any claims relating to the App.
         </Text>
 
         {/* Section 11 */}
@@ -174,7 +174,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 15 */}
         <Text style={styles.sectionTitle}>15. Entire Agreement</Text>
         <Text style={styles.paragraph}>
-          These Terms, together with our Privacy Policy, constitute the entire agreement between you and Optical Rx Now regarding your use of the App and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, both written and oral, regarding the App.
+          These Terms, together with our Privacy Policy, constitute the entire agreement between you and My Optical Wallet regarding your use of the App and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, both written and oral, regarding the App.
         </Text>
 
         {/* Section 16 */}
@@ -183,7 +183,7 @@ export default function TermsOfServiceScreen() {
           If you have any questions, concerns, or feedback about these Terms of Service, please contact us at:
         </Text>
         <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Optical Rx Now</Text>
+          <Text style={styles.bold}>My Optical Wallet</Text>
         </Text>
         <TouchableOpacity onPress={handleEmailPress}>
           <Text style={styles.contactLink}>Email: support@opticalrxnow.com</Text>
@@ -194,7 +194,7 @@ export default function TermsOfServiceScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2026 Optical Rx Now. All rights reserved.</Text>
+          <Text style={styles.footerText}>© 2026 My Optical Wallet. All rights reserved.</Text>
         </View>
 
         <View style={styles.bottomSpacer} />

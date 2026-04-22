@@ -278,7 +278,7 @@ const ADMIN_LINKS = [
     description: "Manage Android app",
   },
   {
-    name: "Optical Rx Now Website",
+    name: "My Optical Wallet Website",
     url: "https://opticalrxnow.com",
     icon: "globe-outline",
     description: "Company website",
@@ -840,8 +840,8 @@ export default function AdminScreen() {
 
         {/* App Info */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Optical Rx Now v1.0.0</Text>
-          <Text style={styles.footerSubtext}>© 2025 Optical Rx Now</Text>
+          <Text style={styles.footerText}>My Optical Wallet v1.0.0</Text>
+          <Text style={styles.footerSubtext}>© 2025 My Optical Wallet</Text>
         </View>
       </ScrollView>
 

@@ -132,7 +132,7 @@ export const promptForReview = async (): Promise<void> => {
 // Manual review prompt fallback
 const showManualReviewPrompt = (): void => {
   Alert.alert(
-    "Enjoying Optical Rx Now?",
+    "Enjoying My Optical Wallet?",
     "Your review helps other families discover our app and keep their prescriptions organized!",
     [
       {

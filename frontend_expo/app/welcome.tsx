@@ -75,8 +75,8 @@ export default function WelcomeScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: "Check out Optical Rx Now - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now: https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
-        title: "Optical Rx Now",
+        message: "Check out My Optical Wallet - the easiest way to store and manage your family's eyeglass and contact lens prescriptions! Download it now: https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1",
+        title: "My Optical Wallet",
       });
     } catch (error) {
       console.log("Error sharing:", error);
@@ -301,7 +301,7 @@ export default function WelcomeScreen() {
             onPress={openStoreForReview}
           >
             <Ionicons name="star" size={20} color="#FFD700" />
-            <Text style={styles.rateButtonText}>Rate Optical Rx Now</Text>
+            <Text style={styles.rateButtonText}>Rate My Optical Wallet</Text>
           </TouchableOpacity>
 
           {/* Ad Banner Placeholder */}

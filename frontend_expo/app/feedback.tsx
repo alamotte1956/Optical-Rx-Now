@@ -39,8 +39,8 @@ export default function FeedbackScreen() {
     setSending(true);
 
     const selectedType = FEEDBACK_TYPES.find((t) => t.id === feedbackType);
-    const subject = `[Optical Rx Now] ${selectedType?.label || "Feedback"}`;
-    const body = `Feedback Type: ${selectedType?.label}\n\n${message}\n\n---\nSent from Optical Rx Now App`;
+    const subject = `[My Optical Wallet] ${selectedType?.label || "Feedback"}`;
+    const body = `Feedback Type: ${selectedType?.label}\n\n${message}\n\n---\nSent from My Optical Wallet App`;
 
     const isAvailable = await MailComposer.isAvailableAsync();
 
@@ -157,7 +157,7 @@ export default function FeedbackScreen() {
           <View style={styles.infoCard}>
             <Ionicons name="heart" size={20} color="#ff5c5c" />
             <Text style={styles.infoText}>
-              We read every message and appreciate your feedback. It helps us make Optical Rx Now better for everyone!
+              We read every message and appreciate your feedback. It helps us make My Optical Wallet better for everyone!
             </Text>
           </View>
         </ScrollView>

@@ -58,7 +58,7 @@ export default function AgeVerificationScreen() {
           <Text style={styles.title}>Age Verification Required</Text>
           
           <Text style={styles.description}>
-            You must be 18 years of age or older to use Optical Rx Now.
+            You must be 18 years of age or older to use My Optical Wallet.
           </Text>
 
           <Text style={styles.question}>
