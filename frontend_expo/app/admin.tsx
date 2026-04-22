@@ -279,7 +279,7 @@ const ADMIN_LINKS = [
   },
   {
     name: "My Optical Wallet Website",
-    url: "https://opticalrxnow.com",
+    url: "https://MyOpticalWallet.com",
     icon: "globe-outline",
     description: "Company website",
   },

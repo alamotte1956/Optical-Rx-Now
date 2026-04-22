@@ -127,9 +127,9 @@
       "typedRoutes": true
     },
     "extra": {
-      "privacyPolicyUrl": "https://opticalrxnow.com/privacy",
+      "privacyPolicyUrl": "https://MyOpticalWallet.com/privacy",
       "supportEmail": "support@OpticalRxNow.com",
-      "websiteUrl": "https://opticalrxnow.com",
+      "websiteUrl": "https://MyOpticalWallet.com",
       "router": {}
     },
     "owner": "alamotte1956"

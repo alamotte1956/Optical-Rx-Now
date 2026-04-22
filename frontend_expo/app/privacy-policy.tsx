@@ -7,11 +7,11 @@ export default function PrivacyPolicyScreen() {
   const router = useRouter();
 
   const handleEmailPress = () => {
-    Linking.openURL("mailto:support@opticalrxnow.com");
+    Linking.openURL("mailto:support@MyOpticalWallet.com");
   };
 
   const handleWebsitePress = () => {
-    Linking.openURL("https://www.opticalrxnow.com");
+    Linking.openURL("https://www.MyOpticalWallet.com");
   };
 
   return (
@@ -150,13 +150,13 @@ export default function PrivacyPolicyScreen() {
           If you have any questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us at:
         </Text>
         <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles.contactLink}>support@opticalrxnow.com</Text>
+          <Text style={styles.contactLink}>support@MyOpticalWallet.com</Text>
         </TouchableOpacity>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>My Optical Wallet</Text>
         </Text>
         <TouchableOpacity onPress={handleWebsitePress}>
-          <Text style={styles.contactLink}>www.opticalrxnow.com</Text>
+          <Text style={styles.contactLink}>www.MyOpticalWallet.com</Text>
         </TouchableOpacity>
         <Text style={styles.paragraph}>
           We will respond to your inquiry within 30 days. If you are not satisfied with our response, you may have the right to lodge a complaint with your local data protection authority.
@@ -166,7 +166,7 @@ export default function PrivacyPolicyScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>© 2026 My Optical Wallet. All rights reserved.</Text>
           <TouchableOpacity onPress={handleEmailPress}>
-            <Text style={styles.footerLink}>support@opticalrxnow.com</Text>
+            <Text style={styles.footerLink}>support@MyOpticalWallet.com</Text>
           </TouchableOpacity>
         </View>
 

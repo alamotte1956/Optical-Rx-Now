@@ -231,7 +231,7 @@ export default function WelcomeScreen() {
           <View style={styles.legalSection}>
             <TouchableOpacity 
               style={styles.legalButton}
-              onPress={() => Linking.openURL("https://www.opticalrxnow.com/privacy-policy")}
+              onPress={() => Linking.openURL("https://www.MyOpticalWallet.com/privacy")}
             >
               <Ionicons name="shield-checkmark" size={18} color="#6b7c8f" />
               <Text style={styles.legalButtonText}>Privacy Policy</Text>
@@ -239,7 +239,7 @@ export default function WelcomeScreen() {
             <Text style={styles.legalDivider}>|</Text>
             <TouchableOpacity 
               style={styles.legalButton}
-              onPress={() => Linking.openURL("https://www.opticalrxnow.com/terms-of-service")}
+              onPress={() => Linking.openURL("https://www.MyOpticalWallet.com/terms")}
             >
               <Ionicons name="document-text" size={18} color="#6b7c8f" />
               <Text style={styles.legalButtonText}>Terms of Service</Text>
