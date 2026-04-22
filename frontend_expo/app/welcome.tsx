@@ -196,35 +196,6 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Retail Optical Stores</Text>
           </TouchableOpacity>
 
-          {/* Reminder Settings Section - More Prominent */}
-          <TouchableOpacity 
-            style={styles.reminderSection}
-            onPress={() => router.push("/notification-settings")}
-          >
-            <View style={styles.reminderHeader}>
-              <View style={styles.reminderIconContainer}>
-                <Ionicons name="alarm" size={28} color="#FF9800" />
-              </View>
-              <View style={styles.reminderInfo}>
-                <Text style={styles.reminderTitle}>Expiry Reminders</Text>
-                <Text style={styles.reminderSubtitle}>
-                  {notificationsEnabled ? "Tap to customize when you get alerts" : "Tap to enable reminders"}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={24} color="#6b7c8f" />
-            </View>
-            <View style={styles.reminderStatus}>
-              <Ionicons 
-                name={notificationsEnabled ? "notifications" : "notifications-off"} 
-                size={16} 
-                color={notificationsEnabled ? "#4CAF50" : "#ff5c5c"} 
-              />
-              <Text style={[styles.reminderStatusText, !notificationsEnabled && styles.reminderStatusOff]}>
-                {notificationsEnabled ? `Active: ${getActiveRemindersText()}` : "Reminders are off"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
           {/* Family Management Section */}
           <View style={styles.familySection}>
             <Text style={styles.sectionTitle}>Family Management</Text>
