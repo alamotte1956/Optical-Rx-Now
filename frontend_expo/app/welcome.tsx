@@ -6,7 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStats, requestNotificationPermissions, getSettings, ReminderSetting } from "../services/localStorage";
-import { openStoreForReview } from "../services/asoService";
 import * as Haptics from "expo-haptics";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
@@ -197,15 +196,6 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Find Retail Optical Stores</Text>
           </TouchableOpacity>
 
-          {/* Find Optometrists Button */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => router.push("/find-optometrists")}
-          >
-            <Ionicons name="eye" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>Find Optometrists Near Me</Text>
-          </TouchableOpacity>
-
           {/* Reminder Settings Section - More Prominent */}
           <TouchableOpacity 
             style={styles.reminderSection}
@@ -256,16 +246,6 @@ export default function WelcomeScreen() {
             </View>
           </View>
 
-          {/* Vision Tips & FAQ Button */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => router.push("/vision-tips")}
-            data-testid="vision-tips-btn"
-          >
-            <Ionicons name="bulb" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>Vision Care Tips & FAQ</Text>
-          </TouchableOpacity>
-
           {/* Feedback Button */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
@@ -294,15 +274,6 @@ export default function WelcomeScreen() {
               <Text style={styles.legalButtonText}>Terms of Service</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Rate App Button */}
-          <TouchableOpacity 
-            style={styles.rateButton}
-            onPress={openStoreForReview}
-          >
-            <Ionicons name="star" size={20} color="#FFD700" />
-            <Text style={styles.rateButtonText}>Rate My Optical Wallet</Text>
-          </TouchableOpacity>
 
           {/* Ad Banner Placeholder */}
           <TouchableOpacity 
