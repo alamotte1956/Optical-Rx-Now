@@ -7,7 +7,7 @@ export default function TermsOfServiceScreen() {
   const router = useRouter();
 
   const handleEmailPress = () => {
-    Linking.openURL("mailto:support@MyOpticalWallet.com");
+    Linking.openURL("mailto:alamotte1956@gmail.com");
   };
 
   const handleWebsitePress = () => {
@@ -186,7 +186,7 @@ export default function TermsOfServiceScreen() {
           <Text style={styles.bold}>My Optical Wallet</Text>
         </Text>
         <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles.contactLink}>Email: support@MyOpticalWallet.com</Text>
+          <Text style={styles.contactLink}>Email: alamotte1956@gmail.com</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleWebsitePress}>
           <Text style={styles.contactLink}>Website: www.MyOpticalWallet.com</Text>

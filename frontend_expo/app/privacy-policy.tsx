@@ -7,7 +7,7 @@ export default function PrivacyPolicyScreen() {
   const router = useRouter();
 
   const handleEmailPress = () => {
-    Linking.openURL("mailto:support@MyOpticalWallet.com");
+    Linking.openURL("mailto:alamotte1956@gmail.com");
   };
 
   const handleWebsitePress = () => {
@@ -150,7 +150,7 @@ export default function PrivacyPolicyScreen() {
           If you have any questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us at:
         </Text>
         <TouchableOpacity onPress={handleEmailPress}>
-          <Text style={styles.contactLink}>support@MyOpticalWallet.com</Text>
+          <Text style={styles.contactLink}>alamotte1956@gmail.com</Text>
         </TouchableOpacity>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>My Optical Wallet</Text>
@@ -166,7 +166,7 @@ export default function PrivacyPolicyScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>© 2026 My Optical Wallet. All rights reserved.</Text>
           <TouchableOpacity onPress={handleEmailPress}>
-            <Text style={styles.footerLink}>support@MyOpticalWallet.com</Text>
+            <Text style={styles.footerLink}>alamotte1956@gmail.com</Text>
           </TouchableOpacity>
         </View>
 

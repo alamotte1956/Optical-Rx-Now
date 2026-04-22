@@ -47,7 +47,7 @@ export default function FeedbackScreen() {
     if (isAvailable) {
       try {
         const result = await MailComposer.composeAsync({
-          recipients: ["support@OpticalRxNow.com"],
+          recipients: ["alamotte1956@gmail.com"],
           subject: subject,
           body: body,
         });
@@ -65,7 +65,7 @@ export default function FeedbackScreen() {
       }
     } else {
       // Fallback to mailto link
-      const mailtoUrl = `mailto:support@OpticalRxNow.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const mailtoUrl = `mailto:alamotte1956@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       const canOpen = await Linking.canOpenURL(mailtoUrl);
 
       if (canOpen) {
@@ -76,7 +76,7 @@ export default function FeedbackScreen() {
       } else {
         Alert.alert(
           "No Email App",
-          "Please email us directly at support@OpticalRxNow.com",
+          "Please email us directly at alamotte1956@gmail.com",
           [{ text: "OK" }]
         );
       }
