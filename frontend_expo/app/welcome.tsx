@@ -157,7 +157,7 @@ export default function WelcomeScreen() {
             ) : (
               <>
                 <Text style={styles.buttonText}>
-                  {stats.familyMembers > 0 ? "Open My Vault" : "Get Started"}
+                  {stats.familyMembers > 0 ? "Open My Wallet" : "Get Started"}
                 </Text>
                 <Ionicons name="arrow-forward" size={20} color="#fff" />
               </>
