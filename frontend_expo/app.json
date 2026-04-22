@@ -73,8 +73,7 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_APP_BADGE"
-      ],
-      "edgeToEdgeEnabled": true
+      ]
     },
     "web": {
       "bundler": "metro",
