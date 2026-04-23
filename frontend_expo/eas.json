@@ -28,7 +28,7 @@
       },
       "ios": {
         "simulator": false,
-        "image": "macos-sequoia-15.3-xcode-16.2"
+        "image": "macos-tahoe"
       },
       "android": {
         "buildType": "apk"
@@ -41,7 +41,7 @@
       },
       "ios": {
         "autoIncrement": "buildNumber",
-        "image": "macos-sequoia-15.3-xcode-16.2"
+        "image": "macos-tahoe"
       },
       "android": {
         "autoIncrement": "versionCode"
