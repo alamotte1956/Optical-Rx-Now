@@ -152,7 +152,7 @@ export default function WelcomeScreen() {
           </Pressable>
 
           {/* App Name */}
-          <Text style={[styles.appName, { color: theme.text }]}>My Optical Wallet</Text>
+          <Text style={[styles.appName, { color: "#4a9eff" }]}>My Optical Wallet</Text>
 
           {/* Title */}
           <Text style={styles.subtitle}>
