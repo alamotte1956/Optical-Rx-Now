@@ -124,12 +124,13 @@ async def get_affiliates():
 async def create_affiliate(affiliate: AffiliateModel):
     data = affiliate.model_dump()
     data["updated_at"] = datetime.now(timezone.utc).isoformat()
-    await db.affiliates.insert_one(data)
+    result = await db.affiliates.insert_one(data)
+    data["_id"] = str(result.inserted_id)
     return {"status": "created", "affiliate": data}
 
 @app.put("/api/affiliates/{affiliate_id}")
 async def update_affiliate(affiliate_id: str, affiliate: AffiliateModel):
-    data = affiliate.model_dump()
+    data = affiliate.model_dump(exclude={"affiliate_id"})
     data["updated_at"] = datetime.now(timezone.utc).isoformat()
     result = await db.affiliates.update_one(
         {"affiliate_id": affiliate_id},
@@ -189,12 +190,13 @@ async def get_banners():
 @app.post("/api/banners")
 async def create_banner(banner: BannerModel):
     data = banner.model_dump()
-    await db.banners.insert_one(data)
+    result = await db.banners.insert_one(data)
+    data["_id"] = str(result.inserted_id)
     return {"status": "created", "banner": data}
 
 @app.put("/api/banners/{banner_id}")
 async def update_banner(banner_id: str, banner: BannerModel):
-    data = banner.model_dump()
+    data = banner.model_dump(exclude={"banner_id"})
     result = await db.banners.update_one(
         {"banner_id": banner_id},
         {"$set": data}
@@ -285,7 +287,8 @@ async def get_invoices():
 @app.post("/api/invoices")
 async def create_invoice(invoice: InvoiceModel):
     data = invoice.model_dump()
-    await db.invoices.insert_one(data)
+    result = await db.invoices.insert_one(data)
+    data["_id"] = str(result.inserted_id)
     return {"status": "created", "invoice": data}
 
 @app.put("/api/invoices/{invoice_id}")
