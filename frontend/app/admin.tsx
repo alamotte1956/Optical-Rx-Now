@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -135,6 +135,7 @@ export default function AdminScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   // Data state
   const [analytics, setAnalytics] = useState<AnalyticsDashboard | null>(null);
@@ -195,6 +196,7 @@ export default function AdminScreen() {
       setAffiliatesList(affiliateData);
       setBannersList(bannerData);
       setInvoicesList(invoiceData);
+      setLastRefresh(new Date());
     } catch (error) {
       console.log("Error loading admin data:", error);
     } finally {
@@ -204,6 +206,17 @@ export default function AdminScreen() {
 
   useEffect(() => {
     loadAllData();
+  }, [loadAllData]);
+
+  // Real-time auto-refresh every 10 seconds
+  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    refreshIntervalRef.current = setInterval(() => {
+      loadAllData();
+    }, 10000);
+    return () => {
+      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+    };
   }, [loadAllData]);
 
   const onRefresh = useCallback(async () => {
