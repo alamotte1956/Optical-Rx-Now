@@ -13,7 +13,8 @@ Build a deployable mobile app (Android + iOS) for storing eyeglass and contact l
 
 ## Architecture
 - **Framework:** React Native (Expo SDK 53, RN 0.79.6)
-- **Storage:** 100% offline, AsyncStorage (no backend/database)
+- **Storage (Optical Documents):** 100% offline, AsyncStorage (local-only)
+- **Storage (Admin/Business):** FastAPI backend + MongoDB (for affiliates, banners, invoices, analytics)
 - **Build System:** EAS Build (cloud)
 - **Deployment:** Google Play Store + Apple App Store
 
@@ -54,6 +55,14 @@ Build a deployable mobile app (Android + iOS) for storing eyeglass and contact l
 - [x] Admin analytics links (App Store Connect + Play Console)
 - [x] Media permissions fully stripped
 - [x] Edge-to-edge and orientation warnings addressed
+- [x] Admin Panel connected to FastAPI backend with full CRUD for:
+  - Analytics Dashboard (app opens, shares, clicks, banner performance)
+  - Financial Overview (revenue, commission potential, invoice summary)
+  - Affiliate Management (create, edit, toggle, delete, seed defaults)
+  - Banner Management (create, edit, schedule, toggle, delete)
+  - Invoicing (create, edit status cycle, delete)
+  - App Management (store links)
+  - Data Management (clear data, reset verification)
 
 ## Upcoming Tasks
 - [ ] P0: Multi-language support (Spanish, French, Chinese Simplified) with auto-detect + manual override
