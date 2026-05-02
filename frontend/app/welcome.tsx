@@ -124,7 +124,7 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: "#b5aaad" }]}>
       {/* Share Button in Header */}
       <View style={styles.header}>
         <View style={styles.headerPlaceholder} />
@@ -136,6 +136,7 @@ export default function WelcomeScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {/* Logo - Long press for 2 seconds to access Admin */}
+          <View style={styles.logoArea}>
           <Pressable 
             style={({ pressed }) => [
               styles.logoContainer,
@@ -150,6 +151,10 @@ export default function WelcomeScreen() {
               resizeMode="contain"
             />
           </Pressable>
+          </View>
+
+          {/* Dark background from here down */}
+          <View style={styles.darkContent}>
 
           {/* App Name */}
           <Text style={styles.appName}>My Optical Wallet</Text>
@@ -299,6 +304,7 @@ export default function WelcomeScreen() {
 
           {/* Version Number */}
           <Text style={styles.versionText}>{t("version")} 2.0.1</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -316,6 +322,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
+    backgroundColor: "#b5aaad",
   },
   headerPlaceholder: {
     width: 44,
@@ -334,15 +341,35 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: isSmallDevice ? 16 : 24,
-    paddingTop: isSmallDevice ? 6 : 10,
+    paddingTop: 0,
     alignItems: "center",
+  },
+  logoArea: {
+    width: "100%",
+    backgroundColor: "#b5aaad",
+    alignItems: "center",
+    paddingTop: isSmallDevice ? 10 : 20,
+    paddingBottom: 0,
+    marginBottom: 0,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+  },
+  darkContent: {
+    flex: 1,
+    backgroundColor: "#0a1628",
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: isSmallDevice ? 16 : 24,
+    paddingTop: isSmallDevice ? 8 : 16,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   logoContainer: {
     width: isSmallDevice ? 240 : isLargeDevice ? 340 : 300,
     height: isSmallDevice ? 160 : isLargeDevice ? 240 : 200,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: isSmallDevice ? 8 : 12,
+    marginBottom: 0,
   },
   logoPressed: {
     opacity: 0.7,
