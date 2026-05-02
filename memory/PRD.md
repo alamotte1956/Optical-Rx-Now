@@ -1,65 +1,70 @@
-# PRD — My Optical Wallet Privacy-First Enhancement
+# My Optical Wallet - Product Requirements Document
 
 ## Original Problem Statement
-Enhance the existing app by keeping signed prescription photos local-only, simplifying patient records, and adding privacy-safe utility features without changing how GPS-based store discovery or affiliate links already work.
+Build a deployable mobile app (Android + iOS) for storing eyeglass and contact lens prescriptions offline on-device. The app must comply with Google Play and Apple App Store policies.
 
-Key requirements implemented from the brief:
-- Prescription photos stay local-only and are stored as photo-only records
-- Expiration date is mandatory for each prescription
-- Replace-only prescription flow with save confirmation before overwriting
-- Multi-person profiles
-- Optional PD per profile
-- Optional warranty photo per profile
-- Contact lens reminders stored locally per person
-- Privacy explainer screen
-- GPS-based store discovery preserved as a public/internet layer
-- Shop links kept visually separate from the private vault
+## App Identity
+- **Name:** My Optical Wallet
+- **Package (Android):** com.opticalrxnow.mobile.v1
+- **Bundle ID (iOS):** com.opticalrxnow.mobile.v1
+- **Owner:** alamotte1956
+- **Contact:** alamotte1956@gmail.com
+- **Website:** MyOpticalWallet.com
 
-User choices applied:
-- Reminder experience: in-app reminder center only
-- Existing data: preserve if easy, otherwise prioritize privacy-first model
-- Visual direction: light polish while keeping the current feel
+## Architecture
+- **Framework:** React Native (Expo SDK 53, RN 0.79.6)
+- **Storage:** 100% offline, AsyncStorage (no backend/database)
+- **Build System:** EAS Build (cloud)
+- **Deployment:** Google Play Store + Apple App Store
 
-## Architecture Decisions
-- Frontend remains React and is now the primary privacy vault layer
-- Private data is stored locally in IndexedDB via `frontend/src/lib/vault-storage.js`
-- Frontend state is centralized in `frontend/src/context/VaultContext.jsx`
-- Public store discovery uses browser GPS plus FastAPI `/api/public/optical-stores`
-- Store finder keeps private vault data off the backend; only public coordinates are used for lookup
-- Shop links are rendered separately as external links with no prescription data transfer
-- UI follows earthy light polish design guidance with separate routes for Vault, Reminders, Stores, Shop, and Privacy
+## Core Features (Implemented)
+- Store eyeglass and contact lens prescription photos
+- Family member management
+- Prescription expiration tracking & reminders
+- Photo capture via camera or gallery (Android Photo Picker)
+- Age verification gate
+- Privacy Policy & Terms of Service (in-app)
+- Admin area (long-press logo access)
+- Share app functionality
+- Find Retail Optical Stores
+- Responsive layout for all device sizes (iPhone SE through Max, all Android)
 
-## What’s Implemented
-- Dashboard with profile cards, current prescription visibility, expiration states, and utility shortcuts
-- Add/edit person profiles with optional PD
-- Profile page with current prescription card, optional warranty photo, and reminder summary
-- Replace-only prescription dialog with required expiration date and overwrite confirmation
-- Local-only reminder center with daily/biweekly/monthly/custom cadence plus expiration reminder timing
-- Privacy screen separating local-only data from internet-powered features
-- Shop page for external optical partner links
-- Backend optical store API with safe maps fallback and non-blocking threaded fetch path
-- Data-testid coverage added across key interactive and critical user-facing UI elements
-- Regression coverage added in `/app/backend/tests/test_public_and_status_api.py`
+## Compliance
+- No broad media permissions (READ_MEDIA_IMAGES blocked)
+- NSPrivacyAccessedAPITypes declared for iOS
+- Health Apps Declaration: "No health features"
+- App Category: Productivity/Tools
+- Privacy Policy URL: MyOpticalWallet.com/privacy
+- Xcode 26.2 build image for iOS 26 SDK compliance
 
-## Prioritized Backlog
-### P0
-- Add local cleanup/reset controls for users who want to remove all device-stored vault data
-- Improve store finder resiliency with additional public provider support and clearer no-result messaging
+## Current Version
+- **Version:** 1.0.2
+- **Android versionCode:** auto-increment (currently ~9+)
+- **iOS buildNumber:** auto-increment
+- **EAS iOS Image:** macos-sequoia-15.6-xcode-26.2
 
-### P1
-- Add profile deletion flow with confirmation
-- Improve image compression and storage tuning for larger prescription/warranty photos
-- Add richer expiration warning summaries on the dashboard
+## What's Been Accomplished
+- [x] Full app functionality (offline prescription storage)
+- [x] Google Play Store approved and published
+- [x] Apple App Store submitted
+- [x] All tester feedback implemented (Privacy, ToS, Tooltips, Onboarding)
+- [x] Name change to "My Optical Wallet"
+- [x] New logo applied
+- [x] Responsive formatting for all devices
+- [x] Admin analytics links (App Store Connect + Play Console)
+- [x] Media permissions fully stripped
+- [x] Edge-to-edge and orientation warnings addressed
 
-### P2
-- Add optional device export/import flow for migrations
-- Add more detailed reminder insights without introducing prescription history
-- Add accessibility refinements and expanded visual regression coverage
+## Upcoming Tasks
+- [ ] P0: Multi-language support (Spanish, French, Chinese Simplified) with auto-detect + manual override
+- [ ] P1: Verify Google Play production rollout
+- [ ] P1: Verify Apple App Store review approval
 
-## Next Tasks
-1. Add vault reset/delete controls and profile removal flow
-2. Improve public store search reliability beyond the current maps fallback path
-3. Add smarter dashboard surfacing for upcoming expiration and reminder due states
-
-## Latest Update
-- Added an “Advertise With Us” email CTA in the sponsor-ready placement using mailto:alamotte1956@gmail.com so advertisers have a direct contact path where the ad slot is showcased
+## Backlog
+- [ ] Backup & Restore (Google Drive/iCloud)
+- [ ] Prescription Photo Zoom & Crop
+- [ ] Export all prescriptions to PDF
+- [ ] Search & Filter prescriptions
+- [ ] Expiration Countdown Widget
+- [ ] Dark/Light Mode Toggle
+- [ ] Share Prescription with Doctor

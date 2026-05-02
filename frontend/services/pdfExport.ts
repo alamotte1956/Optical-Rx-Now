@@ -1,0 +1,177 @@
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import { Prescription, FamilyMember, getFamilyMembers, getPrescriptions } from "./localStorage";
+
+export async function exportAllToPDF(): Promise<void> {
+  const members = await getFamilyMembers();
+  const prescriptions = await getPrescriptions();
+
+  const html = generatePDFHTML(members, prescriptions);
+
+  const { uri } = await Print.printToFileAsync({ html });
+
+  if (await Sharing.isAvailableAsync()) {
+    await Sharing.shareAsync(uri, {
+      mimeType: "application/pdf",
+      dialogTitle: "Share Prescriptions PDF",
+      UTI: "com.adobe.pdf",
+    });
+  }
+}
+
+export async function exportMemberToPDF(memberId: string): Promise<void> {
+  const members = await getFamilyMembers();
+  const prescriptions = await getPrescriptions();
+
+  const member = members.find((m) => m.id === memberId);
+  if (!member) return;
+
+  const memberRx = prescriptions.filter((rx) => rx.familyMemberId === memberId);
+
+  const html = generatePDFHTML([member], memberRx);
+
+  const { uri } = await Print.printToFileAsync({ html });
+
+  if (await Sharing.isAvailableAsync()) {
+    await Sharing.shareAsync(uri, {
+      mimeType: "application/pdf",
+      dialogTitle: `Share ${member.name}'s Prescriptions`,
+      UTI: "com.adobe.pdf",
+    });
+  }
+}
+
+function generatePDFHTML(members: FamilyMember[], prescriptions: Prescription[]): string {
+  const today = new Date().toLocaleDateString();
+
+  const memberSections = members.map((member) => {
+    const memberRx = prescriptions.filter((rx) => rx.familyMemberId === member.id);
+
+    const rxRows = memberRx.map((rx) => {
+      const type = rx.rxType === "eyeglass" ? "Eyeglasses" : "Contact Lenses";
+      const added = new Date(rx.dateTaken).toLocaleDateString();
+      const expiry = rx.expiryDate ? new Date(rx.expiryDate).toLocaleDateString() : "Not set";
+      const isExpired = rx.expiryDate && new Date(rx.expiryDate) < new Date();
+      const status = isExpired ? '<span style="color: #e53e3e;">Expired</span>' : '<span style="color: #38a169;">Active</span>';
+
+      return `
+        <tr>
+          <td>${type}</td>
+          <td>${added}</td>
+          <td>${expiry}</td>
+          <td>${status}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <div class="member-section">
+        <h2>${member.name}</h2>
+        <p class="relationship">${member.relationship || "Family Member"}</p>
+        ${memberRx.length > 0 ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Added</th>
+                <th>Expires</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rxRows}
+            </tbody>
+          </table>
+        ` : '<p class="no-rx">No prescriptions on file</p>'}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          padding: 40px;
+          color: #333;
+          line-height: 1.6;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 40px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #4a9eff;
+        }
+        .header h1 {
+          color: #1a202c;
+          font-size: 28px;
+          margin: 0;
+        }
+        .header p {
+          color: #718096;
+          margin: 8px 0 0;
+          font-size: 14px;
+        }
+        .member-section {
+          margin-bottom: 30px;
+          padding: 20px;
+          background: #f7fafc;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+        }
+        .member-section h2 {
+          color: #2d3748;
+          margin: 0 0 4px;
+          font-size: 20px;
+        }
+        .relationship {
+          color: #718096;
+          margin: 0 0 16px;
+          font-size: 14px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          padding: 10px 12px;
+          text-align: left;
+          border-bottom: 1px solid #e2e8f0;
+          font-size: 14px;
+        }
+        th {
+          background: #edf2f7;
+          font-weight: 600;
+          color: #4a5568;
+        }
+        .no-rx {
+          color: #a0aec0;
+          font-style: italic;
+        }
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e2e8f0;
+          text-align: center;
+          color: #a0aec0;
+          font-size: 12px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>My Optical Wallet</h1>
+        <p>Prescription Records Report - Generated ${today}</p>
+      </div>
+      ${memberSections}
+      <div class="footer">
+        <p>Generated by My Optical Wallet | ${today}</p>
+        <p>This document is for personal records only and does not constitute medical advice.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}

@@ -1,0 +1,54 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "node": "20.18.0",
+      "cache": {
+        "key": "v3-fresh-build",
+        "cacheDefaultPaths": false,
+        "paths": []
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
+      "ios": {
+        "simulator": false,
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+      },
+      "ios": {
+        "autoIncrement": "buildNumber",
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      },
+      "android": {
+        "autoIncrement": "versionCode"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
