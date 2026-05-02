@@ -61,11 +61,15 @@ const DEFAULT_AFFILIATES_SEED: Partial<Affiliate>[] = [
   { name: "Warby Parker", url: "https://www.warbyparker.com", commission: 10, is_active: true },
   { name: "1-800 Contacts", url: "https://www.1800contacts.com", commission: 9, is_active: true },
   { name: "Target Optical", url: "https://www.targetoptical.com", commission: 8, is_active: true },
+  { name: "LensCrafters", url: "https://www.lenscrafters.com", commission: 8, is_active: true },
+  { name: "Pearle Vision", url: "https://www.pearlevision.com", commission: 8, is_active: true },
   { name: "Eyeconic", url: "https://www.eyeconic.com", commission: 8, is_active: true },
   { name: "Coastal", url: "https://www.coastal.com", commission: 8, is_active: true },
   { name: "SportRx", url: "https://www.sportrx.com", commission: 7, is_active: true },
   { name: "FramesDirect", url: "https://www.framesdirect.com", commission: 7, is_active: true },
+  { name: "Visionworks", url: "https://www.visionworks.com", commission: 7, is_active: true },
   { name: "Sam's Club Optical", url: "https://www.samsclub.com/b/optical/1990005", commission: 5, is_active: true },
+  { name: "Walmart Vision Center", url: "https://www.walmart.com/cp/vision-centers/1078944", commission: 5, is_active: true },
   { name: "Costco Optical", url: "https://www.costco.com/optical.html", commission: 4, is_active: true },
   { name: "America's Best", url: "https://www.americasbest.com", commission: 4, is_active: true },
 ];
@@ -294,7 +298,7 @@ export default function AdminScreen() {
   };
 
   const seedAffiliates = async () => {
-    Alert.alert("Seed Affiliates", "This will add 18 default optical affiliate partners to the database.", [
+    Alert.alert("Seed Affiliates", "This will add 22 default optical affiliate partners to the database, sorted by commission rate (highest first).", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Seed",
@@ -304,7 +308,7 @@ export default function AdminScreen() {
               await createAffiliate(aff);
             }
             await loadAllData();
-            Alert.alert("Success", "18 affiliates seeded successfully!");
+            Alert.alert("Success", "22 affiliates seeded successfully!");
           } catch (error: any) {
             Alert.alert("Error", error.message);
           }
@@ -720,7 +724,7 @@ export default function AdminScreen() {
             <View style={styles.emptyCard}>
               <Ionicons name="link-outline" size={40} color="#3a4d63" />
               <Text style={styles.emptyCardText}>No affiliates yet</Text>
-              <Text style={styles.emptyCardSub}>Tap "Seed Defaults" to add 18 optical affiliate partners</Text>
+              <Text style={styles.emptyCardSub}>Tap "Seed Defaults" to add 22 optical affiliate partners sorted by commission</Text>
             </View>
           ) : (
             affiliates.map((aff) => (
