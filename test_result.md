@@ -234,6 +234,19 @@ backend:
           agent: "testing"
           comment: "✅ TESTED: POST /api/invoices/auto-generate returns {status: 'success', invoices_created: N}. Correctly creates invoices only for affiliates with click_count > 0. Tested with 2 affiliates with clicks (50 and 30) and 1 with 0 clicks - correctly created 2 invoices. Invoices verified in database with correct line_items, total_amount calculation (clicks * commission/100), and 30-day due dates."
 
+
+  - task: "Platform tracking in analytics"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED (15/15 tests passing): Platform tracking feature fully functional. (1) POST /api/analytics/event accepts 'platform' field (android, ios, web) and logs events correctly. (2) GET /api/analytics/dashboard returns 'platform_breakdown' with platform counts and 'platform_events' with events grouped by platform. (3) Backward compatibility verified - events without platform field default to 'unknown'. (4) All standard dashboard keys (events, summary, affiliate_stats, banner_stats) still present. (5) Financial dashboard regression test passed. Platform data correctly indexed and aggregated."
+
 frontend:
   - task: "Admin panel with all sections connected to backend"
     implemented: true
@@ -278,3 +291,5 @@ agent_communication:
       message: "✅ ALL BACKEND TESTS PASSING (19/19). Tested all endpoints: Health check, Affiliate CRUD, Banner CRUD, Invoice CRUD, Analytics (POST events + GET dashboard), Financial dashboard, and Affiliate redirect with click tracking. Fixed 2 bugs: (1) MongoDB ObjectId serialization in POST endpoints - added str() conversion for inserted_id, (2) ID fields being overwritten in PUT endpoints - excluded ID fields from model_dump(). All backend APIs are fully functional and ready for frontend integration."
     - agent: "testing"
       message: "✅ NEW ENDPOINTS TESTED (9/9 tests passing). Verified 3 existing endpoints still working: Health check, Analytics dashboard, Financial dashboard. Tested 2 NEW endpoints: (1) GET /api/reports/weekly - Returns valid PDF with correct Content-Type, %PDF magic bytes, 2829 bytes, includes executive summary, financial overview, affiliate/banner performance tables. (2) POST /api/invoices/auto-generate - Returns {status: 'success', invoices_created: N}, correctly creates invoices only for affiliates with clicks > 0, tested with 2 affiliates (50 & 30 clicks) + 1 with 0 clicks = 2 invoices created as expected. All backend APIs fully functional."
+    - agent: "testing"
+      message: "✅ PLATFORM TRACKING FEATURE TESTED (15/15 tests passing). New feature fully functional: (1) POST /api/analytics/event now accepts 'platform' field (android, ios, web) and logs events correctly with platform data. (2) GET /api/analytics/dashboard returns new keys 'platform_breakdown' (platform counts) and 'platform_events' (events grouped by platform). (3) Backward compatibility verified - events without platform field default to 'unknown' platform. (4) All existing dashboard keys (events, summary, affiliate_stats, banner_stats) still present. (5) Financial dashboard regression test passed. Platform tracking implementation complete and working as expected."

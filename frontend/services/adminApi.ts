@@ -180,6 +180,8 @@ export const autoGenerateInvoices = async (): Promise<any> => {
 
 export interface AnalyticsDashboard {
   events: Record<string, number>;
+  platform_breakdown: Record<string, number>;
+  platform_events: Record<string, Record<string, number>>;
   affiliate_stats: {
     total_clicks: number;
     total_affiliates: number;
@@ -221,9 +223,14 @@ export const getFinancialDashboard = async (): Promise<FinancialDashboard> => {
 };
 
 export const logAnalyticsEvent = async (eventType: string, metadata?: Record<string, any>): Promise<any> => {
+  const platformName = Platform.OS; // 'ios', 'android', or 'web'
   return apiCall("/api/analytics/event", {
     method: "POST",
-    body: JSON.stringify({ event_type: eventType, metadata }),
+    body: JSON.stringify({
+      event_type: eventType,
+      platform: platformName,
+      metadata: { ...metadata, platform: platformName },
+    }),
   });
 };
 

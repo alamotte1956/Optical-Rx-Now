@@ -40,6 +40,7 @@ async def startup_db():
     await db.banners.create_index("is_active")
     await db.analytics.create_index("event_type")
     await db.analytics.create_index("created_at")
+    await db.analytics.create_index("platform")
 
 @app.on_event("shutdown")
 async def shutdown_db():
@@ -73,6 +74,7 @@ class BannerModel(BaseModel):
 
 class AnalyticsEvent(BaseModel):
     event_type: str  # app_open, share_click, banner_view, banner_click, affiliate_click
+    platform: Optional[str] = None  # android, ios, web
     metadata: Optional[dict] = None
 
 class InvoiceModel(BaseModel):
@@ -221,6 +223,7 @@ async def log_event(event: AnalyticsEvent):
     """Log anonymous aggregate analytics event"""
     data = {
         "event_type": event.event_type,
+        "platform": (event.platform or event.metadata.get("platform", "unknown") if event.metadata else "unknown").lower(),
         "metadata": event.metadata or {},
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -236,6 +239,29 @@ async def get_analytics_dashboard():
     totals = await db.analytics.aggregate(pipeline_totals).to_list(20)
     metrics = {t["_id"]: t["count"] for t in totals}
     
+    # Platform breakdown
+    pipeline_platforms = [
+        {"$group": {"_id": "$platform", "count": {"$sum": 1}}}
+    ]
+    platform_totals = await db.analytics.aggregate(pipeline_platforms).to_list(10)
+    platform_counts = {}
+    for p in platform_totals:
+        key = (p["_id"] or "unknown").lower()
+        platform_counts[key] = platform_counts.get(key, 0) + p["count"]
+    
+    # Platform + event type cross-tabulation
+    pipeline_platform_events = [
+        {"$group": {"_id": {"platform": "$platform", "event_type": "$event_type"}, "count": {"$sum": 1}}}
+    ]
+    platform_event_totals = await db.analytics.aggregate(pipeline_platform_events).to_list(100)
+    platform_events = {}
+    for pe in platform_event_totals:
+        plat = (pe["_id"].get("platform") or "unknown").lower()
+        evt = pe["_id"].get("event_type", "unknown")
+        if plat not in platform_events:
+            platform_events[plat] = {}
+        platform_events[plat][evt] = pe["count"]
+    
     # Get affiliate click stats
     affiliates = await db.affiliates.find({}).to_list(100)
     total_clicks = sum(a.get("click_count", 0) for a in affiliates)
@@ -248,6 +274,8 @@ async def get_analytics_dashboard():
     
     return {
         "events": metrics,
+        "platform_breakdown": platform_counts,
+        "platform_events": platform_events,
         "affiliate_stats": {
             "total_clicks": total_clicks,
             "total_affiliates": len(affiliates),

@@ -641,6 +641,91 @@ export default function AdminScreen() {
                 <Ionicons name="refresh" size={16} color="#4a9eff" />
                 <Text style={styles.refreshText}>Refresh Data</Text>
               </TouchableOpacity>
+              {/* Platform Breakdown */}
+              {analytics.platform_breakdown && Object.keys(analytics.platform_breakdown).length > 0 && (
+                <>
+                  <Text style={styles.subsectionLabel}>Platform Breakdown</Text>
+                  <View style={styles.platformContainer}>
+                    {(() => {
+                      const platformData = analytics.platform_breakdown;
+                      const total = Object.values(platformData).reduce((a, b) => a + b, 0);
+                      const platformConfig: Record<string, { icon: string; color: string; label: string }> = {
+                        android: { icon: "logo-android", color: "#3DDC84", label: "Android" },
+                        ios: { icon: "logo-apple", color: "#fff", label: "iOS" },
+                        web: { icon: "globe-outline", color: "#4a9eff", label: "Web" },
+                        unknown: { icon: "help-circle-outline", color: "#8899a6", label: "Unknown" },
+                      };
+                      return Object.entries(platformData)
+                        .sort(([, a], [, b]) => b - a)
+                        .map(([platform, count]) => {
+                          const cfg = platformConfig[platform] || platformConfig.unknown;
+                          const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0";
+                          return (
+                            <View key={platform} style={styles.platformCard}>
+                              <View style={styles.platformIconRow}>
+                                <Ionicons name={cfg.icon as any} size={28} color={cfg.color} />
+                                <Text style={[styles.platformCount, { color: cfg.color }]}>{count}</Text>
+                              </View>
+                              <Text style={styles.platformLabel}>{cfg.label}</Text>
+                              {/* Progress bar */}
+                              <View style={styles.platformBarBg}>
+                                <View
+                                  style={[
+                                    styles.platformBarFill,
+                                    {
+                                      backgroundColor: cfg.color,
+                                      width: `${total > 0 ? (count / total) * 100 : 0}%`,
+                                    },
+                                  ]}
+                                />
+                              </View>
+                              <Text style={styles.platformPct}>{pct}%</Text>
+                            </View>
+                          );
+                        });
+                    })()}
+                  </View>
+                  {/* Platform detail: events by platform */}
+                  {analytics.platform_events && Object.keys(analytics.platform_events).length > 0 && (
+                    <View style={styles.platformDetailSection}>
+                      <Text style={[styles.subsectionLabel, { marginTop: 8 }]}>Events by Platform</Text>
+                      {Object.entries(analytics.platform_events)
+                        .sort(([, a], [, b]) => {
+                          const sumA = Object.values(a).reduce((x, y) => x + y, 0);
+                          const sumB = Object.values(b).reduce((x, y) => x + y, 0);
+                          return sumB - sumA;
+                        })
+                        .map(([platform, events]) => {
+                          const cfg: Record<string, { icon: string; color: string; label: string }> = {
+                            android: { icon: "logo-android", color: "#3DDC84", label: "Android" },
+                            ios: { icon: "logo-apple", color: "#fff", label: "iOS" },
+                            web: { icon: "globe-outline", color: "#4a9eff", label: "Web" },
+                            unknown: { icon: "help-circle-outline", color: "#8899a6", label: "Unknown" },
+                          };
+                          const c = cfg[platform] || cfg.unknown;
+                          return (
+                            <View key={platform} style={styles.platformEventCard}>
+                              <View style={styles.platformEventHeader}>
+                                <Ionicons name={c.icon as any} size={20} color={c.color} />
+                                <Text style={[styles.platformEventTitle, { color: c.color }]}>{c.label}</Text>
+                              </View>
+                              {Object.entries(events)
+                                .sort(([, a], [, b]) => b - a)
+                                .map(([evt, cnt]) => (
+                                  <View key={evt} style={styles.platformEventRow}>
+                                    <Text style={styles.platformEventLabel}>
+                                      {evt.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                                    </Text>
+                                    <Text style={styles.platformEventValue}>{cnt}</Text>
+                                  </View>
+                                ))}
+                            </View>
+                          );
+                        })}
+                    </View>
+                  )}
+                </>
+              )}
               <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport}>
                 <Ionicons name="document-text" size={18} color="#fff" />
                 <Text style={styles.addButtonText}>Download Weekly PDF Report</Text>
@@ -1185,6 +1270,94 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   refreshText: { fontSize: 13, color: "#4a9eff", fontWeight: "600" },
+
+  // Platform Breakdown
+  platformContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 16,
+  },
+  platformCard: {
+    flex: 1,
+    minWidth: "28%",
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+    gap: 4,
+  },
+  platformIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  platformCount: {
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  platformLabel: {
+    fontSize: 12,
+    color: "#8899a6",
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  platformBarBg: {
+    width: "100%",
+    height: 4,
+    backgroundColor: "#0f1d2f",
+    borderRadius: 2,
+    marginTop: 6,
+    overflow: "hidden",
+  },
+  platformBarFill: {
+    height: 4,
+    borderRadius: 2,
+  },
+  platformPct: {
+    fontSize: 11,
+    color: "#6b7c8f",
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  platformDetailSection: {
+    marginBottom: 12,
+  },
+  platformEventCard: {
+    backgroundColor: "#1a2d45",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+  },
+  platformEventHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#2a3d55",
+    paddingBottom: 8,
+  },
+  platformEventTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  platformEventRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#0f1d2f",
+  },
+  platformEventLabel: {
+    fontSize: 13,
+    color: "#8899a6",
+  },
+  platformEventValue: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#fff",
+  },
 
   // Section Actions
   sectionActions: {
