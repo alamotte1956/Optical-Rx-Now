@@ -151,6 +151,9 @@ export default function WelcomeScreen() {
             />
           </Pressable>
 
+          {/* App Name */}
+          <Text style={styles.appName}>My Optical Wallet</Text>
+
           {/* Title */}
           <Text style={styles.subtitle}>
             {t("welcome_subtitle")}
@@ -355,6 +358,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: isSmallDevice ? 12 : 16,
     lineHeight: moderateScale(22),
+  },
+  appName: {
+    fontSize: moderateScale(22),
+    fontWeight: "700",
+    color: "#ffffff",
+    textAlign: "center",
+    marginBottom: isSmallDevice ? 4 : 8,
+    letterSpacing: 0.5,
   },
   button: {
     flexDirection: "row",
