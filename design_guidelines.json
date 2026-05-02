@@ -1,0 +1,136 @@
+{
+  "theme": "light",
+  "archetype": "Organic & Earthy",
+  "reasoning": "Users storing medical data (prescriptions) need to feel a sense of calm, stability, and privacy. A dark 'tech' theme feels too cold and potentially insecure. An earthy, tactile light theme with bone-white and deep moss green grounds the experience, making the digital vault feel as reliable as a physical file cabinet.",
+  "typography": {
+    "headings": {
+      "family": "Outfit, sans-serif",
+      "weights": ["400", "500", "700"],
+      "usage": "Use tight tracking (tracking-tight) for large sizes. Max text-4xl for main headers.",
+      "install_command": "@fontsource/outfit"
+    },
+    "body": {
+      "family": "IBM Plex Sans, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Use for all data display, expiration dates, and UI labels. Highly legible.",
+      "install_command": "@fontsource/ibm-plex-sans"
+    },
+    "rules": {
+      "overline": "Uppercase, tracking-[0.2em], text-xs for labels like 'EXPIRATION DATE', 'WARRANTY PHOTO'",
+      "hierarchy": "H1 max text-4xl, H2 text-2xl. Don't oversize."
+    }
+  },
+  "colors": {
+    "background": {
+      "base": "#F9F6F0",
+      "surface": "#FFFFFF",
+      "surface_secondary": "#F0EDE5",
+      "overlay": "rgba(28, 42, 36, 0.4)"
+    },
+    "text": {
+      "primary": "#1C2A24",
+      "secondary": "#5C6B64",
+      "tertiary": "#8F9D96",
+      "inverse": "#FFFFFF"
+    },
+    "brand": {
+      "primary": "#4A6B5D",
+      "primary_hover": "#3A554A",
+      "accent": "#D47A6A",
+      "accent_hover": "#BF6556"
+    },
+    "status": {
+      "success": "#4A6B5D",
+      "warning": "#E8A365",
+      "error": "#D47A6A",
+      "expired": "#D47A6A",
+      "active": "#4A6B5D"
+    },
+    "border": {
+      "default": "#E5E0D8",
+      "focus": "#4A6B5D"
+    }
+  },
+  "layout_and_spacing": {
+    "container": "max-w-md mx-auto min-h-screen bg-[#F9F6F0] relative overflow-hidden",
+    "bento_grid": "grid grid-cols-1 gap-4 w-full px-4",
+    "cards": "bg-white rounded-3xl p-6 border border-[#E5E0D8] shadow-sm transition-all duration-200",
+    "prescription_card": "relative rounded-2xl overflow-hidden bg-[#F0EDE5] border border-[#E5E0D8] aspect-[4/3] flex flex-col justify-end p-4",
+    "padding_scale": {
+      "section": "py-8",
+      "element": "p-4 md:p-6"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#4A6B5D] text-white rounded-full py-4 px-6 font-medium tracking-wide transition-all hover:bg-[#3A554A] hover:shadow-md w-full active:scale-[0.98]",
+      "secondary": "bg-white text-[#1C2A24] border border-[#E5E0D8] rounded-full py-4 px-6 font-medium transition-all hover:bg-[#F9F6F0] w-full active:scale-[0.98]",
+      "danger": "bg-[#D47A6A]/10 text-[#D47A6A] border border-[#D47A6A]/20 rounded-full py-4 px-6 font-medium transition-all hover:bg-[#D47A6A]/20 w-full"
+    },
+    "inputs": {
+      "text": "bg-transparent border-b border-[#E5E0D8] py-3 text-lg focus:border-[#4A6B5D] focus:outline-none transition-colors rounded-none placeholder:text-[#8F9D96]",
+      "file_upload": "border-2 border-dashed border-[#E5E0D8] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 bg-[#F9F6F0]/50 hover:bg-[#F0EDE5] transition-colors cursor-pointer"
+    },
+    "modals": {
+      "overlay": "backdrop-blur-sm bg-[#1C2A24]/40 fixed inset-0 z-50",
+      "content": "bg-white rounded-t-3xl md:rounded-3xl p-6 md:p-8 fixed bottom-0 md:bottom-auto md:top-1/2 left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 max-w-md w-full border-t border-[#E5E0D8] shadow-2xl"
+    },
+    "icons": {
+      "library": "@phosphor-icons/react",
+      "weight": "duotone"
+    }
+  },
+  "motion": {
+    "page_transition": "framer-motion: initial={{ opacity: 0, y: 10 }}, animate={{ opacity: 1, y: 0 }}, exit={{ opacity: 0, y: -10 }}",
+    "list_stagger": "framer-motion: variants with staggerChildren: 0.1",
+    "button_tap": "whileTap={{ scale: 0.98 }}"
+  },
+  "page_specific_rules": {
+    "dashboard": "Display family profiles as horizontal scrolling bento cards or a clean vertical list. Each profile must immediately show if a prescription is ACTIVE (green dot) or EXPIRED (red dot).",
+    "person_profile": "Minimalist header with name and avatar. Below: The main 'Current Prescription' card. Use a strong visual separation between the Prescription (Vault) and the Shopping links (Internet).",
+    "prescription_replace_flow": "CRITICAL: Do not show 'History'. When tapping the prescription photo, open a full-screen or large modal to view it. To update, provide a 'Replace Prescription' button. Show a clear warning: 'This will overwrite your current prescription photo.'",
+    "reminders": "Use Shadcn Tabs or simple toggles for Contact Lens tracking (Daily/Bi-weekly/Monthly). Keep it strictly local.",
+    "privacy_screen": "Use a clear, typographic explainer. Left-aligned, tight tracking headers. Split into two columns or clear lists: 'Stored on Device (Secure)' vs 'Uses Internet (GPS/Shopping)'."
+  },
+  "accessibility": {
+    "contrast": "Ensure #1C2A24 text against #F9F6F0 meets 4.5:1 ratio. Ensure #4A6B5D buttons have white text.",
+    "data_testid_rules": "All interactive elements MUST have role-based kebab-case data-testid. Examples: data-testid='profile-card-john', data-testid='replace-prescription-button', data-testid='expiration-date-input', data-testid='add-profile-button', data-testid='save-prescription-confirm-button'."
+  },
+  "media_urls": {
+    "family_avatars": [
+      {
+        "url": "https://images.unsplash.com/photo-1609253932702-796cbf3d3171?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwzfHxmYW1pbHklMjBwb3J0cmFpdHMlMjBkaXZlcnNlfGVufDB8fHx8MTc3NzU1NzQ1OXww&ixlib=rb-4.1.0&q=85",
+        "description": "Avatar placeholder 1",
+        "category": "avatars"
+      },
+      {
+        "url": "https://images.pexels.com/photos/8525000/pexels-photo-8525000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Avatar placeholder 2",
+        "category": "avatars"
+      }
+    ],
+    "eyeglasses_warranty": [
+      {
+        "url": "https://images.unsplash.com/photo-1595505345098-59eae728c402?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHw0fHxleWVnbGFzc2VzJTIwZmxhdGxheXxlbnwwfHx8fDE3Nzc1NTc0NTl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Placeholder for warranty or eyeglasses",
+        "category": "products"
+      }
+    ],
+    "privacy_hero": [
+      {
+        "url": "https://images.unsplash.com/photo-1652404796149-b63ebbfe61aa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxmYW1pbHklMjBwb3J0cmFpdHMlMjBkaXZlcnNlfGVufDB8fHx8MTc3NzU1NzQ1OXww&ixlib=rb-4.1.0&q=85",
+        "description": "Family portrait for marketing or onboarding",
+        "category": "hero"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette. Do not invent gradients.",
+    "The UI is a Medical/Privacy Vault. Elements should feel 'tactile' (subtle borders, large tap areas) and non-clinical.",
+    "Do NOT use 'Inter' for headings. Use Outfit (Headings) and IBM Plex Sans (Body).",
+    "Adhere strictly to the 'Replace-Only' flow. Never implement a history array for prescriptions.",
+    "Ensure 'Current Prescription' card is heavily prioritized visually over GPS/Shopping buttons.",
+    "Ensure all buttons, tabs, and form elements include data-testid properties.",
+    "Use pure Tailwind CSS for layout logic and heavily custom Shadcn for modals/dialogs/forms."
+  ]
+}

@@ -1,0 +1,663 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 100% 99%;
+    --foreground: 220 38% 19%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 42% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 42% 17%;
+    --primary: 216 86% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 100% 97%;
+    --secondary-foreground: 220 42% 17%;
+    --muted: 210 100% 97%;
+    --muted-foreground: 216 16% 42%;
+    --accent: 199 96% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 2 75% 62%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 212 56% 85%;
+    --input: 212 56% 85%;
+    --ring: 216 86% 46%;
+    --radius: 1rem;
+
+    --app-background: #f4f9ff;
+    --app-surface: rgba(255, 255, 255, 0.76);
+    --app-surface-soft: rgba(232, 242, 255, 0.74);
+    --app-border: rgba(149, 188, 236, 0.42);
+    --app-text: #1e2f4d;
+    --app-text-soft: #5f7192;
+    --app-brand: #1f6fe5;
+    --app-brand-strong: #1458c4;
+    --app-accent: #69c4ff;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    overflow-x: hidden;
+    font-family: "Manrope", sans-serif;
+    line-height: 1.58;
+    background-image: radial-gradient(circle at top left, rgba(31, 111, 229, 0.13), transparent 28%),
+      radial-gradient(circle at top right, rgba(105, 196, 255, 0.12), transparent 22%),
+      radial-gradient(circle at bottom left, rgba(170, 222, 255, 0.16), transparent 24%);
+    color: var(--app-text);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    background: rgba(74, 107, 93, 0.18);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  [data-debug-wrapper="true"] {
+    display: contents !important;
+  }
+
+  [data-debug-wrapper="true"] > * {
+    margin-left: inherit;
+    margin-right: inherit;
+    margin-top: inherit;
+    margin-bottom: inherit;
+    padding-left: inherit;
+    padding-right: inherit;
+    padding-top: inherit;
+    padding-bottom: inherit;
+    column-gap: inherit;
+    row-gap: inherit;
+    gap: inherit;
+    border-left-width: inherit;
+    border-right-width: inherit;
+    border-top-width: inherit;
+    border-bottom-width: inherit;
+    border-left-style: inherit;
+    border-right-style: inherit;
+    border-top-style: inherit;
+    border-bottom-style: inherit;
+    border-left-color: inherit;
+    border-right-color: inherit;
+    border-top-color: inherit;
+    border-bottom-color: inherit;
+  }
+}
+
+@layer components {
+  .App,
+  .vault-shell {
+    min-height: 100vh;
+  }
+
+  .vault-shell-inner {
+    padding-top: max(1.1rem, env(safe-area-inset-top));
+    padding-bottom: calc(7.75rem + env(safe-area-inset-bottom));
+  }
+
+  .vault-shell-main {
+    padding-top: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .vault-header-actions {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .vault-hero-panel {
+    border: 1px solid var(--app-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(233, 244, 255, 0.66));
+    border-radius: 1.1rem;
+    padding: 1rem;
+    box-shadow: 0 14px 34px rgba(31, 111, 229, 0.1);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    position: relative;
+    overflow: hidden;
+    animation: vault-fade-up 0.45s ease;
+  }
+
+  .vault-brand-lockup {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .vault-brand-image {
+    display: block;
+    width: min(100%, 23.25rem);
+    height: auto;
+    object-fit: contain;
+    object-position: left center;
+    filter: drop-shadow(0 10px 24px rgba(20, 87, 216, 0.14));
+  }
+
+  .vault-page-title {
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(2rem, 3.3vw, 3.05rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    margin: 0;
+    max-width: 16ch;
+  }
+
+  .vault-free-word {
+    display: inline-block;
+    color: var(--app-brand-strong);
+    text-shadow: 0 0 0 rgba(31, 111, 229, 0);
+    animation: vault-free-pulse 1.8s ease-in-out infinite;
+  }
+
+  .vault-eyebrow {
+    color: var(--app-text-soft);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .vault-card {
+    border: 1px solid var(--app-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(237, 245, 255, 0.62));
+    border-radius: 1.1rem;
+    padding: 1rem;
+    box-shadow: 0 14px 32px rgba(31, 111, 229, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+    animation: vault-fade-up 0.45s ease;
+  }
+
+  .vault-card-link {
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .vault-card-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px rgba(20, 87, 216, 0.14);
+    border-color: rgba(20, 87, 216, 0.34);
+  }
+
+  .vault-ad-placeholder {
+    margin-top: 1.25rem;
+    border: 1px dashed rgba(20, 87, 216, 0.34);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(224, 239, 255, 0.4));
+    border-radius: 1.1rem;
+    padding: 1rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .vault-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(20, 87, 216, 0.16), rgba(69, 164, 255, 0.08));
+    color: var(--app-brand);
+    font-family: "Outfit", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .vault-prescription-preview,
+  .vault-preview-panel {
+    overflow: hidden;
+    border-radius: 1.1rem;
+    border: 1px solid var(--app-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(226, 239, 255, 0.6));
+    min-height: 15rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+
+  .vault-inline-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .vault-bottom-nav {
+    position: fixed;
+    left: 50%;
+    bottom: max(0.6rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    transform: translateX(-50%);
+    width: min(calc(100vw - 1rem), 46rem);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+    border: 1px solid rgba(149, 188, 236, 0.44);
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: 999px;
+    padding: 0.45rem;
+    box-shadow: 0 18px 44px rgba(31, 111, 229, 0.14);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    overflow: hidden;
+  }
+
+  .vault-bottom-nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    padding: 0.85rem 0.7rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    min-height: 3.2rem;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  }
+
+  .vault-bottom-nav-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .vault-bottom-nav-link-active {
+    background: linear-gradient(135deg, var(--app-brand), var(--app-accent));
+    color: white;
+  }
+
+  .vault-bottom-nav-link-inactive {
+    color: var(--app-text-soft);
+  }
+
+  .vault-upload-panel {
+    min-height: 16rem;
+    border: 2px dashed var(--app-border);
+    border-radius: 1.1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(225, 239, 255, 0.52));
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .vault-upload-panel:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(225, 239, 255, 0.62));
+    border-color: rgba(20, 87, 216, 0.34);
+    transform: translateY(-1px);
+  }
+
+  .vault-dialog-content {
+    border-radius: 1.1rem;
+    box-shadow: 0 28px 64px rgba(20, 87, 216, 0.18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .vault-field-label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--app-text-soft);
+  }
+
+  .vault-select {
+    width: 100%;
+    border: 1px solid var(--app-border);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--app-text);
+    border-radius: 1rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+  }
+
+  .vault-select:focus {
+    border-color: rgba(20, 87, 216, 0.42);
+    box-shadow: 0 0 0 3px rgba(20, 87, 216, 0.12);
+  }
+
+  .admin-panel-shell {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0b1528, #0f1d33 30%, #0a1526 100%);
+    color: white;
+    padding: max(0.75rem, env(safe-area-inset-top)) 0 2rem;
+  }
+
+  .admin-panel-inner {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  .admin-panel-header {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-panel-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    width: 3rem;
+    border: none;
+    background: transparent;
+    color: white;
+  }
+
+  .admin-panel-title {
+    margin: 0;
+    text-align: center;
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .admin-panel-section {
+    margin-top: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .admin-panel-section-button {
+    background: #21324f;
+    padding: 0 !important;
+    color: white;
+  }
+
+  .admin-panel-section-trigger {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.45rem 1rem;
+    font-family: "Outfit", sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .admin-panel-section-trigger-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .admin-panel-stat-card,
+  .admin-panel-note,
+  .admin-panel-hidden-tools {
+    border-radius: 1.3rem;
+    background: #1c2844;
+    border: 1px solid rgba(86, 163, 255, 0.12);
+    padding: 1rem;
+  }
+
+  .admin-panel-affiliate-card,
+  .admin-panel-management-link {
+    border-radius: 1.4rem;
+    background: #21324f;
+    border: 1px solid rgba(86, 163, 255, 0.1);
+    padding: 1.15rem;
+  }
+
+  .admin-panel-primary-button {
+    background: #f6b94d !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .admin-panel-dark-outline {
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+  }
+
+  .admin-panel-danger-outline {
+    border-color: rgba(248, 113, 113, 0.45) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: #fecaca !important;
+  }
+
+  .admin-panel-input {
+    border-color: rgba(148, 163, 184, 0.28) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: white !important;
+  }
+
+  .admin-panel-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .admin-panel-management-link {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    transition: transform 180ms ease, background-color 180ms ease;
+  }
+
+  .admin-panel-management-link:hover {
+    transform: translateY(-1px);
+    background: #263858;
+  }
+
+  .admin-panel-management-link-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .admin-panel-management-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .admin-panel-data-button {
+    width: 100%;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 4.5rem;
+    border-radius: 1.4rem !important;
+    background: #21324f !important;
+    border: 1px solid rgba(86, 163, 255, 0.08) !important;
+    color: #56a3ff !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+  }
+
+  .admin-panel-danger-button {
+    width: 100%;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 4.5rem;
+    border-radius: 1.4rem !important;
+    background: rgba(46, 35, 51, 0.9) !important;
+    border: 2px solid rgba(255, 107, 107, 0.75) !important;
+    color: #ff6b6b !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+  }
+
+  .admin-panel-footer {
+    padding: 2.25rem 1rem 1rem;
+    text-align: center;
+    color: rgba(226, 232, 240, 0.55);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+
+@keyframes vault-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vault-free-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    text-shadow: 0 0 0 rgba(31, 111, 229, 0);
+  }
+
+  50% {
+    transform: scale(1.04);
+    opacity: 0.9;
+    text-shadow: 0 0 18px rgba(31, 111, 229, 0.28);
+  }
+}
+
+@media (min-width: 640px) {
+  .vault-header-actions {
+    display: flex;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .vault-shell-inner {
+    padding-bottom: calc(8.3rem + env(safe-area-inset-bottom));
+  }
+
+  .vault-shell-main {
+    padding-top: 1rem;
+  }
+
+  .vault-hero-panel,
+  .vault-card {
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  .vault-ad-placeholder {
+    border-radius: 1rem;
+    padding: 0.95rem;
+  }
+
+  .vault-page-title {
+    font-size: clamp(1.6rem, 8vw, 2.15rem);
+    max-width: 100%;
+  }
+
+  .vault-brand-image {
+    width: min(100%, 18rem);
+  }
+
+  .vault-eyebrow {
+    font-size: 0.67rem;
+  }
+
+  .vault-bottom-nav {
+    gap: 0.2rem;
+    padding: 0.35rem;
+  }
+
+  .vault-bottom-nav-link {
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.62rem 0.1rem;
+    font-size: 0.64rem;
+    min-height: 3rem;
+  }
+
+  .vault-prescription-preview,
+  .vault-preview-panel,
+  .vault-upload-panel {
+    min-height: 12.5rem;
+  }
+
+  .vault-dialog-content {
+    width: calc(100vw - 1rem);
+    border-radius: 1rem;
+  }
+
+  .admin-panel-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .admin-panel-section-trigger {
+    padding: 1.25rem 0.9rem;
+    font-size: 1.15rem;
+  }
+
+  .admin-panel-management-link {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .vault-shell-inner {
+    padding-bottom: calc(8.1rem + env(safe-area-inset-bottom));
+  }
+
+  .vault-page-title {
+    font-size: clamp(2.2rem, 5vw, 3rem);
+  }
+
+  .vault-hero-panel {
+    padding: 1.15rem 1.2rem;
+  }
+
+  .vault-card {
+    padding: 1.1rem;
+  }
+
+  .vault-brand-image {
+    width: min(100%, 20.25rem);
+  }
+}
