@@ -133,22 +133,20 @@ export default function WelcomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Logo - Outside ScrollView for reliable long press */}
+      {/* Logo - Long press for admin access */}
       <View style={{ alignItems: "center", paddingTop: isSmallDevice ? 6 : 10 }}>
-        <Pressable 
-          style={({ pressed }) => [
-            styles.logoContainer,
-            pressed && styles.logoPressed
-          ]}
+        <TouchableOpacity 
+          style={styles.logoContainer}
           onLongPress={handleLogoLongPress}
-          delayLongPress={1500}
+          delayLongPress={1200}
+          activeOpacity={0.7}
         >
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={[styles.appName, { color: "#4a9eff" }]}>My Optical Wallet</Text>
       </View>
 
