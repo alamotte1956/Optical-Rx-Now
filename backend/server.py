@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
@@ -7,6 +8,7 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 import os
 import uuid
+import io
 
 load_dotenv()
 
@@ -385,3 +387,200 @@ async def auto_generate_invoices():
         invoices_created += 1
     
     return {"status": "success", "invoices_created": invoices_created}
+
+
+# ==================== WEEKLY PDF REPORT ====================
+
+@app.get("/api/reports/weekly")
+async def generate_weekly_report():
+    """Generate a weekly PDF report for advertisers with analytics summary"""
+    from fpdf import FPDF
+    
+    now = datetime.utcnow()
+    week_ago = now - timedelta(days=7)
+    
+    # Fetch data
+    affiliates = await db.affiliates.find().to_list(100)
+    banners = await db.banners.find().to_list(100)
+    events = await db.analytics.find().to_list(10000)
+    invoices = await db.invoices.find().to_list(100)
+    
+    # Aggregate events from last 7 days
+    weekly_events = [e for e in events if e.get("timestamp", "") >= week_ago.isoformat()]
+    event_counts = {}
+    for e in weekly_events:
+        etype = e.get("event_type", "unknown")
+        event_counts[etype] = event_counts.get(etype, 0) + 1
+    
+    total_affiliate_clicks = sum(a.get("click_count", 0) for a in affiliates)
+    total_banner_views = sum(b.get("view_count", 0) for b in banners)
+    total_banner_clicks = sum(b.get("click_count", 0) for b in banners)
+    active_affiliates = len([a for a in affiliates if a.get("is_active")])
+    active_banners = len([b for b in banners if b.get("is_active")])
+    
+    # Invoice stats
+    paid_invoices = [i for i in invoices if i.get("status") == "paid"]
+    pending_invoices = [i for i in invoices if i.get("status") == "pending"]
+    total_revenue = sum(i.get("total_amount", 0) for i in paid_invoices)
+    pending_amount = sum(i.get("total_amount", 0) for i in pending_invoices)
+    
+    # Generate PDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    
+    # Title
+    pdf.set_font("Helvetica", "B", 24)
+    pdf.set_text_color(10, 22, 40)
+    pdf.cell(0, 15, "My Optical Wallet", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.set_font("Helvetica", "", 14)
+    pdf.set_text_color(107, 124, 143)
+    pdf.cell(0, 8, "Weekly Advertiser Report", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 8, f"Period: {week_ago.strftime('%B %d, %Y')} - {now.strftime('%B %d, %Y')}", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.ln(10)
+    
+    # Summary Section
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(74, 158, 255)
+    pdf.cell(0, 10, "Executive Summary", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_draw_color(74, 158, 255)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(5)
+    
+    pdf.set_font("Helvetica", "", 11)
+    pdf.set_text_color(60, 60, 60)
+    
+    summary_data = [
+        ("Total Weekly Events", str(len(weekly_events))),
+        ("App Opens (Weekly)", str(event_counts.get("app_open", 0))),
+        ("Share Clicks (Weekly)", str(event_counts.get("share_click", 0))),
+        ("Banner Views (All-Time)", str(total_banner_views)),
+        ("Banner Clicks (All-Time)", str(total_banner_clicks)),
+        ("Affiliate Clicks (All-Time)", str(total_affiliate_clicks)),
+    ]
+    
+    for label, value in summary_data:
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(120, 8, label)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 8, value, new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.ln(8)
+    
+    # Financial Section
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(76, 175, 80)
+    pdf.cell(0, 10, "Financial Overview", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_draw_color(76, 175, 80)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(5)
+    
+    pdf.set_text_color(60, 60, 60)
+    finance_data = [
+        ("Total Revenue (Paid)", f"${total_revenue:.2f}"),
+        ("Pending Amount", f"${pending_amount:.2f}"),
+        ("Paid Invoices", str(len(paid_invoices))),
+        ("Pending Invoices", str(len(pending_invoices))),
+    ]
+    
+    for label, value in finance_data:
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(120, 8, label)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 8, value, new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.ln(8)
+    
+    # Affiliate Performance Table
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(224, 64, 251)
+    pdf.cell(0, 10, "Affiliate Performance", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_draw_color(224, 64, 251)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(5)
+    
+    if affiliates:
+        # Table header
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_fill_color(240, 240, 245)
+        pdf.set_text_color(60, 60, 60)
+        pdf.cell(70, 8, "Partner", border=1, fill=True)
+        pdf.cell(35, 8, "Commission %", border=1, fill=True, align="C")
+        pdf.cell(30, 8, "Clicks", border=1, fill=True, align="C")
+        pdf.cell(30, 8, "Status", border=1, fill=True, align="C")
+        pdf.cell(0, 8, "", new_x="LMARGIN", new_y="NEXT")
+        
+        pdf.set_font("Helvetica", "", 10)
+        for aff in sorted(affiliates, key=lambda x: x.get("click_count", 0), reverse=True):
+            pdf.cell(70, 7, aff.get("name", "")[:30], border=1)
+            pdf.cell(35, 7, f"{aff.get('commission', 0)}%", border=1, align="C")
+            pdf.cell(30, 7, str(aff.get("click_count", 0)), border=1, align="C")
+            status = "Active" if aff.get("is_active") else "Inactive"
+            pdf.cell(30, 7, status, border=1, align="C")
+            pdf.cell(0, 7, "", new_x="LMARGIN", new_y="NEXT")
+    else:
+        pdf.set_font("Helvetica", "I", 11)
+        pdf.set_text_color(150, 150, 150)
+        pdf.cell(0, 8, "No affiliates configured", new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.ln(8)
+    
+    # Banner Performance
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.set_text_color(255, 152, 0)
+    pdf.cell(0, 10, "Banner Performance", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_draw_color(255, 152, 0)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(5)
+    
+    if banners:
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_fill_color(240, 240, 245)
+        pdf.set_text_color(60, 60, 60)
+        pdf.cell(60, 8, "Banner", border=1, fill=True)
+        pdf.cell(30, 8, "Views", border=1, fill=True, align="C")
+        pdf.cell(30, 8, "Clicks", border=1, fill=True, align="C")
+        pdf.cell(30, 8, "CTR", border=1, fill=True, align="C")
+        pdf.cell(30, 8, "Status", border=1, fill=True, align="C")
+        pdf.cell(0, 8, "", new_x="LMARGIN", new_y="NEXT")
+        
+        pdf.set_font("Helvetica", "", 10)
+        for ban in banners:
+            views = ban.get("view_count", 0)
+            clicks = ban.get("click_count", 0)
+            ctr = f"{(clicks / views * 100):.1f}%" if views > 0 else "0.0%"
+            title = (ban.get("title") or "Untitled")[:25]
+            pdf.cell(60, 7, title, border=1)
+            pdf.cell(30, 7, str(views), border=1, align="C")
+            pdf.cell(30, 7, str(clicks), border=1, align="C")
+            pdf.cell(30, 7, ctr, border=1, align="C")
+            status = "Active" if ban.get("is_active") else "Inactive"
+            pdf.cell(30, 7, status, border=1, align="C")
+            pdf.cell(0, 7, "", new_x="LMARGIN", new_y="NEXT")
+    else:
+        pdf.set_font("Helvetica", "I", 11)
+        pdf.set_text_color(150, 150, 150)
+        pdf.cell(0, 8, "No banners configured", new_x="LMARGIN", new_y="NEXT")
+    
+    pdf.ln(10)
+    
+    # Footer
+    pdf.set_font("Helvetica", "I", 9)
+    pdf.set_text_color(150, 150, 150)
+    pdf.cell(0, 8, f"Generated on {now.strftime('%B %d, %Y at %I:%M %p UTC')}", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.cell(0, 6, "My Optical Wallet - Confidential Advertiser Report", new_x="LMARGIN", new_y="NEXT", align="C")
+    
+    # Return as streaming PDF
+    pdf_buffer = io.BytesIO()
+    pdf_output = pdf.output()
+    pdf_buffer.write(pdf_output)
+    pdf_buffer.seek(0)
+    
+    filename = f"MOW_Weekly_Report_{now.strftime('%Y%m%d')}.pdf"
+    
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

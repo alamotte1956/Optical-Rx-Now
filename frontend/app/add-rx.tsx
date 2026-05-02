@@ -22,6 +22,7 @@ import {
 import { trackPrescriptionForASO } from "../services/asoService";
 import { isSmallDevice, moderateScale } from "../services/responsive";
 import { useTranslation } from "../services/i18n";
+import SmartInvitePrompt, { shouldShowInvitePrompt, incrementSaveCount } from "../components/SmartInvitePrompt";
 
 const RX_TYPES = [
   { value: "eyeglass", labelKey: "eyeglasses", icon: "glasses-outline" },
@@ -40,6 +41,7 @@ export default function AddRxScreen() {
   const [expiryInput, setExpiryInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
 
   // Set the Rx type from URL parameter
   useEffect(() => {
@@ -194,8 +196,18 @@ export default function AddRxScreen() {
       // Track for ASO (may trigger review prompt)
       await trackPrescriptionForASO();
       
-      Alert.alert(t("success"), t("prescription_saved"));
-      router.back();
+      // Increment save count and check if we should show invite
+      await incrementSaveCount();
+      const showPrompt = await shouldShowInvitePrompt();
+      
+      if (showPrompt) {
+        Alert.alert(t("success"), t("prescription_saved"), [
+          { text: "OK", onPress: () => setShowInvite(true) }
+        ]);
+      } else {
+        Alert.alert(t("success"), t("prescription_saved"));
+        router.back();
+      }
     } catch (error) {
       Alert.alert(t("error"), "Failed to save optical document");
       console.log("Save error:", error);
@@ -460,6 +472,15 @@ export default function AddRxScreen() {
           </View>
         </View>
       </View>
+
+      {/* Smart Invite Prompt */}
+      <SmartInvitePrompt
+        visible={showInvite}
+        onDismiss={() => {
+          setShowInvite(false);
+          router.back();
+        }}
+      />
     </SafeAreaView>
   );
 }

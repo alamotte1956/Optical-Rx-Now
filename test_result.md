@@ -210,6 +210,30 @@ backend:
           agent: "testing"
           comment: "✅ TESTED: GET /api/redirect/{affiliate_id} returns correct redirect_url and increments click_count in database. Analytics event logged for affiliate_click. Click tracking verified working."
 
+  - task: "Weekly PDF report generation"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: GET /api/reports/weekly returns valid PDF with Content-Type: application/pdf. Response starts with %PDF magic bytes (2829 bytes). Includes executive summary, financial overview, affiliate performance table, and banner performance table. Filename header correct (MOW_Weekly_Report_YYYYMMDD.pdf)."
+
+  - task: "Auto-generate invoices from affiliate data"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: POST /api/invoices/auto-generate returns {status: 'success', invoices_created: N}. Correctly creates invoices only for affiliates with click_count > 0. Tested with 2 affiliates with clicks (50 and 30) and 1 with 0 clicks - correctly created 2 invoices. Invoices verified in database with correct line_items, total_amount calculation (clicks * commission/100), and 30-day due dates."
+
 frontend:
   - task: "Admin panel with all sections connected to backend"
     implemented: true
@@ -238,7 +262,7 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
@@ -249,6 +273,8 @@ test_plan:
 
 agent_communication:
     - agent: "main"
-      message: "Completed full admin panel rewrite. Backend server.py has all CRUD endpoints for affiliates, banners, invoices, plus analytics dashboard and financial dashboard. Please test all backend endpoints thoroughly - create, read, update, delete for each resource. The backend is running on localhost:8001. MongoDB is on localhost:27017 with database 'test_database'."
+      message: "Added 2 new endpoints: GET /api/reports/weekly (PDF report gen) and POST /api/invoices/auto-generate (auto-invoice from affiliate data). Also added SmartInvitePrompt, FeedbackSheet, and BannerCarousel frontend components. Please test the new backend endpoints."
     - agent: "testing"
       message: "✅ ALL BACKEND TESTS PASSING (19/19). Tested all endpoints: Health check, Affiliate CRUD, Banner CRUD, Invoice CRUD, Analytics (POST events + GET dashboard), Financial dashboard, and Affiliate redirect with click tracking. Fixed 2 bugs: (1) MongoDB ObjectId serialization in POST endpoints - added str() conversion for inserted_id, (2) ID fields being overwritten in PUT endpoints - excluded ID fields from model_dump(). All backend APIs are fully functional and ready for frontend integration."
+    - agent: "testing"
+      message: "✅ NEW ENDPOINTS TESTED (9/9 tests passing). Verified 3 existing endpoints still working: Health check, Analytics dashboard, Financial dashboard. Tested 2 NEW endpoints: (1) GET /api/reports/weekly - Returns valid PDF with correct Content-Type, %PDF magic bytes, 2829 bytes, includes executive summary, financial overview, affiliate/banner performance tables. (2) POST /api/invoices/auto-generate - Returns {status: 'success', invoices_created: N}, correctly creates invoices only for affiliates with clicks > 0, tested with 2 affiliates (50 & 30 clicks) + 1 with 0 clicks = 2 invoices created as expected. All backend APIs fully functional."

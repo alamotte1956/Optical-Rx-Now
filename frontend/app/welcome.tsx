@@ -13,6 +13,7 @@ import { useTheme } from "../services/theme";
 import { exportAllToPDF } from "../services/pdfExport";
 import BannerCarousel from "../components/BannerCarousel";
 import { logAnalyticsEvent } from "../services/adminApi";
+import FeedbackSheet from "../components/FeedbackSheet";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
@@ -32,6 +33,7 @@ export default function WelcomeScreen() {
   const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
   const [reminderSettings, setReminderSettings] = useState<ReminderSetting[]>(DEFAULT_REMINDERS);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -287,6 +289,15 @@ export default function WelcomeScreen() {
           {/* Dynamic Banner Carousel */}
           <BannerCarousel />
 
+          {/* Send Feedback Button */}
+          <TouchableOpacity
+            style={styles.feedbackButton}
+            onPress={() => setShowFeedback(true)}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={18} color="#4a9eff" />
+            <Text style={styles.feedbackButtonText}>Send Feedback</Text>
+          </TouchableOpacity>
+
           {/* Reset Age Verification - for testing */}
           <TouchableOpacity 
             style={styles.resetButton} 
@@ -299,6 +310,9 @@ export default function WelcomeScreen() {
           <Text style={styles.versionText}>{t("version")} 2.0.1</Text>
         </View>
       </ScrollView>
+
+      {/* Feedback Sheet */}
+      <FeedbackSheet visible={showFeedback} onClose={() => setShowFeedback(false)} />
     </SafeAreaView>
   );
 }
@@ -470,6 +484,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6b7c8f",
     textDecorationLine: "underline",
+  },
+  feedbackButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "rgba(74, 158, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(74, 158, 255, 0.2)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  feedbackButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4a9eff",
   },
   versionText: {
     fontSize: 12,

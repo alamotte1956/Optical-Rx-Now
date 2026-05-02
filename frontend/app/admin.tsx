@@ -46,6 +46,7 @@ import {
   type AnalyticsDashboard,
   type FinancialDashboard,
 } from "../services/adminApi";
+import Constants from "expo-constants";
 
 // ==================== DEFAULT SEED DATA ====================
 const DEFAULT_AFFILIATES_SEED: Partial<Affiliate>[] = [
@@ -208,6 +209,18 @@ export default function AdminScreen() {
   }, [loadAllData]);
 
   const toggleSection = (s: string) => setExpandedSection(expandedSection === s ? null : s);
+
+  const handleGenerateReport = async () => {
+    try {
+      const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
+        || process.env.EXPO_PUBLIC_BACKEND_URL || "";
+      const reportUrl = `${baseUrl}/api/reports/weekly`;
+      const { default: Linking } = await import("react-native");
+      await Linking.openURL(reportUrl);
+    } catch (error: any) {
+      Alert.alert("Error", "Could not open report. Try again later.");
+    }
+  };
 
   // ==================== AFFILIATE ACTIONS ====================
   const openAffiliateModal = (affiliate?: Affiliate) => {
@@ -610,6 +623,10 @@ export default function AdminScreen() {
               <TouchableOpacity style={styles.refreshRow} onPress={onRefresh}>
                 <Ionicons name="refresh" size={16} color="#4a9eff" />
                 <Text style={styles.refreshText}>Refresh Data</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport}>
+                <Ionicons name="document-text" size={18} color="#fff" />
+                <Text style={styles.addButtonText}>Download Weekly PDF Report</Text>
               </TouchableOpacity>
             </>
           ) : (
