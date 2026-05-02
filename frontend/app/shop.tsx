@@ -23,8 +23,9 @@ import Constants from "expo-constants";
 
 const AFFILIATES_STORAGE_KEY = "@optical_rx_affiliates";
 
-// Default affiliate data - will be overridden by admin settings
+// Default affiliate data - complete list with categories, descriptions, and store locators
 const DEFAULT_AFFILIATES = [
+  // ===== ONLINE EYEWEAR =====
   {
     id: "eyeglasses-com",
     name: "Eyeglasses.com",
@@ -59,28 +60,6 @@ const DEFAULT_AFFILIATES = [
     affiliateId: "",
   },
   {
-    id: "clearly",
-    name: "Clearly",
-    description: "Quality contacts, eyeglasses & sunglasses.",
-    baseUrl: "https://www.clearly.ca/en-ca",
-    category: "contacts",
-    isPreferred: false,
-    commission: 12,
-    enabled: true,
-    affiliateId: "",
-  },
-  {
-    id: "lens-com",
-    name: "Lens.com",
-    description: "Contact lenses at wholesale prices.",
-    baseUrl: "https://www.lens.com",
-    category: "contacts",
-    isPreferred: false,
-    commission: 12,
-    enabled: true,
-    affiliateId: "",
-  },
-  {
     id: "zenni",
     name: "Zenni Optical",
     description: "Affordable eyeglasses starting at $6.95. Huge selection of frames.",
@@ -105,7 +84,7 @@ const DEFAULT_AFFILIATES = [
   {
     id: "eyebuydirect",
     name: "EyeBuyDirect",
-    description: "Affordable eyeglasses & sunglasses.",
+    description: "Affordable eyeglasses & sunglasses with virtual try-on.",
     baseUrl: "https://www.eyebuydirect.com",
     category: "online",
     isPreferred: false,
@@ -114,32 +93,21 @@ const DEFAULT_AFFILIATES = [
     affiliateId: "",
   },
   {
-    id: "1800contacts",
-    name: "1-800 Contacts",
-    description: "America's #1 contact lens retailer. Fast delivery.",
-    baseUrl: "https://www.1800contacts.com",
-    category: "contacts",
-    isPreferred: false,
-    commission: 9,
-    enabled: true,
-    affiliateId: "",
-  },
-  {
-    id: "target-optical",
-    name: "Target Optical",
-    description: "Designer eyewear at Target. Ray-Ban, Oakley & more.",
-    baseUrl: "https://www.targetoptical.com",
-    category: "retail",
+    id: "eyeconic",
+    name: "Eyeconic",
+    description: "VSP/MetLife integration, virtual try-on, doctor network.",
+    baseUrl: "https://www.eyeconic.com",
+    category: "online",
     isPreferred: false,
     commission: 8,
     enabled: true,
     affiliateId: "",
   },
   {
-    id: "eyeconic",
-    name: "Eyeconic",
-    description: "VSP/MetLife integration, virtual try-on, doctor network.",
-    baseUrl: "https://www.eyeconic.com",
+    id: "coastal",
+    name: "Coastal",
+    description: "Quality eyeglasses & sunglasses with free shipping.",
+    baseUrl: "https://www.coastal.com",
     category: "online",
     isPreferred: false,
     commission: 8,
@@ -158,6 +126,118 @@ const DEFAULT_AFFILIATES = [
     affiliateId: "",
   },
   {
+    id: "framesdirect",
+    name: "FramesDirect",
+    description: "Authentic designer frames at discounted prices.",
+    baseUrl: "https://www.framesdirect.com",
+    category: "online",
+    isPreferred: false,
+    commission: 7,
+    enabled: true,
+    affiliateId: "",
+  },
+  // ===== CONTACT LENSES =====
+  {
+    id: "clearly",
+    name: "Clearly",
+    description: "Quality contacts, eyeglasses & sunglasses.",
+    baseUrl: "https://www.clearly.ca/en-ca",
+    category: "contacts",
+    isPreferred: false,
+    commission: 12,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "lens-com",
+    name: "Lens.com",
+    description: "Contact lenses at wholesale prices. Fast delivery.",
+    baseUrl: "https://www.lens.com",
+    category: "contacts",
+    isPreferred: false,
+    commission: 12,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "contactsdirect",
+    name: "ContactsDirect",
+    description: "Hassle-free contact lens ordering with AutoRefill.",
+    baseUrl: "https://www.contactsdirect.com",
+    category: "contacts",
+    isPreferred: false,
+    commission: 11,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "1800contacts",
+    name: "1-800 Contacts",
+    description: "America's #1 contact lens retailer. Fast delivery.",
+    baseUrl: "https://www.1800contacts.com",
+    category: "contacts",
+    isPreferred: false,
+    commission: 9,
+    enabled: true,
+    affiliateId: "",
+  },
+  // ===== RETAIL STORES (GPS-enabled) =====
+  {
+    id: "lenscrafters",
+    name: "LensCrafters",
+    description: "Premium eyecare chain with in-store eye exams and same-day glasses.",
+    baseUrl: "https://www.lenscrafters.com",
+    category: "retail",
+    isPreferred: false,
+    commission: 8,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "pearle-vision",
+    name: "Pearle Vision",
+    description: "Neighborhood eye care with trusted optometrists and designer frames.",
+    baseUrl: "https://www.pearlevision.com",
+    category: "retail",
+    isPreferred: false,
+    commission: 8,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "target-optical",
+    name: "Target Optical",
+    description: "Designer eyewear at Target. Ray-Ban, Oakley & more.",
+    baseUrl: "https://www.targetoptical.com",
+    category: "retail",
+    isPreferred: false,
+    commission: 8,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "visionworks",
+    name: "Visionworks",
+    description: "Over 700 locations nationwide. Eye exams, glasses & contacts.",
+    baseUrl: "https://www.visionworks.com",
+    category: "retail",
+    isPreferred: false,
+    commission: 7,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "walmart-vision",
+    name: "Walmart Vision Center",
+    description: "Affordable eye exams and eyewear at Walmart stores.",
+    baseUrl: "https://www.walmart.com/cp/vision-centers/1078944",
+    category: "retail",
+    isPreferred: false,
+    commission: 5,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
     id: "sams-club",
     name: "Sam's Club Optical",
     description: "Quality eyewear at warehouse club prices. Members save on frames, lenses, and contacts.",
@@ -165,6 +245,17 @@ const DEFAULT_AFFILIATES = [
     category: "retail",
     isPreferred: false,
     commission: 5,
+    enabled: true,
+    affiliateId: "",
+  },
+  {
+    id: "costco-optical",
+    name: "Costco Optical",
+    description: "Great value on eyeglasses, contacts, and eye exams for members.",
+    baseUrl: "https://www.costco.com/optical.html",
+    category: "retail",
+    isPreferred: false,
+    commission: 4,
     enabled: true,
     affiliateId: "",
   },
@@ -216,12 +307,16 @@ export default function ShopScreen() {
   }, []);
 
   const loadAffiliates = async () => {
+    // ALWAYS start with the full local defaults (which have categories, descriptions, store locator data)
+    let finalAffiliates = [...DEFAULT_AFFILIATES];
+
+    // Try to merge any ADDITIONAL affiliates from the backend (admin-added partners)
     try {
-      // Try fetching from backend first (synced via admin panel)
       const backendAffiliates = await getAffiliates();
       if (backendAffiliates && backendAffiliates.length > 0) {
-        const mapped = backendAffiliates
-          .filter((a: BackendAffiliate) => a.is_active)
+        const localIds = new Set(finalAffiliates.map((a) => a.name.toLowerCase()));
+        const extraFromBackend = backendAffiliates
+          .filter((a: BackendAffiliate) => a.is_active && !localIds.has(a.name.toLowerCase()))
           .map((a: BackendAffiliate) => ({
             id: a.affiliate_id,
             name: a.name,
@@ -231,28 +326,26 @@ export default function ShopScreen() {
             isPreferred: false,
             commission: a.commission,
             enabled: a.is_active,
-            affiliateId: a.affiliate_id, // Use backend ID for redirect
+            affiliateId: a.affiliate_id,
           }));
-        if (mapped.length > 0) {
-          setAffiliates(mapped);
-          return;
-        }
+        finalAffiliates = [...finalAffiliates, ...extraFromBackend];
       }
     } catch (error) {
-      console.log("Backend affiliates unavailable, using local:", error);
+      console.log("Backend affiliates unavailable, using defaults only:", error);
     }
 
-    // Fallback to local storage
+    // Also check local storage for any admin-added custom affiliates
     try {
       const stored = await AsyncStorage.getItem(AFFILIATES_STORAGE_KEY);
       if (stored) {
         const adminAffiliates = JSON.parse(stored);
-        const enabledAffiliates = adminAffiliates
-          .filter((a: any) => a.enabled)
+        const existingIds = new Set(finalAffiliates.map((a) => a.id));
+        const extraLocal = adminAffiliates
+          .filter((a: any) => a.enabled && !existingIds.has(a.id))
           .map((a: any) => ({
             id: a.id,
             name: a.name,
-            description: a.description,
+            description: a.description || `${a.name} - Partner store`,
             baseUrl: a.baseUrl || a.url,
             category: a.category || "online",
             isPreferred: a.isPreferred || false,
@@ -260,14 +353,13 @@ export default function ShopScreen() {
             enabled: a.enabled,
             affiliateId: a.affiliateId || "",
           }));
-        
-        if (enabledAffiliates.length > 0) {
-          setAffiliates(enabledAffiliates);
-        }
+        finalAffiliates = [...finalAffiliates, ...extraLocal];
       }
     } catch (error) {
       console.log("Error loading local affiliates:", error);
     }
+
+    setAffiliates(finalAffiliates);
   };
 
   // Build affiliate URL - route through backend redirect for obfuscation & tracking
