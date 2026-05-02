@@ -40,10 +40,10 @@ export default function TermsOfServiceScreen() {
         {/* Section 2 */}
         <Text style={styles.sectionTitle}>2. Description of Service</Text>
         <Text style={styles.paragraph}>
-          My Optical Wallet is a local-only prescription storage application that allows users to upload, save, and access photos of their eyeglass and contact lens prescriptions directly on their device. The App is designed for personal convenience and organization purposes only. No account creation or registration is required. All data is stored exclusively on your device and is never transmitted to external servers.
+          My Optical Wallet is a local-only optical document storage application that allows users to upload, save, and access photos of their eyeglass and contact lens optical documents directly on their device. The App is designed for personal convenience and organization purposes only. No account creation or registration is required. All data is stored exclusively on your device and is never transmitted to external servers.
         </Text>
         <Text style={styles.paragraph}>
-          The App is provided as a utility tool and is not a medical device, healthcare service, or medical records system. The App does not interpret, validate, or verify the accuracy of any prescription information you store.
+          The App is provided as a utility tool and is not a medical device, healthcare service, or medical records system. The App does not interpret, validate, or verify the accuracy of any optical document information you store.
         </Text>
 
         {/* Section 3 */}
@@ -56,7 +56,7 @@ export default function TermsOfServiceScreen() {
         <Text style={styles.sectionTitle}>4. User Responsibilities</Text>
         <Text style={styles.paragraph}>You agree to:</Text>
         <Text style={styles.bulletPoint}>• Use the App only for lawful purposes and in accordance with these Terms</Text>
-        <Text style={styles.bulletPoint}>• Not share prescription information belonging to others without their consent</Text>
+        <Text style={styles.bulletPoint}>• Not share optical document information belonging to others without their consent</Text>
         <Text style={styles.bulletPoint}>• Not use the App for any commercial, professional medical, or diagnostic purposes</Text>
         <Text style={styles.bulletPoint}>• Maintain the security of your own device, as all data is stored locally</Text>
         <Text style={styles.bulletPoint}>• Be solely responsible for backing up any data stored within the App</Text>
@@ -67,10 +67,10 @@ export default function TermsOfServiceScreen() {
         {/* Section 5 */}
         <Text style={styles.sectionTitle}>5. Medical Disclaimer</Text>
         <Text style={styles.disclaimerBox}>
-          My Optical Wallet is not a medical service, medical device, or healthcare provider and does not provide medical advice, diagnosis, or treatment. The App is solely a storage and organization tool for your prescription information. The App does not replace professional eye care services.
+          My Optical Wallet is not a medical service, medical device, or healthcare provider and does not provide medical advice, diagnosis, or treatment. The App is solely a storage and organization tool for your optical document information. The App does not replace professional eye care services.
         </Text>
         <Text style={styles.paragraph}>
-          Always consult with a qualified eye care professional for any questions regarding your vision, eye health, or prescriptions. Never disregard professional medical advice or delay seeking it because of information stored in or accessed through the App. We make no representations or warranties regarding the accuracy, completeness, or timeliness of any prescription information you store in the App.
+          Always consult with a qualified eye care professional for any questions regarding your vision, eye health, or optical documents. Never disregard professional medical advice or delay seeking it because of information stored in or accessed through the App. We make no representations or warranties regarding the accuracy, completeness, or timeliness of any optical document information you store in the App.
         </Text>
 
         {/* Section 6 */}
@@ -82,7 +82,7 @@ export default function TermsOfServiceScreen() {
           We grant you a limited, non-exclusive, non-transferable, revocable license to use the App for your personal, non-commercial use in accordance with these Terms. This license does not include the right to sublicense, sell, resell, or commercially exploit the App or any content therein.
         </Text>
         <Text style={styles.paragraph}>
-          You retain full ownership of any prescription photos and personal data you store within the App. We claim no ownership rights over your content.
+          You retain full ownership of any optical document photos and personal data you store within the App. We claim no ownership rights over your content.
         </Text>
 
         {/* Section 7 */}
@@ -100,10 +100,10 @@ export default function TermsOfServiceScreen() {
           TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL MY OPTICAL WALLET, ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, OR AFFILIATES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION, LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, ARISING OUT OF OR RELATED TO:
         </Text>
         <Text style={styles.bulletPoint}>• Your use of or inability to use the App</Text>
-        <Text style={styles.bulletPoint}>• Any errors in prescription information you upload or store</Text>
+        <Text style={styles.bulletPoint}>• Any errors in optical document information you upload or store</Text>
         <Text style={styles.bulletPoint}>• Any data loss resulting from device damage, loss, theft, malfunction, or software issues</Text>
         <Text style={styles.bulletPoint}>• Any unauthorized access to your device or data stored within the App</Text>
-        <Text style={styles.bulletPoint}>• Any reliance on prescription information stored in the App for medical decisions</Text>
+        <Text style={styles.bulletPoint}>• Any reliance on optical document information stored in the App for medical decisions</Text>
         <Text style={styles.bulletPoint}>• Any interruption or cessation of the App&apos;s availability</Text>
         <Text style={styles.paragraph}>
           Because all data is stored locally on your device, we are not liable for any data loss or corruption. You are solely responsible for maintaining backups of your data. Our total aggregate liability to you for all claims arising out of or relating to these Terms or the App shall not exceed the amount you paid for the App, if any.
@@ -156,7 +156,7 @@ export default function TermsOfServiceScreen() {
         {/* Section 13 */}
         <Text style={styles.sectionTitle}>13. Termination</Text>
         <Text style={styles.paragraph}>
-          You may stop using the App at any time by uninstalling it from your device. Upon uninstallation, all locally stored data, including prescription photos and family member names, will be permanently deleted from your device.
+          You may stop using the App at any time by uninstalling it from your device. Upon uninstallation, all locally stored data, including optical document photos and family member names, will be permanently deleted from your device.
         </Text>
         <Text style={styles.paragraph}>
           We reserve the right to discontinue the App at any time, with or without notice. In the event of discontinuation, your locally stored data will remain on your device until you choose to remove it by uninstalling the App or clearing its data.

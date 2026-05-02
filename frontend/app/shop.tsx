@@ -18,6 +18,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trackAffiliateClick } from "../services/analytics";
+import { getAffiliates, logAnalyticsEvent, type Affiliate as BackendAffiliate } from "../services/adminApi";
+import Constants from "expo-constants";
 
 const AFFILIATES_STORAGE_KEY = "@optical_rx_affiliates";
 
@@ -81,7 +83,7 @@ const DEFAULT_AFFILIATES = [
   {
     id: "zenni",
     name: "Zenni Optical",
-    description: "Affordable prescription glasses starting at $6.95. Huge selection of frames.",
+    description: "Affordable eyeglasses starting at $6.95. Huge selection of frames.",
     baseUrl: "https://www.zennioptical.com",
     category: "online",
     isPreferred: false,
@@ -103,7 +105,7 @@ const DEFAULT_AFFILIATES = [
   {
     id: "eyebuydirect",
     name: "EyeBuyDirect",
-    description: "Affordable prescription glasses & sunglasses.",
+    description: "Affordable eyeglasses & sunglasses.",
     baseUrl: "https://www.eyebuydirect.com",
     category: "online",
     isPreferred: false,
@@ -147,7 +149,7 @@ const DEFAULT_AFFILIATES = [
   {
     id: "sportrx",
     name: "SportRx",
-    description: "Premium sports eyewear and prescription sunglasses.",
+    description: "Premium sports eyewear and optical sunglasses.",
     baseUrl: "https://www.sportrx.com",
     category: "online",
     isPreferred: false,
@@ -215,10 +217,36 @@ export default function ShopScreen() {
 
   const loadAffiliates = async () => {
     try {
+      // Try fetching from backend first (synced via admin panel)
+      const backendAffiliates = await getAffiliates();
+      if (backendAffiliates && backendAffiliates.length > 0) {
+        const mapped = backendAffiliates
+          .filter((a: BackendAffiliate) => a.is_active)
+          .map((a: BackendAffiliate) => ({
+            id: a.affiliate_id,
+            name: a.name,
+            description: `${a.name} - Partner store`,
+            baseUrl: a.url,
+            category: "online",
+            isPreferred: false,
+            commission: a.commission,
+            enabled: a.is_active,
+            affiliateId: a.affiliate_id, // Use backend ID for redirect
+          }));
+        if (mapped.length > 0) {
+          setAffiliates(mapped);
+          return;
+        }
+      }
+    } catch (error) {
+      console.log("Backend affiliates unavailable, using local:", error);
+    }
+
+    // Fallback to local storage
+    try {
       const stored = await AsyncStorage.getItem(AFFILIATES_STORAGE_KEY);
       if (stored) {
         const adminAffiliates = JSON.parse(stored);
-        // Filter to only enabled affiliates and map to shop format
         const enabledAffiliates = adminAffiliates
           .filter((a: any) => a.enabled)
           .map((a: any) => ({
@@ -238,24 +266,27 @@ export default function ShopScreen() {
         }
       }
     } catch (error) {
-      console.log("Error loading affiliates:", error);
+      console.log("Error loading local affiliates:", error);
     }
   };
 
-  // Build affiliate URL with tracking ID if available
+  // Build affiliate URL - route through backend redirect for obfuscation & tracking
   const buildAffiliateUrl = (affiliate: Affiliate): string => {
-    let url = affiliate.baseUrl;
-    
-    // If affiliate ID is set, append it based on the network/partner
-    if (affiliate.affiliateId) {
-      // Common affiliate URL patterns
-      if (url.includes("?")) {
-        url += `&ref=${affiliate.affiliateId}`;
-      } else {
-        url += `?ref=${affiliate.affiliateId}`;
+    // If this affiliate came from backend (has a UUID-style affiliateId), use redirect endpoint
+    if (affiliate.affiliateId && affiliate.affiliateId.includes("-")) {
+      const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
+        || process.env.EXPO_PUBLIC_BACKEND_URL
+        || "";
+      if (baseUrl) {
+        return `${baseUrl}/api/redirect/${affiliate.affiliateId}`;
       }
     }
     
+    // Fallback: direct URL with optional ref parameter
+    let url = affiliate.baseUrl;
+    if (affiliate.affiliateId) {
+      url += url.includes("?") ? `&ref=${affiliate.affiliateId}` : `?ref=${affiliate.affiliateId}`;
+    }
     return url;
   };
 
@@ -324,8 +355,12 @@ export default function ShopScreen() {
   const handleOpenLink = async (affiliate: Affiliate) => {
     let finalUrl = buildAffiliateUrl(affiliate);
     
-    // Track the click
+    // Track the click (both local analytics and backend)
     await trackAffiliateClick(affiliate.id, affiliate.name);
+    logAnalyticsEvent("affiliate_click", { 
+      affiliate_id: affiliate.id, 
+      affiliate_name: affiliate.name 
+    }).catch(() => {});
     
     // For RETAIL category stores, use location-based search
     if (affiliate.category === "retail") {

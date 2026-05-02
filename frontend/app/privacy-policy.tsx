@@ -39,7 +39,7 @@ export default function PrivacyPolicyScreen() {
         {/* Section 2 */}
         <Text style={styles.sectionTitle}>2. Information We Collect</Text>
         <Text style={styles.paragraph}>
-          My Optical Wallet is a local-only utility. We do not require account creation or registration. The only information processed by the app consists of the prescription photos and family names you choose to save locally on your device.
+          My Optical Wallet is a local-only utility. We do not require account creation or registration. The only information processed by the app consists of the optical document photos and family names you choose to save locally on your device.
         </Text>
         <Text style={styles.subSectionTitle}>Data we do NOT collect:</Text>
         <Text style={styles.bulletPoint}>• Personal identifiers (name, email address, phone number, mailing address)</Text>
@@ -48,20 +48,20 @@ export default function PrivacyPolicyScreen() {
         <Text style={styles.bulletPoint}>• Device identifiers or advertising IDs</Text>
         <Text style={styles.bulletPoint}>• Browsing or search history</Text>
         <Text style={styles.bulletPoint}>• Contacts or address book data</Text>
-        <Text style={styles.bulletPoint}>• Health data beyond what you voluntarily store as prescription photos</Text>
+        <Text style={styles.bulletPoint}>• Health data beyond what you voluntarily store as optical document photos</Text>
         <Text style={styles.bulletPoint}>• Usage analytics or behavioral tracking data</Text>
         <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Device permissions:</Text> The App may request access to your device&apos;s camera and photo library solely for the purpose of allowing you to photograph or select prescription images to store locally. These permissions are optional and can be managed through your device&apos;s settings at any time. No images are transmitted from your device.
+          <Text style={styles.bold}>Device permissions:</Text> The App may request access to your device&apos;s camera and photo library solely for the purpose of allowing you to photograph or select optical document images to store locally. These permissions are optional and can be managed through your device&apos;s settings at any time. No images are transmitted from your device.
         </Text>
 
         {/* Section 3 */}
         <Text style={styles.sectionTitle}>3. How We Use Your Information</Text>
         <Text style={styles.paragraph}>
-          Since all data remains on your device, we do not access, process, or use your personal information on any server or cloud service. The App processes your prescription photos and family member names exclusively on your device to:
+          Since all data remains on your device, we do not access, process, or use your personal information on any server or cloud service. The App processes your optical document photos and family member names exclusively on your device to:
         </Text>
-        <Text style={styles.bulletPoint}>• Display and organize your saved prescription photos within the App</Text>
-        <Text style={styles.bulletPoint}>• Associate prescription photos with family member names you provide</Text>
-        <Text style={styles.bulletPoint}>• Enable you to view your prescriptions at any time on your device</Text>
+        <Text style={styles.bulletPoint}>• Display and organize your saved optical document photos within the App</Text>
+        <Text style={styles.bulletPoint}>• Associate optical document photos with family member names you provide</Text>
+        <Text style={styles.bulletPoint}>• Enable you to view your optical documents at any time on your device</Text>
         <Text style={styles.paragraph}>
           We do not use your data for advertising, analytics, profiling, or any purpose beyond the core functionality described above.
         </Text>
@@ -69,10 +69,10 @@ export default function PrivacyPolicyScreen() {
         {/* Section 4 */}
         <Text style={styles.sectionTitle}>4. Data Storage and Security</Text>
         <Text style={styles.paragraph}>
-          All prescription data, including photos and names, is stored exclusively on your device&apos;s local storage. My Optical Wallet does not transmit, store, or access this data on any external servers or cloud infrastructure. Your data never leaves your device.
+          All optical document data, including photos and names, is stored exclusively on your device&apos;s local storage. My Optical Wallet does not transmit, store, or access this data on any external servers or cloud infrastructure. Your data never leaves your device.
         </Text>
         <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Security measures:</Text> Your data is protected by your device&apos;s built-in security features, including device encryption, passcode/biometric lock, and operating system sandboxing. We recommend that you keep your device&apos;s operating system up to date and use a strong passcode or biometric authentication to protect access to your stored prescriptions.
+          <Text style={styles.bold}>Security measures:</Text> Your data is protected by your device&apos;s built-in security features, including device encryption, passcode/biometric lock, and operating system sandboxing. We recommend that you keep your device&apos;s operating system up to date and use a strong passcode or biometric authentication to protect access to your stored optical documents.
         </Text>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>Data encryption:</Text> Data stored within the App benefits from the encryption provided by your device&apos;s operating system (iOS Data Protection or Android file-based encryption) when your device is locked.
@@ -93,7 +93,7 @@ export default function PrivacyPolicyScreen() {
         {/* Section 6 */}
         <Text style={styles.sectionTitle}>6. Data Retention</Text>
         <Text style={styles.paragraph}>
-          Your prescription photos and family member names are retained on your device for as long as the App is installed and you choose to keep them. We do not retain any copy of your data on our servers, as no data is ever transmitted from your device. You may delete individual prescriptions within the App at any time, or remove all data by uninstalling the App or clearing the App&apos;s data in your device settings.
+          Your optical document photos and family member names are retained on your device for as long as the App is installed and you choose to keep them. We do not retain any copy of your data on our servers, as no data is ever transmitted from your device. You may delete individual optical documents within the App at any time, or remove all data by uninstalling the App or clearing the App&apos;s data in your device settings.
         </Text>
 
         {/* Section 7 */}
@@ -101,9 +101,9 @@ export default function PrivacyPolicyScreen() {
         <Text style={styles.paragraph}>
           You have full control over your data. Because all information is stored locally on your device, you can exercise the following rights at any time without needing to contact us:
         </Text>
-        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Access:</Text> View all stored prescription photos and names directly within the App</Text>
-        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Deletion:</Text> Delete individual prescriptions within the App, or delete all data by uninstalling the App or clearing the App&apos;s data in your device settings</Text>
-        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Portability:</Text> Export or share your prescription photos using your device&apos;s built-in sharing features</Text>
+        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Access:</Text> View all stored optical document photos and names directly within the App</Text>
+        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Deletion:</Text> Delete individual optical documents within the App, or delete all data by uninstalling the App or clearing the App&apos;s data in your device settings</Text>
+        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Portability:</Text> Export or share your optical document photos using your device&apos;s built-in sharing features</Text>
         <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Withdraw consent:</Text> Revoke camera or photo library permissions at any time through your device settings</Text>
 
         <Text style={styles.subSectionTitle}>For Users in the European Economic Area (GDPR)</Text>

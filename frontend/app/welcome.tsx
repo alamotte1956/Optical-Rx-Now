@@ -11,6 +11,8 @@ import { isSmallDevice, isLargeDevice, moderateScale } from "../services/respons
 import { useTranslation } from "../services/i18n";
 import { useTheme } from "../services/theme";
 import { exportAllToPDF } from "../services/pdfExport";
+import BannerCarousel from "../components/BannerCarousel";
+import { logAnalyticsEvent } from "../services/adminApi";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
@@ -40,6 +42,8 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     requestNotificationPermissions();
+    // Track app open
+    logAnalyticsEvent("app_open").catch(() => {});
   }, []);
 
   const loadStats = async () => {
@@ -79,6 +83,7 @@ export default function WelcomeScreen() {
 
   const handleShare = async () => {
     try {
+      logAnalyticsEvent("share_click").catch(() => {});
       await Share.share({
         message: `${t("share_message")} https://play.google.com/store/apps/details?id=com.opticalrxnow.mobile.v1`,
         title: "My Optical Wallet",
@@ -279,14 +284,8 @@ export default function WelcomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Ad Banner Placeholder */}
-          <TouchableOpacity 
-            style={styles.adPlaceholder}
-            onPress={() => Linking.openURL("mailto:alamotte1956@gmail.com?subject=Advertising%20Inquiry")}
-          >
-            <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
-            <Text style={styles.adPlaceholderText}>{t("advertise_with_us")}</Text>
-          </TouchableOpacity>
+          {/* Dynamic Banner Carousel */}
+          <BannerCarousel />
 
           {/* Reset Age Verification - for testing */}
           <TouchableOpacity 

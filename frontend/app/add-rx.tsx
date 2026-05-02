@@ -175,7 +175,7 @@ export default function AddRxScreen() {
     if (!expiryDate) {
       Alert.alert(
         "Expiration Date Required",
-        "Please enter the expiration date from your prescription. This is needed to send you reminders before it expires."
+        "Please enter the expiration date from your optical document. This is needed to send you reminders before it expires."
       );
       return;
     }
@@ -197,7 +197,7 @@ export default function AddRxScreen() {
       Alert.alert(t("success"), t("prescription_saved"));
       router.back();
     } catch (error) {
-      Alert.alert(t("error"), "Failed to save prescription");
+      Alert.alert(t("error"), "Failed to save optical document");
       console.log("Save error:", error);
     } finally {
       setSaving(false);
@@ -225,7 +225,7 @@ export default function AddRxScreen() {
           <Ionicons name="people-outline" size={64} color="#3a4d63" />
           <Text style={styles.emptyText}>No Family Members</Text>
           <Text style={styles.emptySubtext}>
-            Please add a family member first before adding prescriptions
+            Please add a family member first before adding optical documents
           </Text>
           <TouchableOpacity
             style={styles.emptyButton}
@@ -288,7 +288,7 @@ export default function AddRxScreen() {
             </View>
             {!expiryDate && (
               <Text style={styles.expiryHelp}>
-                Enter the expiration date from your prescription
+                Enter the expiration date from your optical document
               </Text>
             )}
           </View>
@@ -413,7 +413,7 @@ export default function AddRxScreen() {
       <View style={styles.captureContainer}>
         <View style={styles.captureContent}>
           <Ionicons name="camera" size={80} color="#4a9eff" />
-          <Text style={styles.captureTitle}>Take a Photo of Your Prescription</Text>
+          <Text style={styles.captureTitle}>Take a Photo of Your Optical Document</Text>
           <Text style={styles.captureSubtitle}>
             You&apos;ll enter the expiration date manually
           </Text>
@@ -441,7 +441,7 @@ export default function AddRxScreen() {
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="expand" size={16} color="#4CAF50" />
-              <Text style={styles.tipItemText}>Capture the full prescription in frame</Text>
+              <Text style={styles.tipItemText}>Capture the full document in frame</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="hand-left" size={16} color="#9C27B0" />
@@ -456,7 +456,7 @@ export default function AddRxScreen() {
           {/* First-time user hint */}
           <View style={styles.hintCard}>
             <Ionicons name="information-circle" size={20} color="#4a9eff" />
-            <Text style={styles.hintText}>After taking a photo, you&apos;ll enter the expiration date from your prescription. We&apos;ll remind you before it expires!</Text>
+            <Text style={styles.hintText}>After taking a photo, you&apos;ll enter the expiration date from your optical document. We&apos;ll remind you before it expires!</Text>
           </View>
         </View>
       </View>

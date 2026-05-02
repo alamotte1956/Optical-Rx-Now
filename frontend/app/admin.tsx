@@ -38,6 +38,7 @@ import {
   createInvoice,
   updateInvoice,
   deleteInvoice,
+  autoGenerateInvoices,
   type Affiliate,
   type Banner,
   type Invoice,
@@ -456,6 +457,31 @@ export default function AdminScreen() {
     ]);
   };
 
+  const handleAutoGenerateInvoices = async () => {
+    Alert.alert(
+      "Auto-Generate Invoices",
+      "This will create invoices based on current affiliate click data and commission rates.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Generate",
+          onPress: async () => {
+            try {
+              const result = await autoGenerateInvoices();
+              await loadAllData();
+              Alert.alert(
+                "Success",
+                `${result.invoices_created} invoice(s) generated from affiliate data.`
+              );
+            } catch (error: any) {
+              Alert.alert("Error", error.message);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const cycleInvoiceStatus = async (inv: Invoice) => {
     const statusOrder: Invoice["status"][] = ["pending", "paid", "overdue"];
     const currentIdx = statusOrder.indexOf(inv.status);
@@ -791,6 +817,10 @@ export default function AdminScreen() {
             <TouchableOpacity style={[styles.addButton, { backgroundColor: "#00BCD4" }]} onPress={() => openInvoiceModal()}>
               <Ionicons name="add-circle" size={18} color="#fff" />
               <Text style={styles.addButtonText}>Create Invoice</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={handleAutoGenerateInvoices}>
+              <Ionicons name="flash" size={18} color="#fff" />
+              <Text style={styles.addButtonText}>Auto-Generate</Text>
             </TouchableOpacity>
           </View>
 

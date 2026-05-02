@@ -318,9 +318,9 @@ export default function FindOptometristsScreen() {
         <View style={styles.infoCard}>
           <Ionicons name="information-circle" size={24} color="#4a9eff" />
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Prescription Tip</Text>
+            <Text style={styles.infoTitle}>Document Tip</Text>
             <Text style={styles.infoText}>
-              Eye prescriptions typically expire 1-2 years from the exam date. Schedule regular eye exams to keep your prescription current.
+              Optical documents typically expire 1-2 years from the exam date. Schedule regular eye exams to keep your documents current.
             </Text>
           </View>
         </View>

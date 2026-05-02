@@ -325,7 +325,7 @@ export const requestNotificationPermissions = async (): Promise<boolean> => {
     if (finalStatus !== "granted") return false;
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("expiry-alerts", {
-        name: "Prescription Expiry Alerts",
+        name: "Document Expiry Alerts",
         importance: Notifications.AndroidImportance.HIGH,
       });
     }
@@ -368,8 +368,8 @@ export const scheduleExpiryNotifications = async (prescription: Prescription): P
     triggerDate.setHours(8, 0, 0, 0);
     if (triggerDate <= new Date()) continue;
 
-    const title = daysBefore === 0 ? "Prescription Expires TODAY!" : `Prescription Expires in ${daysBefore} Days`;
-    const body = `${memberName}'s ${prescription.rxType} prescription ${daysBefore === 0 ? 'expires today' : `expires on ${expiryDate.toLocaleDateString()}`}`;
+    const title = daysBefore === 0 ? "Document Expires TODAY!" : `Document Expires in ${daysBefore} Days`;
+    const body = `${memberName}'s ${prescription.rxType} optical document ${daysBefore === 0 ? 'expires today' : `expires on ${expiryDate.toLocaleDateString()}`}`;
 
     try {
       const secondsUntilTrigger = Math.floor((triggerDate.getTime() - Date.now()) / 1000);

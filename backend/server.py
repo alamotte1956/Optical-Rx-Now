@@ -4,7 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import os
 import uuid
 
@@ -337,3 +337,51 @@ async def get_financial_dashboard():
         },
         "total_revenue": sum(i.get("total_amount", 0) for i in paid_invoices)
     }
+
+
+# ==================== AUTO-INVOICING ====================
+
+@app.post("/api/invoices/auto-generate")
+async def auto_generate_invoices():
+    """Auto-generate invoices based on affiliate click data for the current period"""
+    affiliates = await db.affiliates.find({"is_active": True}).to_list(100)
+    
+    if not affiliates:
+        return {"status": "no_affiliates", "invoices_created": 0}
+    
+    invoices_created = 0
+    for aff in affiliates:
+        clicks = aff.get("click_count", 0)
+        commission = aff.get("commission", 0)
+        potential_revenue = round(clicks * commission / 100, 2)
+        
+        if potential_revenue <= 0:
+            continue
+        
+        invoice_id = str(uuid.uuid4())
+        line_items = [{
+            "description": f"Affiliate clicks ({clicks}) x {commission}% commission",
+            "quantity": clicks,
+            "unit_price": round(commission / 100, 4),
+            "total": potential_revenue
+        }]
+        
+        # Set due date to 30 days from now
+        due_date = (datetime.utcnow() + timedelta(days=30)).isoformat()
+        
+        invoice = {
+            "invoice_id": invoice_id,
+            "recipient_name": aff.get("name", "Unknown"),
+            "recipient_email": None,
+            "invoice_type": "affiliate",
+            "line_items": line_items,
+            "total_amount": potential_revenue,
+            "status": "pending",
+            "due_date": due_date,
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        await db.invoices.insert_one(invoice)
+        invoices_created += 1
+    
+    return {"status": "success", "invoices_created": invoices_created}

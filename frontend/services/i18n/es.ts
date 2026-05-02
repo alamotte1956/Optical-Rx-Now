@@ -4,8 +4,8 @@ export const es = {
   get_started: "Comenzar",
   open_wallet: "Abrir Mi Cartera",
   quick_add: "Agregar Rápido:",
-  glasses_rx: "Receta Lentes",
-  contacts_rx: "Receta Contactos",
+  glasses_rx: "Lentes",
+  contacts_rx: "Lentes de Contacto",
   find_stores: "Buscar Ópticas Cercanas",
   family_management: "Gestión Familiar",
   add_family_member: "Agregar Familiar",
@@ -15,7 +15,7 @@ export const es = {
   advertise_with_us: "Anúnciate con Nosotros",
   reset_age_verification: "Restablecer Verificación de Edad",
   version: "Versión",
-  share_message: "Descubre My Optical Wallet: la forma más fácil de guardar las recetas de lentes de tu familia.",
+  share_message: "Descubre My Optical Wallet: la forma más fácil de guardar las documentos ópticos de lentes de tu familia.",
 
   // Age Verification
   age_verify_title: "Verificación de Edad",
@@ -26,43 +26,43 @@ export const es = {
   age_verify_denied_message: "Debes tener 18 años o más para usar esta aplicación.",
 
   // Prescriptions Screen
-  prescriptions: "Recetas",
-  no_prescriptions: "Aún no hay recetas",
-  no_prescriptions_desc: "Agrega tu primera receta para comenzar",
-  add_prescription: "Agregar Receta",
+  prescriptions: "Documentos Ópticos",
+  no_prescriptions: "Aún no hay documentos ópticos",
+  no_prescriptions_desc: "Agrega tu primera documento óptico para comenzar",
+  add_prescription: "Agregar Documento Óptico",
   all_members: "Todos",
   expired: "Vencida",
   expires: "Vence",
   delete: "Eliminar",
-  delete_confirm: "¿Estás seguro de que quieres eliminar esta receta?",
+  delete_confirm: "¿Estás seguro de que quieres eliminar esta documento óptico?",
   cancel: "Cancelar",
 
   // Family Screen
   family: "Familia",
   no_members: "Aún no hay miembros",
-  no_members_desc: "Agrega un familiar para comenzar a guardar recetas",
-  prescriptions_count: "recetas",
+  no_members_desc: "Agrega un familiar para comenzar a guardar documentos ópticos",
+  prescriptions_count: "documentos ópticos",
   delete_member: "Eliminar Miembro",
-  delete_member_confirm: "Esto también eliminará todas las recetas de este miembro. ¿Continuar?",
+  delete_member_confirm: "Esto también eliminará todas las documentos ópticos de este miembro. ¿Continuar?",
   deleting: "Eliminando...",
 
   // Add Prescription
-  add_rx_title: "Agregar Receta",
-  rx_type: "Tipo de Receta",
+  add_rx_title: "Agregar Documento Óptico",
+  rx_type: "Tipo de Documento Óptico",
   select_member: "Seleccionar Familiar",
   take_photo: "Tomar Foto",
   choose_from_gallery: "Elegir de Galería",
   expiry_date: "Fecha de Vencimiento",
   notes: "Notas (opcional)",
-  notes_placeholder: "Agrega notas sobre esta receta...",
-  save_prescription: "Guardar Receta",
+  notes_placeholder: "Agrega notas sobre esta documento óptico...",
+  save_prescription: "Guardar Documento Óptico",
   saving: "Guardando...",
   photo_required: "Foto Requerida",
-  photo_required_message: "Por favor toma o selecciona una foto de la receta.",
+  photo_required_message: "Por favor toma o selecciona una foto de la documento óptico.",
   member_required: "Miembro Requerido",
   member_required_message: "Por favor selecciona un familiar.",
   success: "Éxito",
-  prescription_saved: "¡Receta guardada exitosamente!",
+  prescription_saved: "¡Documento Óptico guardada exitosamente!",
 
   // Add Member
   add_member_title: "Agregar Familiar",
@@ -75,7 +75,7 @@ export const es = {
   member_saved: "¡Familiar agregado exitosamente!",
 
   // Rx Detail
-  rx_detail_title: "Detalles de Receta",
+  rx_detail_title: "Detalles de Documento Óptico",
   member: "Miembro",
   type: "Tipo",
   eyeglasses: "Lentes",
@@ -85,7 +85,7 @@ export const es = {
   no_expiry_set: "Sin fecha de vencimiento",
   share: "Compartir",
   print: "Imprimir",
-  delete_prescription: "Eliminar Receta",
+  delete_prescription: "Eliminar Documento Óptico",
 
   // Notification Settings
   notification_settings: "Configuración de Notificaciones",

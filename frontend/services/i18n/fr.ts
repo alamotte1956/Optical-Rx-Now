@@ -4,8 +4,8 @@ export const fr = {
   get_started: "Commencer",
   open_wallet: "Ouvrir Mon Portefeuille",
   quick_add: "Ajout Rapide :",
-  glasses_rx: "Ordonnance Lunettes",
-  contacts_rx: "Ordonnance Lentilles",
+  glasses_rx: "Lunettes",
+  contacts_rx: "Lentilles",
   find_stores: "Trouver des Opticiens",
   family_management: "Gestion Familiale",
   add_family_member: "Ajouter un Membre",
@@ -15,7 +15,7 @@ export const fr = {
   advertise_with_us: "Annoncez Chez Nous",
   reset_age_verification: "Réinitialiser la Vérification d'Âge",
   version: "Version",
-  share_message: "Découvrez My Optical Wallet : le moyen le plus simple de conserver les ordonnances optiques de votre famille.",
+  share_message: "Découvrez My Optical Wallet : le moyen le plus simple de conserver les documents optiques de votre famille.",
 
   // Age Verification
   age_verify_title: "Vérification d'Âge",
@@ -26,43 +26,43 @@ export const fr = {
   age_verify_denied_message: "Vous devez avoir 18 ans ou plus pour utiliser cette application.",
 
   // Prescriptions Screen
-  prescriptions: "Ordonnances",
-  no_prescriptions: "Aucune ordonnance",
-  no_prescriptions_desc: "Ajoutez votre première ordonnance pour commencer",
-  add_prescription: "Ajouter une Ordonnance",
+  prescriptions: "Documents Optiques",
+  no_prescriptions: "Aucune document optique",
+  no_prescriptions_desc: "Ajoutez votre première document optique pour commencer",
+  add_prescription: "Ajouter un Document Optique",
   all_members: "Tous",
   expired: "Expirée",
   expires: "Expire",
   delete: "Supprimer",
-  delete_confirm: "Êtes-vous sûr de vouloir supprimer cette ordonnance ?",
+  delete_confirm: "Êtes-vous sûr de vouloir supprimer cette document optique ?",
   cancel: "Annuler",
 
   // Family Screen
   family: "Famille",
   no_members: "Aucun membre",
   no_members_desc: "Ajoutez un membre de la famille pour commencer",
-  prescriptions_count: "ordonnances",
+  prescriptions_count: "documents optiques",
   delete_member: "Supprimer le Membre",
-  delete_member_confirm: "Cela supprimera également toutes les ordonnances de ce membre. Continuer ?",
+  delete_member_confirm: "Cela supprimera également toutes les documents optiques de ce membre. Continuer ?",
   deleting: "Suppression...",
 
   // Add Prescription
-  add_rx_title: "Ajouter une Ordonnance",
-  rx_type: "Type d'Ordonnance",
+  add_rx_title: "Ajouter un Document Optique",
+  rx_type: "Type d'Document Optique",
   select_member: "Sélectionner un Membre",
   take_photo: "Prendre une Photo",
   choose_from_gallery: "Choisir dans la Galerie",
   expiry_date: "Date d'Expiration",
   notes: "Notes (facultatif)",
-  notes_placeholder: "Ajoutez des notes sur cette ordonnance...",
-  save_prescription: "Enregistrer l'Ordonnance",
+  notes_placeholder: "Ajoutez des notes sur cette document optique...",
+  save_prescription: "Enregistrer le Document",
   saving: "Enregistrement...",
   photo_required: "Photo Requise",
-  photo_required_message: "Veuillez prendre ou sélectionner une photo de l'ordonnance.",
+  photo_required_message: "Veuillez prendre ou sélectionner une photo de l'document optique.",
   member_required: "Membre Requis",
   member_required_message: "Veuillez sélectionner un membre de la famille.",
   success: "Succès",
-  prescription_saved: "Ordonnance enregistrée avec succès !",
+  prescription_saved: "Document Optique enregistrée avec succès !",
 
   // Add Member
   add_member_title: "Ajouter un Membre",
@@ -75,7 +75,7 @@ export const fr = {
   member_saved: "Membre ajouté avec succès !",
 
   // Rx Detail
-  rx_detail_title: "Détails de l'Ordonnance",
+  rx_detail_title: "Détails de le Document",
   member: "Membre",
   type: "Type",
   eyeglasses: "Lunettes",
@@ -85,7 +85,7 @@ export const fr = {
   no_expiry_set: "Aucune date d'expiration",
   share: "Partager",
   print: "Imprimer",
-  delete_prescription: "Supprimer l'Ordonnance",
+  delete_prescription: "Supprimer le Document",
 
   // Notification Settings
   notification_settings: "Paramètres de Notifications",

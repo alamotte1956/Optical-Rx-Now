@@ -170,6 +170,12 @@ export const deleteInvoice = async (invoiceId: string): Promise<any> => {
   });
 };
 
+export const autoGenerateInvoices = async (): Promise<any> => {
+  return apiCall("/api/invoices/auto-generate", {
+    method: "POST",
+  });
+};
+
 // ==================== ANALYTICS ====================
 
 export interface AnalyticsDashboard {

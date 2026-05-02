@@ -120,7 +120,7 @@ export default function NotificationSettingsScreen() {
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Never Miss an Expiration</Text>
             <Text style={styles.infoText}>
-              Get notified when your prescriptions are about to expire so you can schedule an eye exam in time.
+              Get notified when your optical documents are about to expire so you can schedule an eye exam in time.
             </Text>
           </View>
         </View>
@@ -195,7 +195,7 @@ export default function NotificationSettingsScreen() {
               <Text style={styles.stepNumberText}>1</Text>
             </View>
             <Text style={styles.stepText}>
-              Add a prescription with an expiration date
+              Add an optical document with an expiration date
             </Text>
           </View>
           <View style={styles.step}>
@@ -211,7 +211,7 @@ export default function NotificationSettingsScreen() {
               <Text style={styles.stepNumberText}>3</Text>
             </View>
             <Text style={styles.stepText}>
-              Get notified before your prescription expires
+              Get notified before your optical document expires
             </Text>
           </View>
         </View>

@@ -67,8 +67,8 @@ export default function PrescriptionsScreen() {
 
   const handleDeletePrescription = (rx: Prescription) => {
     Alert.alert(
-      "Delete Prescription",
-      "Are you sure you want to delete this prescription?",
+      "Delete Optical Document",
+      "Are you sure you want to delete this optical document?",
       [
         { text: "Cancel", style: "cancel" },
         {

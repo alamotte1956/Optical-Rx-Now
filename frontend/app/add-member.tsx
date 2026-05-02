@@ -152,11 +152,11 @@ export default function AddMemberScreen() {
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-              <Text style={styles.tipText}>Add yourself first as &quot;Self&quot; to track your own prescriptions</Text>
+              <Text style={styles.tipText}>Add yourself first as &quot;Self&quot; to track your own optical documents</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
-              <Text style={styles.tipText}>Each family member can have multiple prescriptions</Text>
+              <Text style={styles.tipText}>Each family member can have multiple optical documents</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
@@ -168,7 +168,7 @@ export default function AddMemberScreen() {
           <View style={styles.infoCard}>
             <Ionicons name="information-circle" size={24} color="#4a9eff" />
             <Text style={styles.infoText}>
-              Add family members to organize prescriptions. You can add prescriptions for each member separately.
+              Add family members to organize optical documents. You can add optical documents for each member separately.
             </Text>
           </View>
         </ScrollView>
