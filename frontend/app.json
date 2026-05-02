@@ -144,6 +144,7 @@
       "privacyPolicyUrl": "https://MyOpticalWallet.com/privacy",
       "supportEmail": "alamotte1956@gmail.com",
       "websiteUrl": "https://MyOpticalWallet.com",
+      "EXPO_PUBLIC_BACKEND_URL": "https://optical-rx-now.preview.emergentagent.com",
       "router": {}
     },
     "owner": "alamotte1956",
