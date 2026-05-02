@@ -314,7 +314,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0a1628",
+    backgroundColor: "#b5aaad",
   },
   header: {
     flexDirection: "row",
