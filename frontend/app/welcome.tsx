@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(22),
   },
   appName: {
-    fontSize: moderateScale(22),
+    fontSize: moderateScale(28),
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",
