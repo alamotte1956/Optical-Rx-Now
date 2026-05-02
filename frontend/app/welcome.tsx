@@ -295,7 +295,7 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
 
           {/* Version Number */}
-          <Text style={styles.versionText}>{t("version")} 1.0.2</Text>
+          <Text style={styles.versionText}>{t("version")} 2.0.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
