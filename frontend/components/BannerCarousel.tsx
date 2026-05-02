@@ -140,7 +140,7 @@ export default function BannerCarousel({
         )}
         {currentBanner.title && (
           <View style={styles.bannerOverlay}>
-            <Text style={styles.bannerTitle} numberOfLines={1}>
+            <Text style={styles.bannerTitle} numberOfLines={2}>
               {currentBanner.title}
             </Text>
           </View>
@@ -216,17 +216,23 @@ const styles = StyleSheet.create({
   },
   bannerOverlay: {
     position: "absolute",
+    top: 0,
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
   },
   bannerTitle: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "700",
     color: "#fff",
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   dotsContainer: {
     flexDirection: "row",
