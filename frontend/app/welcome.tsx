@@ -205,15 +205,6 @@ export default function WelcomeScreen() {
           {/* Dynamic Banner Carousel */}
           <BannerCarousel />
 
-          {/* Dark/Light Mode Toggle */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => setMode(isDark ? "light" : "dark")}
-          >
-            <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>{isDark ? "Light Mode" : "Dark Mode"}</Text>
-          </TouchableOpacity>
-
           {/* Find Optical Stores Button - Links to shop */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
@@ -297,13 +288,22 @@ export default function WelcomeScreen() {
             <Text style={styles.resetButtonText}>{t("reset_age_verification")}</Text>
           </TouchableOpacity>
 
-          {/* Language Settings - at the very bottom */}
+          {/* Language Settings */}
           <TouchableOpacity 
             style={styles.secondaryButton} 
             onPress={() => router.push("/language-settings")}
           >
             <Ionicons name="globe-outline" size={22} color="#4a9eff" />
             <Text style={styles.secondaryButtonText}>{t("language_settings")}</Text>
+          </TouchableOpacity>
+
+          {/* Dark/Light Mode Toggle - second from bottom */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => setMode(isDark ? "light" : "dark")}
+          >
+            <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>{isDark ? "Light Mode" : "Dark Mode"}</Text>
           </TouchableOpacity>
 
           {/* Version Number */}
