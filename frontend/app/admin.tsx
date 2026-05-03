@@ -618,7 +618,115 @@ export default function AdminScreen() {
         >
           {analytics ? (
             <>
-              <Text style={styles.subsectionLabel}>App Activity</Text>
+              {/* ---- Android vs iOS Side-by-Side ---- */}
+              {analytics.platform_events && (() => {
+                const androidData = analytics.platform_events["android"] || {};
+                const iosData = analytics.platform_events["ios"] || {};
+                const webData = analytics.platform_events["web"] || {};
+                const androidTotal = Object.values(androidData).reduce((a, b) => a + b, 0);
+                const iosTotal = Object.values(iosData).reduce((a, b) => a + b, 0);
+                const webTotal = Object.values(webData).reduce((a, b) => a + b, 0);
+
+                return (
+                  <>
+                    <View style={styles.platformSplitHeader}>
+                      <View style={styles.platformSplitTab}>
+                        <Ionicons name="logo-android" size={20} color="#3DDC84" />
+                        <Text style={[styles.platformSplitTitle, { color: "#3DDC84" }]}>Android</Text>
+                      </View>
+                      <View style={styles.platformSplitTab}>
+                        <Ionicons name="logo-apple" size={20} color="#fff" />
+                        <Text style={[styles.platformSplitTitle, { color: "#fff" }]}>iOS</Text>
+                      </View>
+                    </View>
+
+                    {/* App Opens */}
+                    <View style={styles.platformSplitRow}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84" }]}>{androidData["app_open"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>App Opens</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff" }]}>{iosData["app_open"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>App Opens</Text>
+                      </View>
+                    </View>
+
+                    {/* Banner Views */}
+                    <View style={styles.platformSplitRow}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84" }]}>{androidData["banner_view"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Banner Views</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff" }]}>{iosData["banner_view"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Banner Views</Text>
+                      </View>
+                    </View>
+
+                    {/* Banner Clicks */}
+                    <View style={styles.platformSplitRow}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84" }]}>{androidData["banner_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Banner Clicks</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff" }]}>{iosData["banner_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Banner Clicks</Text>
+                      </View>
+                    </View>
+
+                    {/* Affiliate Clicks */}
+                    <View style={styles.platformSplitRow}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84" }]}>{androidData["affiliate_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Affiliate Clicks</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff" }]}>{iosData["affiliate_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Affiliate Clicks</Text>
+                      </View>
+                    </View>
+
+                    {/* Shares */}
+                    <View style={styles.platformSplitRow}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84" }]}>{androidData["share_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Shares</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff" }]}>{iosData["share_click"] || 0}</Text>
+                        <Text style={styles.platformSplitLabel}>Shares</Text>
+                      </View>
+                    </View>
+
+                    {/* Totals */}
+                    <View style={[styles.platformSplitRow, { backgroundColor: "#0f1d2f", borderRadius: 8, marginTop: 4 }]}>
+                      <View style={[styles.platformSplitCell, { borderRightWidth: 1, borderRightColor: "#1a2d45" }]}>
+                        <Text style={[styles.platformSplitValue, { color: "#3DDC84", fontSize: 22 }]}>{androidTotal}</Text>
+                        <Text style={[styles.platformSplitLabel, { fontWeight: "700" }]}>Total Android</Text>
+                      </View>
+                      <View style={styles.platformSplitCell}>
+                        <Text style={[styles.platformSplitValue, { color: "#fff", fontSize: 22 }]}>{iosTotal}</Text>
+                        <Text style={[styles.platformSplitLabel, { fontWeight: "700" }]}>Total iOS</Text>
+                      </View>
+                    </View>
+
+                    {/* Web summary */}
+                    {webTotal > 0 && (
+                      <View style={[styles.platformSplitRow, { backgroundColor: "#0f1d2f", borderRadius: 8, marginTop: 4 }]}>
+                        <View style={[styles.platformSplitCell, { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]}>
+                          <Ionicons name="globe-outline" size={18} color="#4a9eff" />
+                          <Text style={[styles.platformSplitValue, { color: "#4a9eff", fontSize: 18 }]}>{webTotal}</Text>
+                          <Text style={[styles.platformSplitLabel, { fontWeight: "700", marginTop: 0 }]}>Web Events</Text>
+                        </View>
+                      </View>
+                    )}
+                  </>
+                );
+              })()}
+
+              <Text style={[styles.subsectionLabel, { marginTop: 16 }]}>Combined Totals</Text>
               <View style={styles.metricsGrid}>
                 <MetricCard value={analytics.summary.app_opens} label="App Opens" icon="phone-portrait-outline" />
                 <MetricCard value={analytics.summary.share_clicks} label="Shares" icon="share-outline" color="#4CAF50" />
@@ -1357,6 +1465,50 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     color: "#fff",
+  },
+
+  // Android vs iOS Split View
+  platformSplitHeader: {
+    flexDirection: "row",
+    marginBottom: 2,
+  },
+  platformSplitTab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    backgroundColor: "#1a2d45",
+    borderRadius: 8,
+    marginHorizontal: 2,
+  },
+  platformSplitTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  platformSplitRow: {
+    flexDirection: "row",
+    marginVertical: 2,
+  },
+  platformSplitCell: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    backgroundColor: "#142236",
+    borderRadius: 6,
+    marginHorizontal: 2,
+  },
+  platformSplitValue: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  platformSplitLabel: {
+    fontSize: 11,
+    color: "#8899a6",
+    fontWeight: "600",
+    marginTop: 2,
   },
 
   // Section Actions
