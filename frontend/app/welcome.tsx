@@ -214,27 +214,6 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>{t("find_stores")}</Text>
           </TouchableOpacity>
 
-          {/* Family Management Section */}
-          <View style={styles.familySection}>
-            <Text style={styles.sectionTitle}>{t("family_management")}</Text>
-            <View style={styles.familyButtons}>
-              <TouchableOpacity 
-                style={styles.familyButton}
-                onPress={() => router.push("/add-member")}
-              >
-                <Ionicons name="person-add" size={24} color="#4CAF50" />
-                <Text style={styles.familyButtonText}>{t("add_family_member")}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.familyButton}
-                onPress={() => router.push("/(tabs)/family")}
-              >
-                <Ionicons name="people" size={24} color="#4a9eff" />
-                <Text style={styles.familyButtonText}>{t("view_delete_members")}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           {/* Export PDF Button */}
           {stats.totalPrescriptions > 0 && (
             <TouchableOpacity 
