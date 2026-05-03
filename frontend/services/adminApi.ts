@@ -8,16 +8,29 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 // Resolve the backend URL
+const HARDCODED_BACKEND_URL = "https://optical-rx-now.preview.emergentagent.com";
+
 const getBaseUrl = (): string => {
-  const envUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
-    || process.env.EXPO_PUBLIC_BACKEND_URL
-    || "";
+  // Try all possible sources for the backend URL
+  const fromExtra = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL;
+  const fromEnv = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-  if (envUrl) return envUrl;
+  const envUrl = fromExtra || fromEnv || "";
 
-  // Fallback for local development
-  if (Platform.OS === "web") return "";
-  return "http://localhost:8001";
+  if (envUrl && envUrl.length > 0) {
+    console.log("[AdminAPI] Using backend URL:", envUrl);
+    return envUrl;
+  }
+
+  // For web preview, use relative URLs (same origin)
+  if (Platform.OS === "web") {
+    console.log("[AdminAPI] Web platform - using relative URLs");
+    return "";
+  }
+
+  // For native builds (Android/iOS), use hardcoded production URL
+  console.log("[AdminAPI] Using hardcoded backend URL:", HARDCODED_BACKEND_URL);
+  return HARDCODED_BACKEND_URL;
 };
 
 const BASE_URL = getBaseUrl();
