@@ -235,7 +235,7 @@ export default function AddRxScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>'{t("add_rx_title")}'</Text>
+          <Text style={styles.headerTitle}>{t("add_rx_title")}</Text>
           <View style={styles.placeholder} />
         </View>
         <View style={styles.emptyContainer}>
