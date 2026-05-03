@@ -33,6 +33,9 @@ const getBaseUrl = (): string => {
   return HARDCODED_BACKEND_URL;
 };
 
+// Admin API Key for protected endpoints
+const ADMIN_API_KEY = Constants.expoConfig?.extra?.ADMIN_API_KEY || "Pvz8xwghNOsIOtw1tBKZXO4LsaB_3xOjiNy81w4qy08";
+
 const BASE_URL = getBaseUrl();
 
 const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
@@ -41,7 +44,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
   
   // Only add Content-Type for write methods (avoids CORS preflight on GET)
   const defaultHeaders: Record<string, string> = isWriteMethod
-    ? { "Content-Type": "application/json" }
+    ? { "Content-Type": "application/json", "X-Admin-Key": ADMIN_API_KEY }
     : {};
 
   try {

@@ -105,6 +105,8 @@ export default function FamilyScreen() {
         <TouchableOpacity 
           style={{ backgroundColor: "#4a9eff", width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center" }}
           onPress={() => router.push("/add-member")}
+          accessibilityLabel="Add family member"
+          accessibilityRole="button"
         >
           <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>

@@ -166,7 +166,7 @@ export default function WelcomeScreen() {
           </Text>
 
           {/* Open My Wallet / Get Started Button */}
-          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+          <TouchableOpacity style={styles.button} onPress={handleGetStarted} accessibilityLabel="Get Started" accessibilityRole="button" accessibilityHint="Opens your optical wallet">
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (

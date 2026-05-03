@@ -437,3 +437,74 @@ export const clearAllData = async (): Promise<void> => {
   await AsyncStorage.multiRemove([KEYS.FAMILY_MEMBERS, KEYS.PRESCRIPTIONS, KEYS.SETTINGS, KEYS.SCHEDULED_NOTIFICATIONS]);
   await Notifications.cancelAllScheduledNotificationsAsync();
 };
+
+// Recommendation 9: Data Export/Backup
+export const exportAllData = async (): Promise<string> => {
+  const members = await getFamilyMembers();
+  const prescriptions = await getPrescriptions();
+  const settings = await getSettings();
+
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    appVersion: "2.0.1",
+    familyMembers: members,
+    opticalDocuments: prescriptions.map((p) => ({
+      ...p,
+      // Include image reference but not full base64 (too large for text export)
+      hasImage: !!p.imageBase64,
+      imageBase64: p.imageBase64 ? "[IMAGE DATA]" : null,
+    })),
+    settings,
+    summary: {
+      totalMembers: members.length,
+      totalDocuments: prescriptions.length,
+    },
+  };
+
+  return JSON.stringify(exportData, null, 2);
+};
+
+export const exportAllDataWithImages = async (): Promise<string> => {
+  const members = await getFamilyMembers();
+  const prescriptions = await getPrescriptions();
+  const settings = await getSettings();
+
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    appVersion: "2.0.1",
+    familyMembers: members,
+    opticalDocuments: prescriptions,
+    settings,
+    summary: {
+      totalMembers: members.length,
+      totalDocuments: prescriptions.length,
+    },
+  };
+
+  return JSON.stringify(exportData);
+};
+
+export const importData = async (jsonString: string): Promise<{ members: number; documents: number }> => {
+  const data = JSON.parse(jsonString);
+
+  if (data.familyMembers && Array.isArray(data.familyMembers)) {
+    const existing = await getFamilyMembers();
+    const existingIds = new Set(existing.map((m) => m.id));
+    const newMembers = data.familyMembers.filter((m: FamilyMember) => !existingIds.has(m.id));
+    if (newMembers.length > 0) {
+      await AsyncStorage.setItem(KEYS.FAMILY_MEMBERS, JSON.stringify([...existing, ...newMembers]));
+    }
+  }
+
+  if (data.opticalDocuments && Array.isArray(data.opticalDocuments)) {
+    const existing = await getPrescriptions();
+    const existingIds = new Set(existing.map((p) => p.id));
+    const newDocs = data.opticalDocuments.filter((p: Prescription) => !existingIds.has(p.id) && p.imageBase64 !== "[IMAGE DATA]");
+    // Note: imports without images will skip, full backup includes images
+  }
+
+  return {
+    members: data.familyMembers?.length || 0,
+    documents: data.opticalDocuments?.length || 0,
+  };
+};

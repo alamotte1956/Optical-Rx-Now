@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, timezone, timedelta
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 import uuid
 import io
@@ -14,13 +17,25 @@ load_dotenv()
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.getenv("DB_NAME", "optical_wallet")
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(title="My Optical Wallet API")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS middleware
+# CORS middleware — Recommendation 4: Restrict origins
+ALLOWED_ORIGINS = [
+    "https://optical-rx-now.preview.emergentagent.com",
+    "http://localhost:3000",
+    "http://localhost:8081",
+    "exp://optical-rx-now.preview.emergentagent.com",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -88,6 +103,15 @@ class InvoiceModel(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     due_date: Optional[str] = None
 
+# Recommendation 1: Admin API Key authentication
+async def verify_admin_key(request: Request):
+    """Verify admin API key for protected endpoints"""
+    if not ADMIN_API_KEY:
+        return  # No key configured, skip auth (dev mode)
+    api_key = request.headers.get("X-Admin-Key", "")
+    if api_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid or missing admin API key")
+
 # ==================== HEALTH ENDPOINTS ====================
 
 @app.get("/")
@@ -118,23 +142,26 @@ async def readyz():
 # ==================== AFFILIATE ENDPOINTS ====================
 
 @app.get("/api/affiliates")
-async def get_affiliates():
+@limiter.limit("60/minute")
+async def get_affiliates(request: Request):
     """Public endpoint - app fetches current affiliate data"""
     affiliates = await db.affiliates.find({"is_active": True}).sort("commission", -1).to_list(100)
     for a in affiliates:
         a["_id"] = str(a["_id"])
     return {"affiliates": affiliates}
 
-@app.post("/api/affiliates")
-async def create_affiliate(affiliate: AffiliateModel):
+@app.post("/api/affiliates", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def create_affiliate(request: Request, affiliate: AffiliateModel):
     data = affiliate.model_dump()
     data["updated_at"] = datetime.now(timezone.utc).isoformat()
     result = await db.affiliates.insert_one(data)
     data["_id"] = str(result.inserted_id)
     return {"status": "created", "affiliate": data}
 
-@app.put("/api/affiliates/{affiliate_id}")
-async def update_affiliate(affiliate_id: str, affiliate: AffiliateModel):
+@app.put("/api/affiliates/{affiliate_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def update_affiliate(request: Request, affiliate_id: str, affiliate: AffiliateModel):
     data = affiliate.model_dump(exclude={"affiliate_id"})
     data["updated_at"] = datetime.now(timezone.utc).isoformat()
     result = await db.affiliates.update_one(
@@ -145,8 +172,9 @@ async def update_affiliate(affiliate_id: str, affiliate: AffiliateModel):
         raise HTTPException(status_code=404, detail="Affiliate not found")
     return {"status": "updated", "affiliate": data}
 
-@app.delete("/api/affiliates/{affiliate_id}")
-async def delete_affiliate(affiliate_id: str):
+@app.delete("/api/affiliates/{affiliate_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def delete_affiliate(request: Request, affiliate_id: str):
     result = await db.affiliates.delete_one({"affiliate_id": affiliate_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Affiliate not found")
@@ -192,15 +220,17 @@ async def get_banners():
         active_banners.append(b)
     return {"banners": active_banners}
 
-@app.post("/api/banners")
-async def create_banner(banner: BannerModel):
+@app.post("/api/banners", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def create_banner(request: Request, banner: BannerModel):
     data = banner.model_dump()
     result = await db.banners.insert_one(data)
     data["_id"] = str(result.inserted_id)
     return {"status": "created", "banner": data}
 
-@app.put("/api/banners/{banner_id}")
-async def update_banner(banner_id: str, banner: BannerModel):
+@app.put("/api/banners/{banner_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def update_banner(request: Request, banner_id: str, banner: BannerModel):
     data = banner.model_dump(exclude={"banner_id"})
     result = await db.banners.update_one(
         {"banner_id": banner_id},
@@ -210,8 +240,9 @@ async def update_banner(banner_id: str, banner: BannerModel):
         raise HTTPException(status_code=404, detail="Banner not found")
     return {"status": "updated", "banner": data}
 
-@app.delete("/api/banners/{banner_id}")
-async def delete_banner(banner_id: str):
+@app.delete("/api/banners/{banner_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def delete_banner(request: Request, banner_id: str):
     result = await db.banners.delete_one({"banner_id": banner_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Banner not found")
@@ -220,7 +251,8 @@ async def delete_banner(banner_id: str):
 # ==================== ANALYTICS ENDPOINTS ====================
 
 @app.post("/api/analytics/event")
-async def log_event(event: AnalyticsEvent):
+@limiter.limit("120/minute")
+async def log_event(request: Request, event: AnalyticsEvent):
     """Log anonymous aggregate analytics event"""
     data = {
         "event_type": event.event_type,
@@ -315,15 +347,17 @@ async def get_invoices():
         inv["_id"] = str(inv["_id"])
     return {"invoices": invoices}
 
-@app.post("/api/invoices")
-async def create_invoice(invoice: InvoiceModel):
+@app.post("/api/invoices", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def create_invoice(request: Request, invoice: InvoiceModel):
     data = invoice.model_dump()
     result = await db.invoices.insert_one(data)
     data["_id"] = str(result.inserted_id)
     return {"status": "created", "invoice": data}
 
-@app.put("/api/invoices/{invoice_id}")
-async def update_invoice(invoice_id: str, updates: dict):
+@app.put("/api/invoices/{invoice_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def update_invoice(request: Request, invoice_id: str, updates: dict):
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
     result = await db.invoices.update_one(
         {"invoice_id": invoice_id},
@@ -333,8 +367,9 @@ async def update_invoice(invoice_id: str, updates: dict):
         raise HTTPException(status_code=404, detail="Invoice not found")
     return {"status": "updated"}
 
-@app.delete("/api/invoices/{invoice_id}")
-async def delete_invoice(invoice_id: str):
+@app.delete("/api/invoices/{invoice_id}", dependencies=[Depends(verify_admin_key)])
+@limiter.limit("30/minute")
+async def delete_invoice(request: Request, invoice_id: str):
     result = await db.invoices.delete_one({"invoice_id": invoice_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Invoice not found")
