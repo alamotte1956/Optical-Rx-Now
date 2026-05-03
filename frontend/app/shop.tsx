@@ -541,7 +541,9 @@ export default function ShopScreen() {
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Shop Eyewear</Text>
-          <View style={styles.placeholder} />
+          <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+            <Ionicons name="home-outline" size={22} color="#4a9eff" />
+          </TouchableOpacity>
         </View>
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#4a9eff" />

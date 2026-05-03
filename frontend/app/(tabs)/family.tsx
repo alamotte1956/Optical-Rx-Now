@@ -101,7 +101,10 @@ export default function FamilyScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0a1628" }} edges={["top"]}>
       {/* Header */}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16, borderBottomWidth: 1, borderBottomColor: "#1a2d45" }}>
-        <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff" }}>{t("family")}</Text>
+        <TouchableOpacity onPress={() => router.replace("/welcome")} style={{ width: 44, height: 44, justifyContent: "center", alignItems: "center" }} accessibilityLabel="Home" accessibilityRole="button">
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff", flex: 1, textAlign: "center" }}>{t("family")}</Text>
         <TouchableOpacity 
           style={{ backgroundColor: "#4a9eff", width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center" }}
           onPress={() => router.push("/add-member")}

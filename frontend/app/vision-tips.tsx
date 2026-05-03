@@ -116,7 +116,9 @@ export default function VisionTipsScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Vision Care Tips</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

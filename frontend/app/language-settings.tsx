@@ -34,7 +34,9 @@ export default function LanguageSettingsScreen() {
           <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("language_settings")}</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={true}>

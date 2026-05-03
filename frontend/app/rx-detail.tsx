@@ -323,7 +323,9 @@ export default function RxDetailScreen() {
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Prescription</Text>
-          <View style={styles.placeholder} />
+          <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+            <Ionicons name="home-outline" size={22} color="#4a9eff" />
+          </TouchableOpacity>
         </View>
         <View style={styles.emptyContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#ff5c5c" />

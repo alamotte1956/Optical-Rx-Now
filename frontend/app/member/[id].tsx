@@ -127,7 +127,9 @@ export default function MemberDetailScreen() {
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Member</Text>
-          <View style={styles.placeholder} />
+          <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+            <Ionicons name="home-outline" size={22} color="#4a9eff" />
+          </TouchableOpacity>
         </View>
         <View style={styles.emptyContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#ff5c5c" />
@@ -141,9 +143,14 @@ export default function MemberDetailScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.replace("/welcome")} style={{ width: 36, height: 36, justifyContent: "center", alignItems: "center" }} accessibilityLabel="Home" accessibilityRole="button">
+            <Ionicons name="home-outline" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerTitle} numberOfLines={1}>{member.name}</Text>
         <TouchableOpacity onPress={handleDeleteMember} style={styles.deleteButton}>
           <Ionicons name="trash-outline" size={22} color="#ff5c5c" />

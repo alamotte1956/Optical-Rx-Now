@@ -110,7 +110,9 @@ export default function NotificationSettingsScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Expiry Alerts</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+          <Ionicons name="home-outline" size={22} color="#4a9eff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>

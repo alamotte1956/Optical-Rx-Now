@@ -585,9 +585,14 @@ export default function AdminScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="close" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.replace("/welcome")} style={{ width: 36, height: 36, justifyContent: "center", alignItems: "center" }} accessibilityLabel="Home" accessibilityRole="button">
+            <Ionicons name="home-outline" size={20} color="#4a9eff" />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={styles.headerRight}>
           <View style={[styles.statusDot, { backgroundColor: backendOnline ? "#4CAF50" : "#ff5c5c" }]} />
