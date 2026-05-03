@@ -17,6 +17,7 @@ import {
   getPrescriptions,
   getFamilyMembers,
   deletePrescription,
+  deleteFamilyMember,
   Prescription,
   FamilyMember,
 } from "../../services/localStorage";
@@ -85,6 +86,41 @@ export default function PrescriptionsScreen() {
         },
       ]
     );
+  };
+
+  const handleDeleteMember = () => {
+    if (familyMembers.length === 0) {
+      Alert.alert("No Members", "There are no family members to delete.");
+      return;
+    }
+    const buttons = familyMembers.map((member) => ({
+      text: member.name,
+      style: "destructive" as const,
+      onPress: () => {
+        Alert.alert(
+          `Delete ${member.name}?`,
+          "This will also remove all their optical documents. This cannot be undone.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await deleteFamilyMember(member.id);
+                  if (selectedMember === member.id) setSelectedMember(null);
+                  loadData();
+                } catch (error) {
+                  console.log("Delete member error:", error);
+                }
+              },
+            },
+          ]
+        );
+      },
+    }));
+    buttons.push({ text: "Cancel", style: "cancel" as const, onPress: () => {} });
+    Alert.alert("Delete Family Member", "Select the member to delete:", buttons);
   };
 
   const getMemberName = (memberId: string) => {
@@ -227,20 +263,29 @@ export default function PrescriptionsScreen() {
                 <Text style={styles.emptyButtonText}>{t("add_family_member")}</Text>
               </TouchableOpacity>
             ) : (
-              <View style={styles.emptyButtonsRow}>
+              <View style={{ gap: 12, width: "100%", paddingHorizontal: 32 }}>
+                <View style={styles.emptyButtonsRow}>
+                  <TouchableOpacity
+                    style={styles.emptyButtonGlasses}
+                    onPress={() => router.push("/add-rx?type=eyeglass")}
+                  >
+                    <Ionicons name="glasses-outline" size={20} color="#fff" />
+                    <Text style={styles.emptyButtonText}>{t("glasses_rx")}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.emptyButtonContacts}
+                    onPress={() => router.push("/add-rx?type=contact")}
+                  >
+                    <Ionicons name="eye-outline" size={20} color="#fff" />
+                    <Text style={styles.emptyButtonText}>{t("contacts_rx")}</Text>
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity
-                  style={styles.emptyButtonGlasses}
-                  onPress={() => router.push("/add-rx?type=eyeglass")}
+                  style={styles.deleteButton}
+                  onPress={handleDeleteMember}
                 >
-                  <Ionicons name="glasses-outline" size={20} color="#fff" />
-                  <Text style={styles.emptyButtonText}>{t("glasses_rx")}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.emptyButtonContacts}
-                  onPress={() => router.push("/add-rx?type=contact")}
-                >
-                  <Ionicons name="eye-outline" size={20} color="#fff" />
-                  <Text style={styles.emptyButtonText}>{t("contacts_rx")}</Text>
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
+                  <Text style={styles.deleteButtonText}>Delete Family Member</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -461,6 +506,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#dc3545",
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
   },
   rxCard: {
     flexDirection: "row",
