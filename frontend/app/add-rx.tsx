@@ -32,9 +32,9 @@ const RX_TYPES = [
 export default function AddRxScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { type } = useLocalSearchParams<{ type?: "eyeglass" | "contact" }>();
+  const { type, memberId } = useLocalSearchParams<{ type?: "eyeglass" | "contact"; memberId?: string }>();
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string>(memberId || "");
   const [rxType, setRxType] = useState<"eyeglass" | "contact">(type || "eyeglass");
   const [imageUri, setImageUri] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState("");
@@ -60,7 +60,10 @@ export default function AddRxScreen() {
     const members = await getFamilyMembers();
     setFamilyMembers(members);
     if (members.length > 0 && !selectedMemberId) {
-      setSelectedMemberId(members[0].id);
+      // Only auto-select first member if no memberId was passed via params
+      if (!memberId) {
+        setSelectedMemberId(members[0].id);
+      }
     }
   };
 
