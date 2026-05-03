@@ -9,6 +9,8 @@ import {
   Image,
   TextInput,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -268,6 +270,10 @@ export default function AddRxScreen() {
           <View style={styles.placeholder} />
         </View>
 
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
         <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent}>
           {/* Expiration Date - FIRST and MOST PROMINENT */}
           <View style={[styles.expiryCard, !expiryDate && styles.expiryCardRequired]}>
@@ -386,6 +392,7 @@ export default function AddRxScreen() {
             </View>
           </View>
         </ScrollView>
+        </KeyboardAvoidingView>
 
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
