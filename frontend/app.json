@@ -41,9 +41,9 @@
         ]
       },
       "infoPlist": {
-        "NSCameraUsageDescription": "Take photos of your prescriptions to store them",
-        "NSPhotoLibraryUsageDescription": "Import prescription photos from your gallery",
-        "NSPhotoLibraryAddUsageDescription": "Save prescription images to your gallery",
+        "NSCameraUsageDescription": "Capture photos of optical documents to store locally",
+        "NSPhotoLibraryUsageDescription": "Import optical document photos from your gallery",
+        "NSPhotoLibraryAddUsageDescription": "Save optical document images to your gallery",
         "NSLocationWhenInUseUsageDescription": "Find nearby optical stores for eyewear shopping",
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
@@ -104,9 +104,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "This app needs access to your photo library so you can select and store images of your eyeglass and contact lens prescriptions locally.",
+          "photosPermission": "Select and store images of your optical documents locally.",
           "microphonePermission": false,
-          "cameraPermission": "This app needs access to your camera so you can take photos of your optical prescriptions to store them locally."
+          "cameraPermission": "Capture photos of your optical documents to store them locally."
         }
       ],
       [
@@ -135,7 +135,6 @@
       "expo-web-browser",
       "expo-font",
       "expo-mail-composer",
-      "expo-localization",
       "expo-localization"
     ],
     "experiments": {
