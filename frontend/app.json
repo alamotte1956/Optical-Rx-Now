@@ -91,6 +91,7 @@
     "plugins": [
       "expo-router",
       "./plugins/withRemovePermissions",
+      "./plugins/withNetworkSecurity",
       [
         "expo-splash-screen",
         {

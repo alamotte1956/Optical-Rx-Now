@@ -99,6 +99,7 @@ async def api_root():
     return {"status": "healthy", "service": "My Optical Wallet API", "version": "2.0.1"}
 
 @app.get("/api/health")
+@app.head("/api/health")
 async def api_health():
     return {"status": "healthy", "service": "my-optical-wallet", "version": "2.0.1"}
 

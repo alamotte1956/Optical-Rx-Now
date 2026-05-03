@@ -37,15 +37,25 @@ const BASE_URL = getBaseUrl();
 
 const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const url = `${BASE_URL}${endpoint}`;
-  const defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  const isWriteMethod = options.method && ["POST", "PUT", "PATCH", "DELETE"].includes(options.method);
+  
+  // Only add Content-Type for write methods (avoids CORS preflight on GET)
+  const defaultHeaders: Record<string, string> = isWriteMethod
+    ? { "Content-Type": "application/json" }
+    : {};
 
   try {
+    // Add timeout for Android (native fetch can hang)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
     const response = await fetch(url, {
       ...options,
       headers: { ...defaultHeaders, ...(options.headers || {}) },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -54,7 +64,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
 
     return await response.json();
   } catch (error: any) {
-    console.log(`[AdminAPI] ${endpoint} failed:`, error.message);
+    console.log(`[AdminAPI] ${url} failed:`, error.message || error);
     throw error;
   }
 };
