@@ -238,6 +238,21 @@ export default function PrescriptionsScreen() {
         </ScrollView>
       )}
 
+      {/* Delete Family Member Button */}
+      {familyMembers.length > 0 && (
+        <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteMember}
+            accessibilityLabel="Delete Family Member"
+            accessibilityRole="button"
+          >
+            <Ionicons name="trash-outline" size={18} color="#fff" />
+            <Text style={styles.deleteButtonText}>Delete Family Member</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Prescriptions List */}
       <ScrollView
         style={styles.scrollView}
