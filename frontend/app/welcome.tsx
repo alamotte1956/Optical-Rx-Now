@@ -141,7 +141,7 @@ export default function WelcomeScreen() {
       </View>
 
       {/* Logo - Long press for admin access */}
-      <View style={{ alignItems: "center", paddingTop: isSmallDevice ? 6 : 10 }}>
+      <View style={{ alignItems: "center", paddingTop: 0 }}>
         <TouchableOpacity 
           style={styles.logoContainer}
           onLongPress={handleLogoLongPress}
@@ -346,15 +346,15 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: isSmallDevice ? 16 : 24,
-    paddingTop: isSmallDevice ? 6 : 10,
+    paddingTop: 0,
     alignItems: "center",
   },
   logoContainer: {
     width: isSmallDevice ? 240 : isLargeDevice ? 340 : 300,
-    height: isSmallDevice ? 160 : isLargeDevice ? 240 : 200,
+    height: isSmallDevice ? 145 : isLargeDevice ? 225 : 185,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: isSmallDevice ? 8 : 12,
+    marginBottom: isSmallDevice ? 0 : 0,
   },
   logoPressed: {
     opacity: 0.7,
