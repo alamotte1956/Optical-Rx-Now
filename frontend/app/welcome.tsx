@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking, Pressable, Vibration } from "react-native";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Alert, ScrollView, Share, Linking, Pressable, Vibration, Animated, Easing } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -34,6 +34,39 @@ export default function WelcomeScreen() {
   const [reminderSettings, setReminderSettings] = useState<ReminderSetting[]>(DEFAULT_REMINDERS);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showFeedback, setShowFeedback] = useState(false);
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  // Shimmer animation for logo
+  useEffect(() => {
+    const shimmerLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    shimmerLoop.start();
+    return () => shimmerLoop.stop();
+  }, []);
+
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.75, 1, 0.75],
+  });
+
+  const shimmerScale = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 1.03, 1],
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -126,11 +159,13 @@ export default function WelcomeScreen() {
           delayLongPress={1200}
           activeOpacity={0.7}
         >
-          <Image
-            source={require("../assets/images/logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Animated.View style={{ opacity: shimmerOpacity, transform: [{ scale: shimmerScale }] }}>
+            <Image
+              source={require("../assets/images/logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </Animated.View>
         </TouchableOpacity>
         <Text style={[styles.appName, { color: "#4a9eff" }]}>My Optical Wallet</Text>
       </View>
