@@ -176,20 +176,12 @@ export default function PrescriptionsScreen() {
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("prescriptions")}</Text>
-        <View style={styles.addButtonsContainer}>
-          <TouchableOpacity
-            style={styles.addButtonGlasses}
-            onPress={() => router.push("/add-rx?type=eyeglass")}
-          >
-            <Ionicons name="glasses-outline" size={20} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.addButtonContacts}
-            onPress={() => router.push("/add-rx?type=contact")}
-          >
-            <Ionicons name="eye-outline" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.addButtonGeneric}
+          onPress={() => router.push("/add-rx")}
+        >
+          <Ionicons name="add-circle-outline" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       {/* Member Filter */}
@@ -279,22 +271,12 @@ export default function PrescriptionsScreen() {
               </TouchableOpacity>
             ) : (
               <View style={{ gap: 12, width: "100%", paddingHorizontal: 32 }}>
-                <View style={styles.emptyButtonsRow}>
-                  <TouchableOpacity
-                    style={styles.emptyButtonGlasses}
-                    onPress={() => router.push("/add-rx?type=eyeglass")}
-                  >
-                    <Ionicons name="glasses-outline" size={20} color="#fff" />
-                    <Text style={styles.emptyButtonText}>{t("glasses_rx")}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.emptyButtonContacts}
-                    onPress={() => router.push("/add-rx?type=contact")}
-                  >
-                    <Ionicons name="eye-outline" size={20} color="#fff" />
-                    <Text style={styles.emptyButtonText}>{t("contacts_rx")}</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={styles.emptyButton}
+                  onPress={() => router.push("/add-rx")}
+                >
+                  <Text style={styles.emptyButtonText}>Add Optical Document</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={handleDeleteMember}
@@ -409,23 +391,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
-  addButtonsContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  addButtonGlasses: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  addButtonGeneric: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#4a9eff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addButtonContacts: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#4CAF50",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -492,29 +462,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     backgroundColor: "#4a9eff",
-    borderRadius: 8,
-  },
-  emptyButtonsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 16,
-  },
-  emptyButtonGlasses: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#4a9eff",
-    borderRadius: 8,
-  },
-  emptyButtonContacts: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#4CAF50",
     borderRadius: 8,
   },
   emptyButtonText: {
