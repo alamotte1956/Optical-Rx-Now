@@ -7,29 +7,40 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
+// Production backend URL for this app
+const PRODUCTION_BACKEND_URL = "https://optical-rx-now.preview.emergentagent.com";
+
 // Resolve the backend URL dynamically from environment config
 const getBaseUrl = (): string => {
-  // Try all possible sources for the backend URL
-  const fromExtra = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL;
-  const fromEnv = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-  const envUrl = fromExtra || fromEnv || "";
-
-  if (envUrl && envUrl.length > 0) {
-    console.log("[AdminAPI] Using backend URL:", envUrl);
-    return envUrl;
-  }
-
   // For web preview, use relative URLs (same origin)
   if (Platform.OS === "web") {
-    console.log("[AdminAPI] Web platform - using relative URLs");
     return "";
   }
 
-  // For native builds, fallback to production backend URL
-  const NATIVE_FALLBACK_URL = "https://optical-rx-now.preview.emergentagent.com";
-  console.log("[AdminAPI] Using native fallback URL:", NATIVE_FALLBACK_URL);
-  return NATIVE_FALLBACK_URL;
+  // Try all possible sources for the backend URL
+  try {
+    const fromExtra = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL;
+    if (fromExtra && fromExtra.length > 0) {
+      console.log("[AdminAPI] Using URL from extra:", fromExtra);
+      return fromExtra;
+    }
+  } catch (e) {
+    console.log("[AdminAPI] Constants.expoConfig not available");
+  }
+
+  try {
+    const fromEnv = process.env.EXPO_PUBLIC_BACKEND_URL;
+    if (fromEnv && fromEnv.length > 0) {
+      console.log("[AdminAPI] Using URL from env:", fromEnv);
+      return fromEnv;
+    }
+  } catch (e) {
+    console.log("[AdminAPI] process.env not available");
+  }
+
+  // Always fallback to production URL for native builds
+  console.log("[AdminAPI] Using production URL:", PRODUCTION_BACKEND_URL);
+  return PRODUCTION_BACKEND_URL;
 };
 
 // Admin API Key for protected endpoints
@@ -49,7 +60,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<any
   try {
     // Add timeout for Android (native fetch can hang)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
     const response = await fetch(url, {
       ...options,
