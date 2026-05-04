@@ -9,12 +9,26 @@ const KEYS = {
   SETTINGS: "@optical_rx_settings",
   AGE_VERIFIED: "@optical_rx_age_verified",
   SCHEDULED_NOTIFICATIONS: "@optical_rx_notifications",
+  INSURANCE_CARDS: "@optical_rx_insurance_cards",
 };
 
 export interface FamilyMember {
   id: string;
   name: string;
   relationship: string;
+  createdAt: string;
+}
+
+export interface InsuranceCard {
+  id: string;
+  familyMemberId: string;
+  label: string;
+  frontImageBase64: string;
+  backImageBase64: string | null;
+  insurerName: string;
+  memberId: string;
+  groupNumber: string;
+  notes: string;
   createdAt: string;
 }
 
@@ -27,6 +41,10 @@ export interface Prescription {
   dateTaken: string;
   expiryDate: string | null;
   createdAt: string;
+  // Optional doctor/provider info
+  doctorName?: string;
+  doctorPhone?: string;
+  clinicName?: string;
 }
 
 interface PrescriptionStorage {
@@ -507,4 +525,38 @@ export const importData = async (jsonString: string): Promise<{ members: number;
     members: data.familyMembers?.length || 0,
     documents: data.opticalDocuments?.length || 0,
   };
+};
+
+// ============ Insurance Card Functions ============
+
+export const getInsuranceCards = async (): Promise<InsuranceCard[]> => {
+  try {
+    const data = await AsyncStorage.getItem(KEYS.INSURANCE_CARDS);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const getInsuranceCardsByMember = async (memberId: string): Promise<InsuranceCard[]> => {
+  const cards = await getInsuranceCards();
+  return cards.filter((c) => c.familyMemberId === memberId);
+};
+
+export const saveInsuranceCard = async (card: Omit<InsuranceCard, "id" | "createdAt">): Promise<InsuranceCard> => {
+  const cards = await getInsuranceCards();
+  const newCard: InsuranceCard = {
+    ...card,
+    id: `ins_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    createdAt: new Date().toISOString(),
+  };
+  cards.push(newCard);
+  await AsyncStorage.setItem(KEYS.INSURANCE_CARDS, JSON.stringify(cards));
+  return newCard;
+};
+
+export const deleteInsuranceCard = async (cardId: string): Promise<void> => {
+  const cards = await getInsuranceCards();
+  const filtered = cards.filter((c) => c.id !== cardId);
+  await AsyncStorage.setItem(KEYS.INSURANCE_CARDS, JSON.stringify(filtered));
 };
