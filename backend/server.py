@@ -26,16 +26,10 @@ app = FastAPI(title="My Optical Wallet API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS middleware — Recommendation 4: Restrict origins
-ALLOWED_ORIGINS = [
-    "https://optical-rx-now.preview.emergentagent.com",
-    "http://localhost:3000",
-    "http://localhost:8081",
-    "exp://optical-rx-now.preview.emergentagent.com",
-]
+# CORS middleware — Allow all origins for native mobile app compatibility
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
