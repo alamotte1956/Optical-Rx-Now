@@ -95,28 +95,6 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleResetAgeVerification = async () => {
-    Alert.alert(
-      "Reset Age Verification",
-      "This will show the age verification screen again next time you open the app. Continue?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem(AGE_VERIFIED_KEY);
-              Alert.alert("Done", "Age verification has been reset. Close and reopen the app to see the verification screen.");
-            } catch (error) {
-              console.log("Error resetting age verification:", error);
-            }
-          },
-        },
-      ]
-    );
-  };
-
   // Long press handler for admin access
   const handleLogoLongPress = async () => {
     console.log("Long press detected - navigating to admin");
@@ -223,6 +201,24 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>Insurance Cards</Text>
           </TouchableOpacity>
 
+          {/* Language Settings */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => router.push("/language-settings")}
+          >
+            <Ionicons name="globe-outline" size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>{t("language_settings")}</Text>
+          </TouchableOpacity>
+
+          {/* Dark/Light Mode Toggle */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => setMode(isDark ? "light" : "dark")}
+          >
+            <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>{isDark ? "Light Mode" : "Dark Mode"}</Text>
+          </TouchableOpacity>
+
           {/* Export PDF Button */}
           {stats.totalPrescriptions > 0 && (
             <TouchableOpacity 
@@ -240,7 +236,16 @@ export default function WelcomeScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Legal Section - Opens Website URLs */}
+          {/* Send Feedback Button */}
+          <TouchableOpacity
+            style={styles.feedbackButton}
+            onPress={() => setShowFeedback(true)}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={18} color="#4a9eff" />
+            <Text style={styles.feedbackButtonText}>Send Feedback</Text>
+          </TouchableOpacity>
+
+          {/* Legal Section - Privacy & Terms at the very bottom */}
           <View style={styles.legalSection}>
             <TouchableOpacity 
               style={styles.legalButton}
@@ -258,41 +263,6 @@ export default function WelcomeScreen() {
               <Text style={styles.legalButtonText}>{t("terms_of_service")}</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Send Feedback Button */}
-          <TouchableOpacity
-            style={styles.feedbackButton}
-            onPress={() => setShowFeedback(true)}
-          >
-            <Ionicons name="chatbubble-ellipses-outline" size={18} color="#4a9eff" />
-            <Text style={styles.feedbackButtonText}>Send Feedback</Text>
-          </TouchableOpacity>
-
-          {/* Reset Age Verification - for testing */}
-          <TouchableOpacity 
-            style={styles.resetButton} 
-            onPress={handleResetAgeVerification}
-          >
-            <Text style={styles.resetButtonText}>{t("reset_age_verification")}</Text>
-          </TouchableOpacity>
-
-          {/* Language Settings */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => router.push("/language-settings")}
-          >
-            <Ionicons name="globe-outline" size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>{t("language_settings")}</Text>
-          </TouchableOpacity>
-
-          {/* Dark/Light Mode Toggle - second from bottom */}
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={() => setMode(isDark ? "light" : "dark")}
-          >
-            <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={22} color="#4a9eff" />
-            <Text style={styles.secondaryButtonText}>{isDark ? "Light Mode" : "Dark Mode"}</Text>
-          </TouchableOpacity>
 
           {/* Version Number */}
           <Text style={styles.versionText}>{t("version")} 2.0.1</Text>
@@ -463,15 +433,6 @@ const styles = StyleSheet.create({
     color: "#6b7c8f",
     textTransform: "uppercase",
     letterSpacing: 1,
-  },
-  resetButton: {
-    paddingVertical: 12,
-    marginBottom: 8,
-  },
-  resetButtonText: {
-    fontSize: 12,
-    color: "#6b7c8f",
-    textDecorationLine: "underline",
   },
   feedbackButton: {
     flexDirection: "row",
