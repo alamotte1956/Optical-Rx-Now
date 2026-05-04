@@ -157,29 +157,6 @@ export default function WelcomeScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Quick Add Prescription Buttons */}
-          {stats.familyMembers > 0 && (
-            <View style={styles.quickAddContainer}>
-              <Text style={styles.quickAddLabel}>{t("quick_add")}</Text>
-              <View style={styles.quickAddButtons}>
-                <TouchableOpacity 
-                  style={styles.quickAddButtonGlasses}
-                  onPress={() => router.push("/add-rx?type=eyeglass")}
-                >
-                  <Ionicons name="glasses-outline" size={20} color="#fff" />
-                  <Text style={styles.quickAddButtonText}>{t("glasses_rx")}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.quickAddButtonContacts}
-                  onPress={() => router.push("/add-rx?type=contact")}
-                >
-                  <Ionicons name="eye-outline" size={20} color="#fff" />
-                  <Text style={styles.quickAddButtonText}>{t("contacts_rx")}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
           {/* Dynamic Banner Carousel */}
           <BannerCarousel />
 
@@ -351,48 +328,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: moderateScale(18),
-    fontWeight: "600",
-    color: "#fff",
-  },
-  quickAddContainer: {
-    width: "100%",
-    marginBottom: 16,
-  },
-  quickAddLabel: {
-    fontSize: 13,
-    color: "#6b7c8f",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  quickAddButtons: {
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "center",
-  },
-  quickAddButtonGlasses: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#4a9eff",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-  },
-  quickAddButtonContacts: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#4CAF50",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-  },
-  quickAddButtonText: {
-    fontSize: 14,
     fontWeight: "600",
     color: "#fff",
   },
