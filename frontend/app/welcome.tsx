@@ -159,13 +159,11 @@ export default function WelcomeScreen() {
           delayLongPress={1200}
           activeOpacity={0.7}
         >
-          <Animated.View style={{ opacity: shimmerOpacity, transform: [{ scale: shimmerScale }] }}>
-            <Image
-              source={require("../assets/images/logo.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </Animated.View>
+          <Animated.Image
+            source={require("../assets/images/logo.png")}
+            style={[styles.logo, { opacity: shimmerOpacity, transform: [{ scale: shimmerScale }] }]}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <Text style={[styles.appName, { color: "#4a9eff" }]}>My Optical Wallet</Text>
       </View>
