@@ -136,6 +136,7 @@ function AppContent() {
         <Stack.Screen name="vision-tips" options={{ presentation: "card" }} />
         <Stack.Screen name="privacy-policy" options={{ presentation: "card" }} />
         <Stack.Screen name="terms-of-service" options={{ presentation: "card" }} />
+        <Stack.Screen name="insurance-cards" options={{ presentation: "card" }} />
       </Stack>
     </SafeAreaProvider>
   );

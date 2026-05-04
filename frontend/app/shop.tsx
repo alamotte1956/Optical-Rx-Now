@@ -628,6 +628,42 @@ export default function ShopScreen() {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Featured Store Spotlights */}
+        <View style={styles.spotlightSection}>
+          <View style={styles.spotlightHeader}>
+            <Ionicons name="star" size={18} color="#FFD700" />
+            <Text style={styles.spotlightTitle}>Featured Stores</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.spotlightScroll}>
+            {affiliates
+              .filter((a) => a.isPreferred)
+              .concat(affiliates.filter((a) => !a.isPreferred).slice(0, 3))
+              .slice(0, 4)
+              .map((spotlight) => (
+                <TouchableOpacity
+                  key={`spotlight-${spotlight.id}`}
+                  style={styles.spotlightCard}
+                  onPress={() => handleOpenLink(spotlight)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.spotlightIconWrap}>
+                    <Ionicons
+                      name={getCategoryIcon(spotlight.category) as any}
+                      size={28}
+                      color="#4a9eff"
+                    />
+                  </View>
+                  <Text style={styles.spotlightName} numberOfLines={1}>{spotlight.name}</Text>
+                  <Text style={styles.spotlightDesc} numberOfLines={2}>{spotlight.description}</Text>
+                  <View style={styles.spotlightBadge}>
+                    <Text style={styles.spotlightBadgeText}>Visit Store</Text>
+                    <Ionicons name="arrow-forward" size={12} color="#4a9eff" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+          </ScrollView>
+        </View>
+
         {/* Category Filter */}
         <View style={styles.filterContainer}>
           {categories.map((cat) => (
@@ -955,5 +991,66 @@ const styles = StyleSheet.create({
     color: "#6b7c8f",
     textTransform: "uppercase",
     letterSpacing: 1,
+  },
+  spotlightSection: {
+    marginBottom: 20,
+  },
+  spotlightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  spotlightTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFD700",
+    letterSpacing: 0.5,
+  },
+  spotlightScroll: {
+    paddingRight: 16,
+    gap: 12,
+  },
+  spotlightCard: {
+    width: 160,
+    backgroundColor: "#1a2d45",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.25)",
+    marginRight: 12,
+  },
+  spotlightIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(74, 158, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  spotlightName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  spotlightDesc: {
+    fontSize: 11,
+    color: "#8899a6",
+    lineHeight: 16,
+    marginBottom: 10,
+    minHeight: 32,
+  },
+  spotlightBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    alignSelf: "flex-start",
+  },
+  spotlightBadgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#4a9eff",
   },
 });

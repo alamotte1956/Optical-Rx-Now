@@ -44,6 +44,8 @@ export default function AddRxScreen() {
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [doctorName, setDoctorName] = useState("");
+  const [doctorPhone, setDoctorPhone] = useState("");
 
   // Set the Rx type from URL parameter
   useEffect(() => {
@@ -196,6 +198,8 @@ export default function AddRxScreen() {
         notes: "",
         dateTaken: new Date().toISOString(),
         expiryDate: expiryDate,
+        doctorName: doctorName.trim() || undefined,
+        doctorPhone: doctorPhone.trim() || undefined,
       });
       
       // Track for ASO (may trigger review prompt)
@@ -225,6 +229,8 @@ export default function AddRxScreen() {
     setImageUri("");
     setExpiryDate("");
     setExpiryInput("");
+    setDoctorName("");
+    setDoctorPhone("");
     setShowPreview(false);
   };
 
@@ -382,6 +388,31 @@ export default function AddRxScreen() {
                     </TouchableOpacity>
                   ))}
                 </View>
+              </View>
+            </View>
+
+            {/* Doctor/Provider Contact (Optional) */}
+            <View style={styles.infoCard}>
+              <Ionicons name="medkit-outline" size={20} color="#4a9eff" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Doctor / Provider (optional)</Text>
+                <TextInput
+                  style={styles.doctorInput}
+                  placeholder="Doctor or clinic name"
+                  placeholderTextColor="#6b7c8f"
+                  value={doctorName}
+                  onChangeText={setDoctorName}
+                  returnKeyType="next"
+                />
+                <TextInput
+                  style={[styles.doctorInput, { marginTop: 8 }]}
+                  placeholder="Phone number"
+                  placeholderTextColor="#6b7c8f"
+                  value={doctorPhone}
+                  onChangeText={setDoctorPhone}
+                  keyboardType="phone-pad"
+                  returnKeyType="done"
+                />
               </View>
             </View>
 
@@ -920,6 +951,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: "#4CAF50",
+  },
+  doctorInput: {
+    backgroundColor: "#0f1d2f",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: "#fff",
+    borderWidth: 1,
+    borderColor: "#3a4d63",
   },
   actionButtons: {
     flexDirection: "row",

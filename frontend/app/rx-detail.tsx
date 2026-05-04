@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Linking,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -400,6 +401,34 @@ export default function RxDetailScreen() {
           ) : null}
         </View>
 
+        {/* Doctor / Provider Info */}
+        {(prescription.doctorName || prescription.doctorPhone) && (
+          <View style={styles.doctorCard}>
+            <View style={styles.doctorHeader}>
+              <Ionicons name="medkit" size={20} color="#4a9eff" />
+              <Text style={styles.doctorTitle}>Doctor / Provider</Text>
+            </View>
+            {prescription.doctorName ? (
+              <View style={styles.doctorRow}>
+                <Text style={styles.doctorLabel}>Name</Text>
+                <Text style={styles.doctorValue}>{prescription.doctorName}</Text>
+              </View>
+            ) : null}
+            {prescription.doctorPhone ? (
+              <View style={styles.doctorRow}>
+                <Text style={styles.doctorLabel}>Phone</Text>
+                <TouchableOpacity 
+                  style={styles.callButton}
+                  onPress={() => Linking.openURL(`tel:${prescription.doctorPhone}`)}
+                >
+                  <Ionicons name="call" size={16} color="#4a9eff" />
+                  <Text style={styles.callButtonText}>{prescription.doctorPhone}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+        )}
+
         <View style={styles.actions}>
           <TouchableOpacity style={[styles.actionButton, sharing && styles.actionButtonDisabled]} onPress={handleShare} disabled={sharing}>
             {sharing ? <ActivityIndicator size="small" color="#4a9eff" /> : (
@@ -451,4 +480,12 @@ const styles = StyleSheet.create({
   actionButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1a2d45", paddingVertical: 16, borderRadius: 12 },
   actionButtonDisabled: { opacity: 0.7 },
   actionButtonText: { fontSize: 16, color: "#4a9eff", fontWeight: "600" },
+  doctorCard: { backgroundColor: "#1a2d45", borderRadius: 16, padding: 16, marginBottom: 16 },
+  doctorHeader: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#2a3d55" },
+  doctorTitle: { fontSize: 16, fontWeight: "700", color: "#fff" },
+  doctorRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8 },
+  doctorLabel: { fontSize: 14, color: "#8899a6" },
+  doctorValue: { fontSize: 16, color: "#fff", fontWeight: "500" },
+  callButton: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(74, 158, 255, 0.15)", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  callButtonText: { fontSize: 15, color: "#4a9eff", fontWeight: "600" },
 });

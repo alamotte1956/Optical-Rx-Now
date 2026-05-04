@@ -56,6 +56,10 @@ interface PrescriptionStorage {
   dateTaken: string;
   expiryDate: string | null;
   createdAt: string;
+  // Doctor/provider info
+  doctorName?: string;
+  doctorPhone?: string;
+  clinicName?: string;
 }
 
 export interface ReminderSetting {
@@ -226,6 +230,9 @@ export const getPrescriptions = async (): Promise<Prescription[]> => {
         dateTaken: stored.dateTaken,
         expiryDate: stored.expiryDate,
         createdAt: stored.createdAt,
+        doctorName: stored.doctorName,
+        doctorPhone: stored.doctorPhone,
+        clinicName: stored.clinicName,
       };
     });
     
@@ -258,6 +265,9 @@ export const savePrescription = async (prescription: Omit<Prescription, "id" | "
       dateTaken: prescription.dateTaken,
       expiryDate: prescription.expiryDate,
       createdAt: new Date().toISOString(),
+      doctorName: prescription.doctorName,
+      doctorPhone: prescription.doctorPhone,
+      clinicName: prescription.clinicName,
     };
     
     storedPrescriptions.push(storageRx);

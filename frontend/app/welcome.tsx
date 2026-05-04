@@ -214,6 +214,15 @@ export default function WelcomeScreen() {
             <Text style={styles.secondaryButtonText}>{t("find_stores")}</Text>
           </TouchableOpacity>
 
+          {/* Insurance Cards Button */}
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => router.push("/insurance-cards")}
+          >
+            <Ionicons name="card-outline" size={22} color="#4a9eff" />
+            <Text style={styles.secondaryButtonText}>Insurance Cards</Text>
+          </TouchableOpacity>
+
           {/* Export PDF Button */}
           {stats.totalPrescriptions > 0 && (
             <TouchableOpacity 
