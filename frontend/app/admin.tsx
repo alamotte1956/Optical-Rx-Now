@@ -232,10 +232,29 @@ export default function AdminScreen() {
       const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
         || process.env.EXPO_PUBLIC_BACKEND_URL || "";
       const reportUrl = `${baseUrl}/api/reports/weekly`;
-      const { default: Linking } = await import("react-native");
-      await Linking.openURL(reportUrl);
+
+      if (Platform.OS === "web") {
+        // On web, open in new tab to trigger download
+        const { default: Linking } = await import("react-native");
+        await Linking.openURL(reportUrl);
+      } else {
+        // On native, download and share the PDF
+        const FileSystem = await import("expo-file-system");
+        const Sharing = await import("expo-sharing");
+        const filename = `MOW_Weekly_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+        const fileUri = FileSystem.documentDirectory + filename;
+        const download = await FileSystem.downloadAsync(reportUrl, fileUri);
+        if (download.status === 200) {
+          await Sharing.shareAsync(download.uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Weekly PDF Report",
+          });
+        } else {
+          Alert.alert("Error", "Failed to download report.");
+        }
+      }
     } catch (error: any) {
-      Alert.alert("Error", "Could not open report. Try again later.");
+      Alert.alert("Error", "Could not generate report. Try again later.");
     }
   };
 
