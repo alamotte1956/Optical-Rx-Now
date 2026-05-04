@@ -277,13 +277,6 @@ export default function PrescriptionsScreen() {
                 >
                   <Text style={styles.emptyButtonText}>Add Optical Document</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={handleDeleteMember}
-                >
-                  <Ionicons name="trash-outline" size={18} color="#fff" />
-                  <Text style={styles.deleteButtonText}>Delete Family Member</Text>
-                </TouchableOpacity>
               </View>
             )}
           </View>
