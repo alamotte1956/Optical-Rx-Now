@@ -26,9 +26,10 @@ const getBaseUrl = (): string => {
     return "";
   }
 
-  // For native builds, the URL must come from app.json extra config (set during EAS build)
-  console.warn("[AdminAPI] No backend URL configured. Admin features may not work.");
-  return "";
+  // For native builds, fallback to production backend URL
+  const NATIVE_FALLBACK_URL = "https://optical-rx-now.preview.emergentagent.com";
+  console.log("[AdminAPI] Using native fallback URL:", NATIVE_FALLBACK_URL);
+  return NATIVE_FALLBACK_URL;
 };
 
 // Admin API Key for protected endpoints
