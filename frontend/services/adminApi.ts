@@ -7,9 +7,7 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-// Resolve the backend URL
-const HARDCODED_BACKEND_URL = "https://optical-rx-now.preview.emergentagent.com";
-
+// Resolve the backend URL dynamically from environment config
 const getBaseUrl = (): string => {
   // Try all possible sources for the backend URL
   const fromExtra = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL;
@@ -28,9 +26,9 @@ const getBaseUrl = (): string => {
     return "";
   }
 
-  // For native builds (Android/iOS), use hardcoded production URL
-  console.log("[AdminAPI] Using hardcoded backend URL:", HARDCODED_BACKEND_URL);
-  return HARDCODED_BACKEND_URL;
+  // For native builds, the URL must come from app.json extra config (set during EAS build)
+  console.warn("[AdminAPI] No backend URL configured. Admin features may not work.");
+  return "";
 };
 
 // Admin API Key for protected endpoints
