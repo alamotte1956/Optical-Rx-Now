@@ -93,34 +93,30 @@ export default function PrescriptionsScreen() {
       Alert.alert("No Members", "There are no family members to delete.");
       return;
     }
-    const buttons = familyMembers.map((member) => ({
-      text: member.name,
-      style: "destructive" as const,
-      onPress: () => {
-        Alert.alert(
-          `Delete ${member.name}?`,
-          "This will also remove all their optical documents. This cannot be undone.",
-          [
-            { text: "Cancel", style: "cancel" },
-            {
-              text: "Delete",
-              style: "destructive",
-              onPress: async () => {
-                try {
-                  await deleteFamilyMember(member.id);
-                  if (selectedMember === member.id) setSelectedMember(null);
-                  loadData();
-                } catch (error) {
-                  console.log("Delete member error:", error);
-                }
-              },
-            },
-          ]
-        );
-      },
-    }));
-    buttons.push({ text: "Cancel", style: "cancel" as const, onPress: () => {} });
-    Alert.alert("Delete Family Member", "Select the member to delete:", buttons);
+    
+    // Delete the currently selected/viewed member
+    const currentMember = familyMembers.find((m) => m.id === selectedMember) || familyMembers[0];
+    
+    Alert.alert(
+      `Delete ${currentMember.name}?`,
+      "This will also remove all their optical documents. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteFamilyMember(currentMember.id);
+              if (selectedMember === currentMember.id) setSelectedMember(null);
+              loadData();
+            } catch (error) {
+              console.log("Delete member error:", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const getMemberName = (memberId: string) => {
