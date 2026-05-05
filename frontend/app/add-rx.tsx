@@ -449,7 +449,7 @@ export default function AddRxScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/")} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.backButton}>
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("add_rx_title")}</Text>
