@@ -32,6 +32,7 @@ export default function PrescriptionsScreen() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Navigate back to welcome screen
   const goToHome = () => {
@@ -90,26 +91,16 @@ export default function PrescriptionsScreen() {
 
   const handleDeleteMember = () => {
     if (familyMembers.length === 0) return;
-    
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteMember = () => {
     const memberToDelete = familyMembers.find((m) => m.id === selectedMember) || familyMembers[0];
-    
-    Alert.alert(
-      "Delete " + memberToDelete.name + "?",
-      "All their optical documents will be removed. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteFamilyMember(memberToDelete.id).then(() => {
-              setSelectedMember(null);
-              loadData();
-            });
-          },
-        },
-      ]
-    );
+    deleteFamilyMember(memberToDelete.id).then(() => {
+      setSelectedMember(null);
+      setShowDeleteConfirm(false);
+      loadData();
+    });
   };
 
   const getMemberName = (memberId: string) => {
@@ -227,14 +218,46 @@ export default function PrescriptionsScreen() {
             <Text style={styles.addDocButtonText}>Add Family Member</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDeleteMember}
-            accessibilityLabel="Delete Family Member"
+            style={styles.addDocButton}
+            onPress={() => router.push("/add-rx")}
+            accessibilityLabel="Add Optical Document"
             accessibilityRole="button"
           >
-            <Ionicons name="trash-outline" size={18} color="#fff" />
-            <Text style={styles.deleteButtonText}>Delete Family Member</Text>
+            <Ionicons name="add-circle-outline" size={20} color="#fff" />
+            <Text style={styles.addDocButtonText}>Add Optical Document</Text>
           </TouchableOpacity>
+
+          {!showDeleteConfirm ? (
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteMember}
+              accessibilityLabel="Delete Family Member"
+              accessibilityRole="button"
+            >
+              <Ionicons name="trash-outline" size={16} color="#fff" />
+              <Text style={styles.deleteButtonText}>Delete Family Member</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.deleteConfirmBox}>
+              <Text style={styles.deleteConfirmText}>
+                Delete {(familyMembers.find((m) => m.id === selectedMember) || familyMembers[0])?.name}?
+              </Text>
+              <View style={styles.deleteConfirmButtons}>
+                <TouchableOpacity
+                  style={styles.deleteConfirmCancel}
+                  onPress={() => setShowDeleteConfirm(false)}
+                >
+                  <Text style={styles.deleteConfirmCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteConfirmYes}
+                  onPress={confirmDeleteMember}
+                >
+                  <Text style={styles.deleteConfirmYesText}>Yes, Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       )}
 
@@ -476,6 +499,46 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 13,
+  },
+  deleteConfirmBox: {
+    backgroundColor: "#2a1015",
+    borderWidth: 1,
+    borderColor: "#dc3545",
+    borderRadius: 10,
+    padding: 14,
+    alignItems: "center",
+    gap: 12,
+  },
+  deleteConfirmText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  deleteConfirmButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteConfirmCancel: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: "#3a4d63",
+  },
+  deleteConfirmCancelText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  deleteConfirmYes: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: "#dc3545",
+  },
+  deleteConfirmYesText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   rxCard: {
     flexDirection: "row",
