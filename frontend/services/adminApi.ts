@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 // Production backend URL for this app
-const PRODUCTION_BACKEND_URL = "https://optical-rx-now.preview.emergentagent.com";
+const PRODUCTION_BACKEND_URL = "https://optical-rx-now-production.up.railway.app";
 
 // Resolve the backend URL dynamically from environment config
 const getBaseUrl = (): string => {

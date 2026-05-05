@@ -25,7 +25,7 @@
       "distribution": "internal",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "EXPO_PUBLIC_BACKEND_URL": "https://optical-rx-now.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://optical-rx-now-production.up.railway.app"
       },
       "ios": {
         "simulator": false,
@@ -39,7 +39,7 @@
       "extends": "base",
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "EXPO_PUBLIC_BACKEND_URL": "https://optical-rx-now.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://optical-rx-now-production.up.railway.app"
       },
       "ios": {
         "autoIncrement": "buildNumber",
