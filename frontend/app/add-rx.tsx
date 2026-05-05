@@ -180,15 +180,6 @@ export default function AddRxScreen() {
       return;
     }
 
-    // Expiration date is REQUIRED
-    if (!expiryDate) {
-      Alert.alert(
-        "Expiration Date Required",
-        "Please enter the expiration date from your optical document. This is needed to send you reminders before it expires."
-      );
-      return;
-    }
-
     setSaving(true);
     try {
       await savePrescription({
@@ -283,16 +274,16 @@ export default function AddRxScreen() {
           style={{ flex: 1 }}
         >
         <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent}>
-          {/* Expiration Date - FIRST and MOST PROMINENT */}
-          <View style={[styles.expiryCard, !expiryDate && styles.expiryCardRequired]}>
+          {/* Expiration Date - Optional */}
+          <View style={styles.expiryCard}>
             <View style={styles.expiryHeader}>
               <Ionicons 
                 name="calendar" 
                 size={24} 
-                color={expiryDate ? "#4CAF50" : "#FF9800"} 
+                color={expiryDate ? "#4CAF50" : "#4a9eff"} 
               />
               <Text style={styles.expiryTitle}>
-                Expiration Date {!expiryDate && <Text style={styles.requiredLabel}>*</Text>}
+                Expiration Date <Text style={{ fontSize: 12, color: "#6b7c8f" }}>(optional)</Text>
               </Text>
             </View>
             <View style={styles.expiryInputRow}>
@@ -436,10 +427,10 @@ export default function AddRxScreen() {
           <TouchableOpacity
             style={[
               styles.saveButton, 
-              (saving || !selectedMemberId || !expiryDate) && styles.saveButtonDisabled
+              (saving || !selectedMemberId) && styles.saveButtonDisabled
             ]}
             onPress={handleSave}
-            disabled={saving || !selectedMemberId || !expiryDate}
+            disabled={saving || !selectedMemberId}
           >
             {saving ? (
               <ActivityIndicator size="small" color="#fff" />
