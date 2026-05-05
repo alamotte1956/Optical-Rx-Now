@@ -11,6 +11,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
 } from "react-native";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -404,12 +405,12 @@ export default function AddRxScreen() {
 
             {/* Action Buttons - Inside scroll so keyboard doesn't cover them */}
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
+              <Pressable style={styles.retakeButton} onPress={handleRetake}>
                 <Ionicons name="camera-reverse" size={20} color="#8899a6" />
                 <Text style={styles.retakeButtonText}>Retake</Text>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 style={[
                   styles.saveButton, 
                   saving && styles.saveButtonDisabled
@@ -425,7 +426,7 @@ export default function AddRxScreen() {
                     <Text style={styles.saveButtonText}>{t("save_prescription")}</Text>
                   </>
                 )}
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </ScrollView>
