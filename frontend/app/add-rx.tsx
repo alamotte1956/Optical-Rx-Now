@@ -382,31 +382,6 @@ export default function AddRxScreen() {
               </View>
             </View>
 
-            {/* Doctor/Provider Contact (Optional) */}
-            <View style={styles.infoCard}>
-              <Ionicons name="medkit-outline" size={20} color="#4a9eff" />
-              <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Doctor / Provider (optional)</Text>
-                <TextInput
-                  style={styles.doctorInput}
-                  placeholder="Doctor or clinic name"
-                  placeholderTextColor="#6b7c8f"
-                  value={doctorName}
-                  onChangeText={setDoctorName}
-                  returnKeyType="next"
-                />
-                <TextInput
-                  style={[styles.doctorInput, { marginTop: 8 }]}
-                  placeholder="Phone number"
-                  placeholderTextColor="#6b7c8f"
-                  value={doctorPhone}
-                  onChangeText={setDoctorPhone}
-                  keyboardType="phone-pad"
-                  returnKeyType="done"
-                />
-              </View>
-            </View>
-
             {/* HIPAA Notice */}
             <View style={styles.hipaaNotice}>
               <Ionicons name="shield-checkmark" size={16} color="#4CAF50" />
