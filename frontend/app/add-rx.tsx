@@ -170,13 +170,20 @@ export default function AddRxScreen() {
   };
 
   const handleSave = async () => {
-    if (!selectedMemberId) {
-      Alert.alert(t("error"), t("member_required_message"));
+    // Auto-select first member if none selected
+    let memberId = selectedMemberId;
+    if (!memberId && familyMembers.length > 0) {
+      memberId = familyMembers[0].id;
+      setSelectedMemberId(memberId);
+    }
+
+    if (!memberId) {
+      Alert.alert("Error", "No family member selected. Please add a family member first.");
       return;
     }
 
     if (!imageUri) {
-      Alert.alert(t("error"), t("photo_required_message"));
+      Alert.alert("Error", "No photo captured. Please take a photo first.");
       return;
     }
 
@@ -188,7 +195,7 @@ export default function AddRxScreen() {
     setSaving(true);
     try {
       await savePrescription({
-        familyMemberId: selectedMemberId,
+        familyMemberId: memberId,
         rxType,
         imageBase64: imageUri,
         notes: "",
@@ -214,7 +221,7 @@ export default function AddRxScreen() {
         router.back();
       }
     } catch (error) {
-      Alert.alert(t("error"), "Failed to save optical document");
+      Alert.alert("Error", "Failed to save optical document. Please try again.");
       console.log("Save error:", error);
     } finally {
       setSaving(false);
@@ -405,10 +412,10 @@ export default function AddRxScreen() {
               <TouchableOpacity
                 style={[
                   styles.saveButton, 
-                  (saving || !selectedMemberId) && styles.saveButtonDisabled
+                  saving && styles.saveButtonDisabled
                 ]}
                 onPress={handleSave}
-                disabled={saving || !selectedMemberId}
+                disabled={saving}
               >
                 {saving ? (
                   <ActivityIndicator size="small" color="#fff" />
