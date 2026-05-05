@@ -238,7 +238,7 @@ export default function AddRxScreen() {
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("add_rx_title")}</Text>
-          <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
+          <TouchableOpacity onPress={() => router.navigate("/welcome")} style={styles.placeholder} accessibilityLabel="Home" accessibilityRole="button">
             <Ionicons name="home-outline" size={22} color="#4a9eff" />
           </TouchableOpacity>
         </View>
@@ -430,7 +430,7 @@ export default function AddRxScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.dismiss(); router.replace("/welcome"); }} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.navigate("/welcome")} style={styles.backButton}>
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("add_rx_title")}</Text>
