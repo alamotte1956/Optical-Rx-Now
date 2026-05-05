@@ -176,12 +176,7 @@ export default function PrescriptionsScreen() {
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("prescriptions")}</Text>
-        <TouchableOpacity
-          style={styles.addButtonGeneric}
-          onPress={() => router.push("/add-rx")}
-        >
-          <Ionicons name="add-circle-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={{ width: 44 }} />
       </View>
 
       {/* Member Filter */}
@@ -230,9 +225,18 @@ export default function PrescriptionsScreen() {
         </ScrollView>
       )}
 
-      {/* Delete Family Member Button */}
+      {/* Add Optical Document & Delete Family Member Buttons */}
       {familyMembers.length > 0 && (
-        <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+        <View style={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
+          <TouchableOpacity
+            style={styles.addDocButton}
+            onPress={() => router.push("/add-rx")}
+            accessibilityLabel="Add Optical Document"
+            accessibilityRole="button"
+          >
+            <Ionicons name="add-circle-outline" size={20} color="#fff" />
+            <Text style={styles.addDocButtonText}>Add Optical Document</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={handleDeleteMember}
@@ -384,14 +388,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
-  addButtonGeneric: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#4a9eff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   addButton: {
     width: 40,
     height: 40,
@@ -461,6 +457,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,
+  },
+  addDocButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#4a9eff",
+    paddingVertical: 14,
+    borderRadius: 10,
+  },
+  addDocButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
   },
   deleteButton: {
     flexDirection: "row",
