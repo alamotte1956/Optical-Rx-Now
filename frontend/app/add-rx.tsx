@@ -414,34 +414,35 @@ export default function AddRxScreen() {
                 Your data stays on this device only
               </Text>
             </View>
+
+            {/* Action Buttons - Inside scroll so keyboard doesn't cover them */}
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
+                <Ionicons name="camera-reverse" size={20} color="#8899a6" />
+                <Text style={styles.retakeButtonText}>Retake</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.saveButton, 
+                  (saving || !selectedMemberId) && styles.saveButtonDisabled
+                ]}
+                onPress={handleSave}
+                disabled={saving || !selectedMemberId}
+              >
+                {saving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                    <Text style={styles.saveButtonText}>{t("save_prescription")}</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
         </KeyboardAvoidingView>
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.retakeButton} onPress={handleRetake}>
-            <Ionicons name="camera-reverse" size={20} color="#8899a6" />
-            <Text style={styles.retakeButtonText}>Retake</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.saveButton, 
-              (saving || !selectedMemberId) && styles.saveButtonDisabled
-            ]}
-            onPress={handleSave}
-            disabled={saving || !selectedMemberId}
-          >
-            {saving ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                <Text style={styles.saveButtonText}>{t("save_prescription")}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     );
   }
