@@ -123,7 +123,7 @@ function AppContent() {
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
         <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="add-rx" options={{ presentation: "modal" }} />
+        <Stack.Screen name="add-rx" options={{ presentation: "card" }} />
         <Stack.Screen name="rx-detail" options={{ presentation: "card" }} />
         <Stack.Screen name="add-member" options={{ presentation: "modal" }} />
         <Stack.Screen name="member/[id]" options={{ presentation: "card" }} />

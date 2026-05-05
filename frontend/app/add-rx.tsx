@@ -180,6 +180,11 @@ export default function AddRxScreen() {
       return;
     }
 
+    if (!expiryDate) {
+      Alert.alert("Expiration Date Required", "Please enter the expiration date (MM/DD/YYYY) from your optical document.");
+      return;
+    }
+
     setSaving(true);
     try {
       await savePrescription({
@@ -274,16 +279,16 @@ export default function AddRxScreen() {
           style={{ flex: 1 }}
         >
         <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent}>
-          {/* Expiration Date - Optional */}
+          {/* Expiration Date - Required */}
           <View style={styles.expiryCard}>
             <View style={styles.expiryHeader}>
               <Ionicons 
                 name="calendar" 
                 size={24} 
-                color={expiryDate ? "#4CAF50" : "#4a9eff"} 
+                color={expiryDate ? "#4CAF50" : "#FF9800"} 
               />
               <Text style={styles.expiryTitle}>
-                Expiration Date <Text style={{ fontSize: 12, color: "#6b7c8f" }}>(optional)</Text>
+                Expiration Date <Text style={{ fontSize: 12, color: "#FF9800" }}>*required</Text>
               </Text>
             </View>
             <View style={styles.expiryInputRow}>
@@ -425,7 +430,7 @@ export default function AddRxScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace("/welcome")} style={styles.backButton}>
+        <TouchableOpacity onPress={() => { router.dismiss(); router.replace("/welcome"); }} style={styles.backButton}>
           <Ionicons name="home-outline" size={22} color="#4a9eff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("add_rx_title")}</Text>
