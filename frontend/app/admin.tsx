@@ -229,8 +229,10 @@ export default function AdminScreen() {
 
   const handleGenerateReport = async () => {
     try {
+      // Use same URL resolution as adminApi
       const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
-        || process.env.EXPO_PUBLIC_BACKEND_URL || "";
+        || process.env.EXPO_PUBLIC_BACKEND_URL 
+        || "https://optical-rx-now-production.up.railway.app";
       const reportUrl = `${baseUrl}/api/reports/weekly`;
 
       if (Platform.OS === "web") {
@@ -250,11 +252,11 @@ export default function AdminScreen() {
             dialogTitle: "Weekly PDF Report",
           });
         } else {
-          Alert.alert("Error", "Failed to download report.");
+          Alert.alert("Error", "Failed to download report. Status: " + download.status);
         }
       }
     } catch (error: any) {
-      Alert.alert("Error", "Could not generate report. Try again later.");
+      Alert.alert("Error", "Could not generate report: " + (error.message || "Unknown error"));
     }
   };
 
