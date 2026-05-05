@@ -230,12 +230,12 @@ export default function PrescriptionsScreen() {
         <View style={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}>
           <TouchableOpacity
             style={styles.addDocButton}
-            onPress={() => router.push("/add-rx")}
-            accessibilityLabel="Add Optical Document"
+            onPress={() => router.push("/add-member")}
+            accessibilityLabel="Add Family Member"
             accessibilityRole="button"
           >
-            <Ionicons name="add-circle-outline" size={20} color="#fff" />
-            <Text style={styles.addDocButtonText}>Add Optical Document</Text>
+            <Ionicons name="person-add-outline" size={20} color="#fff" />
+            <Text style={styles.addDocButtonText}>Add Family Member</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.deleteButton}
