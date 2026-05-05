@@ -89,30 +89,23 @@ export default function PrescriptionsScreen() {
   };
 
   const handleDeleteMember = () => {
-    if (familyMembers.length === 0) {
-      Alert.alert("No Members", "There are no family members to delete.");
-      return;
-    }
+    if (familyMembers.length === 0) return;
     
-    // Delete the currently selected/viewed member
-    const currentMember = familyMembers.find((m) => m.id === selectedMember) || familyMembers[0];
+    const memberToDelete = familyMembers.find((m) => m.id === selectedMember) || familyMembers[0];
     
     Alert.alert(
-      `Delete ${currentMember.name}?`,
-      "This will also remove all their optical documents. This cannot be undone.",
+      "Delete " + memberToDelete.name + "?",
+      "All their optical documents will be removed. This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteFamilyMember(currentMember.id);
-              if (selectedMember === currentMember.id) setSelectedMember(null);
+          onPress: () => {
+            deleteFamilyMember(memberToDelete.id).then(() => {
+              setSelectedMember(null);
               loadData();
-            } catch (error) {
-              console.log("Delete member error:", error);
-            }
+            });
           },
         },
       ]
