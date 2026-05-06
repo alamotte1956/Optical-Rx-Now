@@ -286,7 +286,7 @@ export default function AddRxScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
-        <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent}>
+        <ScrollView style={styles.previewScroll} contentContainerStyle={styles.previewScrollContent} keyboardShouldPersistTaps="handled">
           {/* Expiration Date - Required */}
           <View style={styles.expiryCard}>
             <View style={styles.expiryHeader}>
