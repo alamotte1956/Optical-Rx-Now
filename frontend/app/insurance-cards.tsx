@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -290,12 +291,12 @@ export default function InsuranceCardsScreen() {
 
               {/* Buttons */}
               <View style={styles.formButtons}>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => { resetForm(); setShowAddForm(false); }}>
+                <Pressable style={styles.cancelButton} onPress={() => { resetForm(); setShowAddForm(false); }}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.saveButton, !frontImage && styles.saveButtonDisabled]} onPress={handleSave} disabled={saving || !frontImage}>
+                </Pressable>
+                <Pressable style={[styles.saveButton, !frontImage && styles.saveButtonDisabled]} onPress={handleSave} disabled={saving || !frontImage}>
                   {saving ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.saveButtonText}>Save Card</Text>}
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           )}
@@ -315,9 +316,9 @@ export default function InsuranceCardsScreen() {
                     <Text style={styles.cardLabel}>{card.label}</Text>
                     <Text style={styles.cardMember}>{getMemberName(card.familyMemberId)}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleDelete(card)} style={{ padding: 8 }}>
+                  <Pressable onPress={() => handleDelete(card)} style={{ padding: 8 }}>
                     <Ionicons name="trash-outline" size={20} color="#ff5c5c" />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
                 {card.insurerName ? <Text style={styles.cardDetail}>{card.insurerName}</Text> : null}
                 {card.memberId ? <Text style={styles.cardDetail}>Member ID: {card.memberId}</Text> : null}
