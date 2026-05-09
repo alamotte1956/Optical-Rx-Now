@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   Alert,
   Modal,
   TextInput,
@@ -163,14 +163,14 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
         badge={String(invoices.length)}
       >
         <View style={styles.sectionActions}>
-          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#00BCD4" }]} onPress={() => openModal()}>
+          <Pressable style={[styles.addButton, { backgroundColor: "#00BCD4" }]} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Create Invoice</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={handleAutoGenerate}>
+          </Pressable>
+          <Pressable style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={handleAutoGenerate}>
             <Ionicons name="flash" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Auto-Generate</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {invoices.length === 0 ? (
@@ -186,14 +186,14 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 <View style={{ flex: 1 }}>
                   <View style={styles.itemTitleRow}>
                     <Text style={styles.itemName}>{inv.recipient_name}</Text>
-                    <TouchableOpacity
+                    <Pressable
                       style={[styles.statusBadge, { backgroundColor: statusColor(inv.status) + "22", borderColor: statusColor(inv.status) }]}
                       onPress={() => cycleStatus(inv)}
                     >
                       <Text style={[styles.statusBadgeText, { color: statusColor(inv.status) }]}>
                         {inv.status.toUpperCase()}
                       </Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                   <Text style={styles.itemSubtext}>
                     {inv.invoice_type === "advertiser" ? "Advertiser" : "Affiliate"}{" "}
@@ -209,12 +209,12 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 </View>
               </View>
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => openModal(inv)}>
+                <Pressable style={styles.iconBtn} onPress={() => openModal(inv)}>
                   <Ionicons name="create-outline" size={18} color="#00BCD4" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(inv)}>
+                </Pressable>
+                <Pressable style={styles.iconBtn} onPress={() => handleDelete(inv)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           ))
@@ -233,29 +233,29 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
               <TextInput style={styles.modalInput} placeholder="Recipient Name" placeholderTextColor="#6b7c8f" value={invRecipient} onChangeText={setInvRecipient} />
               <TextInput style={styles.modalInput} placeholder="Email (optional)" placeholderTextColor="#6b7c8f" value={invEmail} onChangeText={setInvEmail} keyboardType="email-address" autoCapitalize="none" />
               <View style={styles.typeToggle}>
-                <TouchableOpacity
+                <Pressable
                   style={[styles.typeButton, invType === "advertiser" && styles.typeButtonActive]}
                   onPress={() => setInvType("advertiser")}
                 >
                   <Text style={[styles.typeButtonText, invType === "advertiser" && styles.typeButtonTextActive]}>Advertiser</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Pressable>
+                <Pressable
                   style={[styles.typeButton, invType === "affiliate" && styles.typeButtonActive]}
                   onPress={() => setInvType("affiliate")}
                 >
                   <Text style={[styles.typeButtonText, invType === "affiliate" && styles.typeButtonTextActive]}>Affiliate</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
               <TextInput style={styles.modalInput} placeholder="Description" placeholderTextColor="#6b7c8f" value={invDescription} onChangeText={setInvDescription} />
               <TextInput style={styles.modalInput} placeholder="Total Amount ($)" placeholderTextColor="#6b7c8f" value={invAmount} onChangeText={setInvAmount} keyboardType="decimal-pad" />
               <TextInput style={styles.modalInput} placeholder="Due Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={invDueDate} onChangeText={setInvDueDate} />
               <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalSaveButton, { backgroundColor: "#00BCD4" }]} onPress={saveInvoice}>
+                </Pressable>
+                <Pressable style={[styles.modalSaveButton, { backgroundColor: "#00BCD4" }]} onPress={saveInvoice}>
                   <Text style={styles.modalSaveText}>Save</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           </ScrollView>

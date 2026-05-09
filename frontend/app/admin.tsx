@@ -3,7 +3,7 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
@@ -57,17 +57,17 @@ export default function AdminScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             onPress={() => router.replace("/welcome")}
             style={{ width: 36, height: 36, justifyContent: "center", alignItems: "center" }}
             accessibilityLabel="Home"
             accessibilityRole="button"
           >
             <Ionicons name="home-outline" size={20} color="#4a9eff" />
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={styles.headerRight}>
@@ -78,6 +78,7 @@ export default function AdminScreen() {
 
       <ScrollView
         style={styles.content}
+        keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4a9eff" />}
       >
         {/* Backend Status Warning */}

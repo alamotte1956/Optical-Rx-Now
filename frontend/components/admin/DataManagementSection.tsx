@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, Text, Alert } from "react-native";
+import { Pressable, Text, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Section } from "./Section";
@@ -56,14 +56,14 @@ export const DataManagementSection: React.FC<Props> = ({ expanded, onToggle }) =
       expanded={expanded}
       onToggle={onToggle}
     >
-      <TouchableOpacity style={styles.actionButton} onPress={handleResetAgeVerification}>
+      <Pressable style={styles.actionButton} onPress={handleResetAgeVerification}>
         <Ionicons name="refresh" size={20} color="#4a9eff" />
         <Text style={styles.actionButtonText}>Reset Age Verification</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionButton, styles.dangerButton]} onPress={handleClearAllData}>
+      </Pressable>
+      <Pressable style={[styles.actionButton, styles.dangerButton]} onPress={handleClearAllData}>
         <Ionicons name="trash" size={20} color="#ff5c5c" />
         <Text style={[styles.actionButtonText, styles.dangerText]}>Clear All App Data</Text>
-      </TouchableOpacity>
+      </Pressable>
     </Section>
   );
 };

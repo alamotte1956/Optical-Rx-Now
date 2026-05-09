@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   Switch,
   Linking,
   Alert,
@@ -142,15 +142,15 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
         badge={String(affiliates.length)}
       >
         <View style={styles.sectionActions}>
-          <TouchableOpacity style={styles.addButton} onPress={() => openModal()}>
+          <Pressable style={styles.addButton} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Add Affiliate</Text>
-          </TouchableOpacity>
+          </Pressable>
           {affiliates.length === 0 && (
-            <TouchableOpacity style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={seedAffiliates}>
+            <Pressable style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={seedAffiliates}>
               <Ionicons name="download-outline" size={18} color="#fff" />
               <Text style={styles.addButtonText}>Seed Defaults</Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 
@@ -182,15 +182,15 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
                 />
               </View>
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => openModal(aff)}>
+                <Pressable style={styles.iconBtn} onPress={() => openModal(aff)}>
                   <Ionicons name="create-outline" size={18} color="#4a9eff" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)}>
+                </Pressable>
+                <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(aff)}>
+                </Pressable>
+                <Pressable style={styles.iconBtn} onPress={() => handleDelete(aff)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           ))
@@ -209,12 +209,12 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
             <TextInput style={styles.modalInput} placeholder="Website URL" placeholderTextColor="#6b7c8f" value={affUrl} onChangeText={setAffUrl} keyboardType="url" autoCapitalize="none" />
             <TextInput style={styles.modalInput} placeholder="Commission %" placeholderTextColor="#6b7c8f" value={affCommission} onChangeText={setAffCommission} keyboardType="decimal-pad" />
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+              <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalSaveButton, { backgroundColor: "#E040FB" }]} onPress={saveAffiliate}>
+              </Pressable>
+              <Pressable style={[styles.modalSaveButton, { backgroundColor: "#E040FB" }]} onPress={saveAffiliate}>
                 <Text style={styles.modalSaveText}>Save</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </KeyboardAvoidingView>

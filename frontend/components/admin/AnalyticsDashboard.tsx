@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert, Platform } from "react-native";
+import { View, Text, Pressable, Alert, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Section } from "./Section";
@@ -178,10 +178,10 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
             <MetricCard value={analytics.banner_stats.active_banners} label="Active Banners" icon="images-outline" color="#FF9800" />
             <MetricCard value={analytics.affiliate_stats.total_affiliates} label="Affiliates" icon="people-outline" color="#E040FB" />
           </View>
-          <TouchableOpacity style={styles.refreshRow} onPress={onRefresh}>
+          <Pressable style={styles.refreshRow} onPress={onRefresh}>
             <Ionicons name="refresh" size={16} color="#4a9eff" />
             <Text style={styles.refreshText}>Refresh Data</Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Platform Breakdown */}
           {analytics.platform_breakdown && Object.keys(analytics.platform_breakdown).length > 0 && (
@@ -269,10 +269,10 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
             </>
           )}
 
-          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport}>
+          <Pressable style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport}>
             <Ionicons name="document-text" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Download Weekly PDF Report</Text>
-          </TouchableOpacity>
+          </Pressable>
         </>
       ) : (
         <Text style={styles.emptyText}>No analytics data available yet.</Text>

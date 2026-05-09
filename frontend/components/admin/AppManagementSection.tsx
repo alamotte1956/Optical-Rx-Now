@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, Text, View, Linking } from "react-native";
+import { Pressable, Text, View, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { adminStyles as styles } from "../../styles/adminStyles";
@@ -19,14 +19,14 @@ export const AppManagementSection: React.FC<Props> = ({ expanded, onToggle }) =>
     onToggle={onToggle}
   >
     {ADMIN_LINKS.map((link) => (
-      <TouchableOpacity key={link.name} style={styles.linkCard} onPress={() => Linking.openURL(link.url)}>
+      <Pressable key={link.name} style={styles.linkCard} onPress={() => Linking.openURL(link.url)}>
         <Ionicons name={link.icon as any} size={22} color="#4a9eff" />
         <View style={styles.linkInfo}>
           <Text style={styles.linkName}>{link.name}</Text>
           <Text style={styles.linkDescription}>{link.description}</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color="#6b7c8f" />
-      </TouchableOpacity>
+      </Pressable>
     ))}
   </Section>
 );

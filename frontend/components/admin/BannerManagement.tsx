@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   Switch,
   Linking,
   Alert,
@@ -128,10 +128,10 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
         badge={String(banners.length)}
       >
         <View style={styles.sectionActions}>
-          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()}>
+          <Pressable style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Add Banner</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {banners.length === 0 ? (
@@ -165,15 +165,15 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                 />
               </View>
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => openModal(ban)}>
+                <Pressable style={styles.iconBtn} onPress={() => openModal(ban)}>
                   <Ionicons name="create-outline" size={18} color="#FF9800" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
+                </Pressable>
+                <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(ban)}>
+                </Pressable>
+                <Pressable style={styles.iconBtn} onPress={() => handleDelete(ban)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           ))
@@ -195,12 +195,12 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
               <TextInput style={styles.modalInput} placeholder="Start Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banStartDate} onChangeText={setBanStartDate} />
               <TextInput style={styles.modalInput} placeholder="End Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banEndDate} onChangeText={setBanEndDate} />
               <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalSaveButton, { backgroundColor: "#FF9800" }]} onPress={saveBanner}>
+                </Pressable>
+                <Pressable style={[styles.modalSaveButton, { backgroundColor: "#FF9800" }]} onPress={saveBanner}>
                   <Text style={styles.modalSaveText}>Save</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
           </ScrollView>
