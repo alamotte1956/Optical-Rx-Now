@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { ScrollView, RectButton } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -57,17 +56,15 @@ export default function AdminScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <RectButton onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
-          </Pressable>
-          <Pressable
+          </RectButton>
+          <RectButton
             onPress={() => router.replace("/welcome")}
             style={{ width: 36, height: 36, justifyContent: "center", alignItems: "center" }}
-            accessibilityLabel="Home"
-            accessibilityRole="button"
           >
             <Ionicons name="home-outline" size={20} color="#4a9eff" />
-          </Pressable>
+          </RectButton>
         </View>
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={styles.headerRight}>

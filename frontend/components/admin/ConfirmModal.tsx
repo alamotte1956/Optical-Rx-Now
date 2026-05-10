@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Modal, StyleSheet } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 
 interface ConfirmModalProps {
@@ -37,12 +37,12 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </View>
         <Text style={modalStyles.message}>{message}</Text>
         <View style={modalStyles.buttons}>
-          <Pressable style={modalStyles.cancelBtn} onPress={onCancel}>
+          <RectButton style={modalStyles.cancelBtn} onPress={onCancel}>
             <Text style={modalStyles.cancelText}>{cancelText}</Text>
-          </Pressable>
-          <Pressable style={[modalStyles.confirmBtn, { backgroundColor: confirmColor }]} onPress={onConfirm}>
+          </RectButton>
+          <RectButton style={[modalStyles.confirmBtn, { backgroundColor: confirmColor }]} onPress={onConfirm}>
             <Text style={modalStyles.confirmText}>{confirmText}</Text>
-          </Pressable>
+          </RectButton>
         </View>
       </View>
     </View>

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { adminStyles as styles } from "../../styles/adminStyles";
 
@@ -24,7 +24,7 @@ export const Section: React.FC<SectionProps> = ({
   children,
 }) => (
   <View style={styles.section}>
-    <Pressable style={styles.sectionHeader} onPress={onToggle}>
+    <RectButton style={styles.sectionHeader} onPress={onToggle}>
       <View style={styles.sectionHeaderLeft}>
         <Ionicons name={icon as any} size={22} color={iconColor} />
         <Text style={styles.sectionTitle}>{title}</Text>
@@ -35,7 +35,7 @@ export const Section: React.FC<SectionProps> = ({
         )}
       </View>
       <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={22} color="#6b7c8f" />
-    </Pressable>
+    </RectButton>
     {expanded && <View style={styles.sectionContent}>{children}</View>}
   </View>
 );

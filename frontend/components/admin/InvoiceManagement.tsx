@@ -9,7 +9,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { ConfirmModal } from "./ConfirmModal";
@@ -157,14 +157,14 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
         badge={String(invoices.length)}
       >
         <View style={styles.sectionActions}>
-          <Pressable style={[styles.addButton, { backgroundColor: "#00BCD4" }]} onPress={() => openModal()}>
+          <RectButton style={[styles.addButton, { backgroundColor: "#00BCD4" }]} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Create Invoice</Text>
-          </Pressable>
-          <Pressable style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={() => setShowAutoGenConfirm(true)}>
+          </RectButton>
+          <RectButton style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={() => setShowAutoGenConfirm(true)}>
             <Ionicons name="flash" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Auto-Generate</Text>
-          </Pressable>
+          </RectButton>
         </View>
 
         {invoices.length === 0 ? (
@@ -180,14 +180,14 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 <View style={{ flex: 1 }}>
                   <View style={styles.itemTitleRow}>
                     <Text style={styles.itemName}>{inv.recipient_name}</Text>
-                    <Pressable
+                    <RectButton
                       style={[styles.statusBadge, { backgroundColor: statusColor(inv.status) + "22", borderColor: statusColor(inv.status) }]}
                       onPress={() => cycleStatus(inv)}
                     >
                       <Text style={[styles.statusBadgeText, { color: statusColor(inv.status) }]}>
                         {inv.status.toUpperCase()}
                       </Text>
-                    </Pressable>
+                    </RectButton>
                   </View>
                   <Text style={styles.itemSubtext}>
                     {inv.invoice_type === "advertiser" ? "Advertiser" : "Affiliate"}{" "}
@@ -203,12 +203,12 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 </View>
               </View>
               <View style={styles.itemActions}>
-                <Pressable style={styles.iconBtn} onPress={() => openModal(inv)}>
+                <RectButton style={styles.iconBtn} onPress={() => openModal(inv)}>
                   <Ionicons name="create-outline" size={18} color="#00BCD4" />
-                </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(inv)}>
+                </RectButton>
+                <RectButton style={styles.iconBtn} onPress={() => setDeleteTarget(inv)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </Pressable>
+                </RectButton>
               </View>
             </View>
           ))
@@ -281,27 +281,27 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
               <TextInput style={styles.modalInput} placeholder="Recipient Name (required)" placeholderTextColor="#6b7c8f" value={invRecipient} onChangeText={(t) => { setStatusMsg(null); setInvRecipient(t); }} />
               <TextInput style={styles.modalInput} placeholder="Email (optional)" placeholderTextColor="#6b7c8f" value={invEmail} onChangeText={setInvEmail} keyboardType="email-address" autoCapitalize="none" />
               <View style={styles.typeToggle}>
-                <Pressable
+                <RectButton
                   style={[styles.typeButton, invType === "advertiser" && styles.typeButtonActive]}
                   onPress={() => setInvType("advertiser")}
                 >
                   <Text style={[styles.typeButtonText, invType === "advertiser" && styles.typeButtonTextActive]}>Advertiser</Text>
-                </Pressable>
-                <Pressable
+                </RectButton>
+                <RectButton
                   style={[styles.typeButton, invType === "affiliate" && styles.typeButtonActive]}
                   onPress={() => setInvType("affiliate")}
                 >
                   <Text style={[styles.typeButtonText, invType === "affiliate" && styles.typeButtonTextActive]}>Affiliate</Text>
-                </Pressable>
+                </RectButton>
               </View>
               <TextInput style={styles.modalInput} placeholder="Description" placeholderTextColor="#6b7c8f" value={invDescription} onChangeText={setInvDescription} />
               <TextInput style={styles.modalInput} placeholder="Total Amount ($)" placeholderTextColor="#6b7c8f" value={invAmount} onChangeText={setInvAmount} keyboardType="decimal-pad" />
               <TextInput style={styles.modalInput} placeholder="Due Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={invDueDate} onChangeText={setInvDueDate} />
               <View style={styles.modalButtons}>
-                <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                <RectButton style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalCancelText}>Cancel</Text>
-                </Pressable>
-                <Pressable
+                </RectButton>
+                <RectButton
                   style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#00BCD4" }]}
                   onPress={saveInvoice}
                   disabled={saving}
@@ -311,7 +311,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                   ) : (
                     <Text style={styles.modalSaveText}>Save</Text>
                   )}
-                </Pressable>
+                </RectButton>
               </View>
             </View>
           </ScrollView>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Text, Alert } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Section } from "./Section";
@@ -47,14 +47,14 @@ export const DataManagementSection: React.FC<Props> = ({ expanded, onToggle }) =
         expanded={expanded}
         onToggle={onToggle}
       >
-        <Pressable style={styles.actionButton} onPress={handleResetAgeVerification}>
+        <RectButton style={styles.actionButton} onPress={handleResetAgeVerification}>
           <Ionicons name="refresh" size={20} color="#4a9eff" />
           <Text style={styles.actionButtonText}>Reset Age Verification</Text>
-        </Pressable>
-        <Pressable style={[styles.actionButton, styles.dangerButton]} onPress={() => setShowClearConfirm(true)}>
+        </RectButton>
+        <RectButton style={[styles.actionButton, styles.dangerButton]} onPress={() => setShowClearConfirm(true)}>
           <Ionicons name="trash" size={20} color="#ff5c5c" />
           <Text style={[styles.actionButtonText, styles.dangerText]}>Clear All App Data</Text>
-        </Pressable>
+        </RectButton>
       </Section>
 
       {/* Clear All Data Confirmation */}

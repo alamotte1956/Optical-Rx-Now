@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { ConfirmModal } from "./ConfirmModal";
@@ -140,15 +140,15 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
         badge={String(affiliates.length)}
       >
         <View style={styles.sectionActions}>
-          <Pressable style={styles.addButton} onPress={() => openModal()}>
+          <RectButton style={styles.addButton} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Add Affiliate</Text>
-          </Pressable>
+          </RectButton>
           {affiliates.length === 0 && (
-            <Pressable style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={() => setShowSeedConfirm(true)}>
+            <RectButton style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={() => setShowSeedConfirm(true)}>
               <Ionicons name="download-outline" size={18} color="#fff" />
               <Text style={styles.addButtonText}>Seed Defaults</Text>
-            </Pressable>
+            </RectButton>
           )}
         </View>
 
@@ -180,15 +180,15 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
                 />
               </View>
               <View style={styles.itemActions}>
-                <Pressable style={styles.iconBtn} onPress={() => openModal(aff)}>
+                <RectButton style={styles.iconBtn} onPress={() => openModal(aff)}>
                   <Ionicons name="create-outline" size={18} color="#4a9eff" />
-                </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)}>
+                </RectButton>
+                <RectButton style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
-                </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(aff)}>
+                </RectButton>
+                <RectButton style={styles.iconBtn} onPress={() => setDeleteTarget(aff)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </Pressable>
+                </RectButton>
               </View>
             </View>
           ))
@@ -261,10 +261,10 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
             <TextInput style={styles.modalInput} placeholder="Website URL (required)" placeholderTextColor="#6b7c8f" value={affUrl} onChangeText={(t) => { setStatusMsg(null); setAffUrl(t); }} keyboardType="url" autoCapitalize="none" />
             <TextInput style={styles.modalInput} placeholder="Commission %" placeholderTextColor="#6b7c8f" value={affCommission} onChangeText={setAffCommission} keyboardType="decimal-pad" />
             <View style={styles.modalButtons}>
-              <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+              <RectButton style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
-              </Pressable>
-              <Pressable
+              </RectButton>
+              <RectButton
                 style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#E040FB" }]}
                 onPress={saveAffiliate}
                 disabled={saving}
@@ -274,7 +274,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
                 ) : (
                   <Text style={styles.modalSaveText}>Save</Text>
                 )}
-              </Pressable>
+              </RectButton>
             </View>
           </View>
         </KeyboardAvoidingView>

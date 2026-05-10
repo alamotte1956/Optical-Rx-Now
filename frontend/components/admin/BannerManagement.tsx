@@ -11,7 +11,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { ConfirmModal } from "./ConfirmModal";
@@ -139,10 +139,10 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
         badge={String(banners.length)}
       >
         <View style={styles.sectionActions}>
-          <Pressable style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()}>
+          <RectButton style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Add Banner</Text>
-          </Pressable>
+          </RectButton>
         </View>
 
         {banners.length === 0 ? (
@@ -176,15 +176,15 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                 />
               </View>
               <View style={styles.itemActions}>
-                <Pressable style={styles.iconBtn} onPress={() => openModal(ban)}>
+                <RectButton style={styles.iconBtn} onPress={() => openModal(ban)}>
                   <Ionicons name="create-outline" size={18} color="#FF9800" />
-                </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
+                </RectButton>
+                <RectButton style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
-                </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(ban)}>
+                </RectButton>
+                <RectButton style={styles.iconBtn} onPress={() => setDeleteTarget(ban)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </Pressable>
+                </RectButton>
               </View>
             </View>
           ))
@@ -247,10 +247,10 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
               <TextInput style={styles.modalInput} placeholder="Start Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banStartDate} onChangeText={setBanStartDate} />
               <TextInput style={styles.modalInput} placeholder="End Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banEndDate} onChangeText={setBanEndDate} />
               <View style={styles.modalButtons}>
-                <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
+                <RectButton style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalCancelText}>Cancel</Text>
-                </Pressable>
-                <Pressable
+                </RectButton>
+                <RectButton
                   style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#FF9800" }]}
                   onPress={saveBanner}
                   disabled={saving}
@@ -260,7 +260,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                   ) : (
                     <Text style={styles.modalSaveText}>Save</Text>
                   )}
-                </Pressable>
+                </RectButton>
               </View>
             </View>
           </ScrollView>
