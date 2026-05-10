@@ -20,6 +20,7 @@ import {
   deleteFamilyMember,
   Prescription,
   FamilyMember,
+  getExpiringPrescriptions,
 } from "../../services/localStorage";
 import { isSmallDevice, moderateScale } from "../../services/responsive";
 import { useTranslation } from "../../services/i18n";
@@ -33,6 +34,7 @@ export default function PrescriptionsScreen() {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [expiringItems, setExpiringItems] = useState<{ rx: Prescription; memberName: string; daysLeft: number }[]>([]);
 
   // Navigate back to welcome screen
   const goToHome = () => {
@@ -43,6 +45,7 @@ export default function PrescriptionsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
+      loadExpiring();
     }, [])
   );
 
@@ -59,6 +62,15 @@ export default function PrescriptionsScreen() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const loadExpiring = async () => {
+    try {
+      const items = await getExpiringPrescriptions(30);
+      setExpiringItems(items);
+    } catch (error) {
+      console.log("Error loading expiring:", error);
     }
   };
 
@@ -259,6 +271,40 @@ export default function PrescriptionsScreen() {
             </View>
           )}
         </View>
+      )}
+
+      {/* Expiring Soon Banner */}
+      {expiringItems.length > 0 && (
+        <TouchableOpacity
+          style={styles.expiringBanner}
+          onPress={() => router.push("/notification-settings")}
+          activeOpacity={0.7}
+        >
+          <View style={styles.expiringBannerIcon}>
+            <Ionicons name="alert-circle" size={22} color="#fff" />
+          </View>
+          <View style={styles.expiringBannerContent}>
+            <Text style={styles.expiringBannerTitle}>
+              {expiringItems.filter(i => i.daysLeft < 0).length > 0
+                ? `${expiringItems.filter(i => i.daysLeft < 0).length} Expired`
+                : ""}
+              {expiringItems.filter(i => i.daysLeft < 0).length > 0 && expiringItems.filter(i => i.daysLeft >= 0).length > 0
+                ? " + "
+                : ""}
+              {expiringItems.filter(i => i.daysLeft >= 0).length > 0
+                ? `${expiringItems.filter(i => i.daysLeft >= 0).length} Expiring Soon`
+                : ""}
+            </Text>
+            <Text style={styles.expiringBannerSubtext}>
+              {expiringItems.slice(0, 2).map(item => {
+                if (item.daysLeft < 0) return `${item.memberName}: expired ${Math.abs(item.daysLeft)}d ago`;
+                if (item.daysLeft === 0) return `${item.memberName}: expires TODAY`;
+                return `${item.memberName}: ${item.daysLeft}d left`;
+              }).join(" | ")}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.6)" />
+        </TouchableOpacity>
       )}
 
       {/* Prescriptions List */}
@@ -622,5 +668,38 @@ const styles = StyleSheet.create({
     color: "#6b7c8f",
     marginTop: 4,
     fontStyle: "italic",
+  },
+  expiringBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 92, 92, 0.12)",
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+    padding: 12,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 92, 92, 0.3)",
+  },
+  expiringBannerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#ff5c5c",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  expiringBannerContent: {
+    flex: 1,
+  },
+  expiringBannerTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#ff5c5c",
+    marginBottom: 2,
+  },
+  expiringBannerSubtext: {
+    fontSize: 12,
+    color: "#8899a6",
   },
 });

@@ -449,6 +449,181 @@ export const getScheduledNotifications = async (): Promise<ScheduledNotification
   }
 };
 
+/**
+ * Reschedule ALL expiry notifications for every prescription.
+ * Call this when:
+ * - Notification settings change (toggle reminders on/off, change days)
+ * - App opens (to refresh stale TIME_INTERVAL triggers after reboot)
+ */
+export const rescheduleAllNotifications = async (): Promise<{ scheduled: number; prescriptions: number }> => {
+  try {
+    const settings = await getSettings();
+    if (!settings.notificationsEnabled) {
+      // If notifications disabled, cancel everything
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      await AsyncStorage.setItem(KEYS.SCHEDULED_NOTIFICATIONS, JSON.stringify([]));
+      return { scheduled: 0, prescriptions: 0 };
+    }
+
+    const hasPermission = await requestNotificationPermissions();
+    if (!hasPermission) return { scheduled: 0, prescriptions: 0 };
+
+    // Cancel all existing scheduled notifications
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    await AsyncStorage.setItem(KEYS.SCHEDULED_NOTIFICATIONS, JSON.stringify([]));
+
+    // Get all prescriptions with expiry dates
+    const allPrescriptions = await getPrescriptions();
+    const rxWithExpiry = allPrescriptions.filter(rx => rx.expiryDate);
+    
+    let totalScheduled = 0;
+    const allNewNotifications: ScheduledNotification[] = [];
+
+    const defaultAlertDays = [30, 14, 7, 2, 0];
+    const alertDays = settings.reminderDays
+      ? settings.reminderDays.filter(r => r.enabled).map(r => r.days)
+      : defaultAlertDays;
+
+    for (const rx of rxWithExpiry) {
+      if (!rx.expiryDate) continue;
+
+      let expiryDate: Date;
+      const dateStr = rx.expiryDate;
+      const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoMatch) {
+        expiryDate = new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+      } else {
+        expiryDate = new Date(dateStr);
+      }
+      if (isNaN(expiryDate.getTime())) continue;
+
+      // Skip if already fully expired (all reminder dates passed)
+      const earliestReminder = new Date(expiryDate);
+      earliestReminder.setDate(earliestReminder.getDate() - Math.max(...alertDays, 0));
+      if (earliestReminder < new Date() && expiryDate < new Date()) continue;
+
+      const member = await getFamilyMemberById(rx.familyMemberId);
+      const memberName = member?.name || "Family member";
+
+      for (const daysBefore of alertDays) {
+        const triggerDate = new Date(expiryDate);
+        triggerDate.setDate(triggerDate.getDate() - daysBefore);
+        triggerDate.setHours(8, 0, 0, 0);
+        if (triggerDate <= new Date()) continue;
+
+        const title = daysBefore === 0 
+          ? "Document Expires TODAY!" 
+          : `Document Expires in ${daysBefore} Days`;
+        const body = `${memberName}'s ${rx.rxType} optical document ${
+          daysBefore === 0 ? 'expires today' : `expires on ${expiryDate.toLocaleDateString()}`
+        }`;
+
+        try {
+          const secondsUntilTrigger = Math.floor((triggerDate.getTime() - Date.now()) / 1000);
+          if (secondsUntilTrigger < 60) continue;
+
+          const notificationId = await Notifications.scheduleNotificationAsync({
+            content: { title, body, data: { prescriptionId: rx.id }, sound: true },
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: secondsUntilTrigger } as any,
+          });
+
+          allNewNotifications.push({
+            id: generateId(),
+            prescriptionId: rx.id,
+            triggerDate: triggerDate.toISOString(),
+            daysBefore,
+            notificationId,
+          });
+          totalScheduled++;
+        } catch (error) {
+          console.log("Error scheduling notification for rx:", rx.id, error);
+        }
+      }
+    }
+
+    await AsyncStorage.setItem(KEYS.SCHEDULED_NOTIFICATIONS, JSON.stringify(allNewNotifications));
+    return { scheduled: totalScheduled, prescriptions: rxWithExpiry.length };
+  } catch (error) {
+    console.log("Error rescheduling all notifications:", error);
+    return { scheduled: 0, prescriptions: 0 };
+  }
+};
+
+/**
+ * Send a test notification immediately to verify the device can receive them.
+ */
+export const sendTestNotification = async (): Promise<boolean> => {
+  try {
+    const hasPermission = await requestNotificationPermissions();
+    if (!hasPermission) return false;
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Test Reminder Working!",
+        body: "You'll receive expiry alerts just like this. Your reminders are set up correctly.",
+        data: { test: true },
+        sound: true,
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 } as any,
+    });
+    return true;
+  } catch (error) {
+    console.log("Error sending test notification:", error);
+    return false;
+  }
+};
+
+/**
+ * Get prescriptions that are expiring within the next N days.
+ */
+export const getExpiringPrescriptions = async (withinDays: number = 30): Promise<{ rx: Prescription; memberName: string; daysLeft: number }[]> => {
+  try {
+    const allPrescriptions = await getPrescriptions();
+    const members = await getFamilyMembers();
+    const memberMap = new Map(members.map(m => [m.id, m.name]));
+    
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const futureDate = new Date(now);
+    futureDate.setDate(futureDate.getDate() + withinDays);
+
+    const expiring: { rx: Prescription; memberName: string; daysLeft: number }[] = [];
+
+    for (const rx of allPrescriptions) {
+      if (!rx.expiryDate) continue;
+
+      let expiryDate: Date;
+      const dateStr = rx.expiryDate;
+      const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoMatch) {
+        expiryDate = new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+      } else {
+        expiryDate = new Date(dateStr);
+      }
+      if (isNaN(expiryDate.getTime())) continue;
+
+      expiryDate.setHours(0, 0, 0, 0);
+      const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Include expired (negative days) and soon-to-expire
+      if (daysLeft <= withinDays) {
+        expiring.push({
+          rx,
+          memberName: memberMap.get(rx.familyMemberId) || "Unknown",
+          daysLeft,
+        });
+      }
+    }
+
+    // Sort by days left (most urgent first)
+    expiring.sort((a, b) => a.daysLeft - b.daysLeft);
+    return expiring;
+  } catch (error) {
+    console.log("Error getting expiring prescriptions:", error);
+    return [];
+  }
+};
+
 export const getStats = async (): Promise<{ familyMembers: number; totalPrescriptions: number }> => {
   const members = await getFamilyMembers();
   const prescriptions = await getPrescriptions();

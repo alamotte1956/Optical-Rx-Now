@@ -5,7 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getStats, requestNotificationPermissions, getSettings, ReminderSetting } from "../services/localStorage";
+import { getStats, requestNotificationPermissions, getSettings, ReminderSetting, rescheduleAllNotifications, getExpiringPrescriptions } from "../services/localStorage";
 import * as Haptics from "expo-haptics";
 import { isSmallDevice, isLargeDevice, moderateScale } from "../services/responsive";
 import { useTranslation } from "../services/i18n";
@@ -32,6 +32,7 @@ export default function WelcomeScreen() {
   const [stats, setStats] = useState({ familyMembers: 0, totalPrescriptions: 0 });
   const [reminderSettings, setReminderSettings] = useState<ReminderSetting[]>(DEFAULT_REMINDERS);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [expiringCount, setExpiringCount] = useState(0);
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   // Shimmer animation for logo
@@ -70,6 +71,9 @@ export default function WelcomeScreen() {
     useCallback(() => {
       loadStats();
       loadReminderSettings();
+      loadExpiringCount();
+      // Reschedule all notifications on app open to refresh stale timers
+      rescheduleAllNotifications().catch(e => console.log("Reschedule on open error:", e));
     }, [])
   );
 
@@ -99,6 +103,15 @@ export default function WelcomeScreen() {
       }
     } catch (error) {
       console.log("Error loading reminder settings:", error);
+    }
+  };
+
+  const loadExpiringCount = async () => {
+    try {
+      const expiring = await getExpiringPrescriptions(30);
+      setExpiringCount(expiring.length);
+    } catch (error) {
+      console.log("Error loading expiring count:", error);
     }
   };
 
@@ -207,6 +220,36 @@ export default function WelcomeScreen() {
           >
             <Ionicons name="card-outline" size={22} color="#4a9eff" />
             <Text style={styles.secondaryButtonText}>Insurance Cards</Text>
+          </TouchableOpacity>
+
+          {/* Expiry Alerts Button */}
+          <TouchableOpacity 
+            style={[
+              styles.secondaryButton, 
+              expiringCount > 0 && styles.expiryAlertButton
+            ]} 
+            onPress={() => router.push("/notification-settings")}
+          >
+            <View style={{ position: "relative" }}>
+              <Ionicons 
+                name="notifications-outline" 
+                size={22} 
+                color={expiringCount > 0 ? "#ff9500" : "#4a9eff"} 
+              />
+              {expiringCount > 0 && (
+                <View style={styles.alertBadge}>
+                  <Text style={styles.alertBadgeText}>{expiringCount}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={[
+              styles.secondaryButtonText,
+              expiringCount > 0 && styles.expiryAlertButtonText
+            ]}>
+              {expiringCount > 0 
+                ? `Expiry Alerts (${expiringCount} expiring soon)` 
+                : "Expiry Alerts"}
+            </Text>
           </TouchableOpacity>
 
           {/* Language Settings */}
@@ -394,6 +437,30 @@ const styles = StyleSheet.create({
     color: "#4a5568",
     textAlign: "center",
     marginBottom: 24,
+  },
+  expiryAlertButton: {
+    backgroundColor: "rgba(255, 149, 0, 0.12)",
+    borderColor: "rgba(255, 149, 0, 0.4)",
+  },
+  expiryAlertButtonText: {
+    color: "#ff9500",
+  },
+  alertBadge: {
+    position: "absolute",
+    top: -4,
+    right: -6,
+    backgroundColor: "#ff5c5c",
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 3,
+  },
+  alertBadgeText: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#fff",
   },
   familySection: {
     width: "100%",
