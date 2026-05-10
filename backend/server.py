@@ -77,6 +77,7 @@ class BannerModel(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     is_active: bool = True
+    show_sample_overlay: bool = True
     view_count: int = 0
     click_count: int = 0
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

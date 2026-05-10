@@ -145,10 +145,12 @@ export default function BannerCarousel({
             </Text>
           </View>
         )}
-        {/* SAMPLE watermark stamp */}
-        <View style={styles.sampleOverlay} pointerEvents="none">
-          <Text style={styles.sampleText}>SAMPLE AD</Text>
-        </View>
+        {/* SAMPLE watermark stamp - controlled per banner */}
+        {(currentBanner.show_sample_overlay !== false) && (
+          <View style={styles.sampleOverlay} pointerEvents="none">
+            <Text style={styles.sampleText}>SAMPLE AD</Text>
+          </View>
+        )}
       </TouchableOpacity>
 
       {/* Dots indicator */}

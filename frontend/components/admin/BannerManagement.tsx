@@ -41,6 +41,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Banner | null>(null);
+  const [banShowSample, setBanShowSample] = useState(true);
 
   const openModal = (banner?: Banner) => {
     setStatusMsg(null);
@@ -52,6 +53,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
       setBanDestUrl(banner.destination_url);
       setBanStartDate(banner.start_date || "");
       setBanEndDate(banner.end_date || "");
+      setBanShowSample(banner.show_sample_overlay !== false);
     } else {
       setEditing(null);
       setBanTitle("");
@@ -59,6 +61,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
       setBanDestUrl("");
       setBanStartDate("");
       setBanEndDate("");
+      setBanShowSample(true);
     }
     setModalVisible(true);
   };
@@ -83,6 +86,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
           destination_url: banDestUrl.trim(),
           start_date: banStartDate.trim() || null,
           end_date: banEndDate.trim() || null,
+          show_sample_overlay: banShowSample,
         });
       } else {
         await createBanner({
@@ -92,6 +96,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
           start_date: banStartDate.trim() || null,
           end_date: banEndDate.trim() || null,
           is_active: true,
+          show_sample_overlay: banShowSample,
         });
       }
       setSaving(false);
@@ -143,6 +148,12 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                   <Text style={styles.itemName}>{ban.title || "Untitled Banner"}</Text>
                   <Text style={styles.itemSubtext} numberOfLines={1}>{ban.image_url}</Text>
                   <Text style={styles.itemMeta}>Views: {ban.view_count || 0} | Clicks: {ban.click_count || 0}</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                    <Ionicons name={ban.show_sample_overlay !== false ? "flag" : "flag-outline"} size={14} color={ban.show_sample_overlay !== false ? "#ff5c5c" : "#6b7c8f"} />
+                    <Text style={{ fontSize: 11, color: ban.show_sample_overlay !== false ? "#ff5c5c" : "#6b7c8f", marginLeft: 4, fontWeight: "600" }}>
+                      {ban.show_sample_overlay !== false ? "SAMPLE AD overlay ON" : "SAMPLE AD overlay OFF"}
+                    </Text>
+                  </View>
                 </View>
                 <Switch value={ban.is_active} onValueChange={() => handleToggle(ban)} trackColor={{ false: "#3a4d63", true: "#FF9800" }} thumbColor={ban.is_active ? "#fff" : "#8899a6"} />
               </View>
@@ -187,6 +198,13 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                 <TextInput style={styles.modalInput} placeholder="Destination URL (required)" placeholderTextColor="#6b7c8f" value={banDestUrl} onChangeText={(t) => { setStatusMsg(null); setBanDestUrl(t); }} keyboardType="url" autoCapitalize="none" />
                 <TextInput style={styles.modalInput} placeholder="Start Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banStartDate} onChangeText={setBanStartDate} />
                 <TextInput style={styles.modalInput} placeholder="End Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banEndDate} onChangeText={setBanEndDate} />
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "rgba(255,92,92,0.08)", borderRadius: 10, padding: 12, marginBottom: 12 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <Ionicons name="flag" size={20} color="#ff5c5c" />
+                    <Text style={{ fontSize: 14, color: "#c8d6e5", fontWeight: "600", marginLeft: 8 }}>Show SAMPLE AD overlay</Text>
+                  </View>
+                  <Switch value={banShowSample} onValueChange={setBanShowSample} trackColor={{ false: "#3a4d63", true: "#ff5c5c" }} thumbColor={banShowSample ? "#fff" : "#8899a6"} />
+                </View>
                 <View style={styles.modalButtons}>
                   <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)} activeOpacity={0.7}>
                     <Text style={styles.modalCancelText}>Cancel</Text>

@@ -125,6 +125,8 @@ export interface Banner {
   start_date?: string | null;
   end_date?: string | null;
   is_active: boolean;
+  show_sample_overlay?: boolean;
+  background_color?: string | null;
   view_count: number;
   click_count: number;
   created_at?: string;
