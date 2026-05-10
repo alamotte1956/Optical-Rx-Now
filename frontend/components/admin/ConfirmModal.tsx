@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Modal, Pressable, StyleSheet } from "react-native";
+import { View, Text, Modal, StyleSheet } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 
 interface ConfirmModalProps {

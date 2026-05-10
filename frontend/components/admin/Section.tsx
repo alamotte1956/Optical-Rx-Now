@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { adminStyles as styles } from "../../styles/adminStyles";
 

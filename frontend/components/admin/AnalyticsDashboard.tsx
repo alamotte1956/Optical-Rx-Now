@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable, Alert, Platform } from "react-native";
+import { View, Text, Alert, Platform } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Section } from "./Section";

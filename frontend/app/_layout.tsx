@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { I18nProvider } from "../services/i18n";
 import { ThemeProvider, useTheme } from "../services/theme";
 import { logAnalyticsEvent } from "../services/adminApi";
@@ -144,12 +145,14 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <ErrorBoundary>
-      <I18nProvider>
-        <ThemeProvider>
-          <AppContent />
-        </ThemeProvider>
-      </I18nProvider>
-    </ErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <I18nProvider>
+          <ThemeProvider>
+            <AppContent />
+          </ThemeProvider>
+        </I18nProvider>
+      </ErrorBoundary>
+    </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Pressable, Text, Alert } from "react-native";
+import { Text, Alert } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Section } from "./Section";

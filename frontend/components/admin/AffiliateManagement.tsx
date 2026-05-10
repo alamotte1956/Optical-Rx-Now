@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Pressable,
   Switch,
   Linking,
   Modal,
@@ -11,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { ConfirmModal } from "./ConfirmModal";
