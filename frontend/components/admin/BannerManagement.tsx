@@ -119,7 +119,8 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
 
   const handleToggle = async (ban: Banner) => {
     try {
-      await updateBanner(ban.banner_id, { ...ban, is_active: !ban.is_active });
+      const { _id, banner_id, view_count, click_count, created_at, ...rest } = ban as any;
+      await updateBanner(ban.banner_id, { ...rest, is_active: !ban.is_active });
       await refreshData();
     } catch {}
   };
@@ -148,12 +149,26 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                   <Text style={styles.itemName}>{ban.title || "Untitled Banner"}</Text>
                   <Text style={styles.itemSubtext} numberOfLines={1}>{ban.image_url}</Text>
                   <Text style={styles.itemMeta}>Views: {ban.view_count || 0} | Clicks: {ban.click_count || 0}</Text>
-                  <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                  <TouchableOpacity 
+                    style={{ flexDirection: "row", alignItems: "center", marginTop: 4, padding: 4 }}
+                    onPress={async () => {
+                      try {
+                        const newVal = ban.show_sample_overlay === false ? true : false;
+                        const { _id, banner_id, view_count, click_count, created_at, ...rest } = ban as any;
+                        await updateBanner(ban.banner_id, { ...rest, show_sample_overlay: newVal });
+                        await refreshData();
+                      } catch (e) {
+                        console.log("Toggle error:", e);
+                      }
+                    }}
+                    activeOpacity={0.6}
+                  >
                     <Ionicons name={ban.show_sample_overlay !== false ? "flag" : "flag-outline"} size={14} color={ban.show_sample_overlay !== false ? "#ff5c5c" : "#6b7c8f"} />
                     <Text style={{ fontSize: 11, color: ban.show_sample_overlay !== false ? "#ff5c5c" : "#6b7c8f", marginLeft: 4, fontWeight: "600" }}>
                       {ban.show_sample_overlay !== false ? "SAMPLE AD overlay ON" : "SAMPLE AD overlay OFF"}
                     </Text>
-                  </View>
+                    <Text style={{ fontSize: 10, color: "#4a9eff", marginLeft: 6 }}>(tap to toggle)</Text>
+                  </TouchableOpacity>
                 </View>
                 <Switch value={ban.is_active} onValueChange={() => handleToggle(ban)} trackColor={{ false: "#3a4d63", true: "#FF9800" }} thumbColor={ban.is_active ? "#fff" : "#8899a6"} />
               </View>
