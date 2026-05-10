@@ -131,7 +131,7 @@ export default function BannerCarousel({
           <Image
             source={{ uri: currentBanner.image_url }}
             style={styles.bannerImage}
-            resizeMode="contain"
+            resizeMode="cover"
           />
         ) : (
           <View style={styles.bannerPlaceholder}>
