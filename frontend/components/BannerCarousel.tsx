@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   sampleText: {
     fontSize: 32,
     fontWeight: "900",
-    color: "rgba(255, 0, 0, 0.65)",
+    color: "rgba(200, 0, 0, 0.80)",
     letterSpacing: 6,
     textAlign: "center",
     transform: [{ rotate: "-25deg" }],
