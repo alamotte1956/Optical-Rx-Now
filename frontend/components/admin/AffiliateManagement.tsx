@@ -130,7 +130,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
               </View>
               <View style={styles.itemActions}>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => openModal(aff)} activeOpacity={0.7}><Ionicons name="create-outline" size={18} color="#4a9eff" /></TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)} activeOpacity={0.7}><Ionicons name="open-outline" size={18} color="#8899a6" /></TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)} activeOpacity={0.7}><Ionicons name="open-outline" size={18} color="#4a9eff" /></TouchableOpacity>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => setDeleteTarget(aff)} activeOpacity={0.7}><Ionicons name="trash-outline" size={18} color="#ff5c5c" /></TouchableOpacity>
               </View>
             </View>

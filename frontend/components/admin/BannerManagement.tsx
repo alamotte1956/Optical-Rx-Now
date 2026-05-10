@@ -151,7 +151,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                   <Ionicons name="create-outline" size={18} color="#FF9800" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)} activeOpacity={0.7}>
-                  <Ionicons name="open-outline" size={18} color="#8899a6" />
+                  <Ionicons name="open-outline" size={18} color="#4a9eff" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconBtn} onPress={() => setDeleteTarget(ban)} activeOpacity={0.7}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
