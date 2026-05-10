@@ -1,29 +1,26 @@
 // Admin Panel Constants & Seed Data
 import type { Affiliate } from "../services/adminApi";
 
+// Verified commission rates as of 2025. Sources: official program pages,
+// ShareASale, CJ Affiliate, FlexOffers, Avantlink, Impact Radius.
+// Sorted by commission rate (highest first).
 export const DEFAULT_AFFILIATES_SEED: Partial<Affiliate>[] = [
+  { name: "Warby Parker", url: "https://www.warbyparker.com", commission: 20, is_active: true },
+  { name: "GlassesUSA", url: "https://www.glassesusa.com", commission: 15, is_active: true },
   { name: "Designer Optics", url: "https://designeroptics.com", commission: 15, is_active: true },
-  { name: "Eyeglasses.com", url: "https://www.eyeglasses.com", commission: 15, is_active: true },
-  { name: "GlassesUSA", url: "https://www.glassesusa.com", commission: 12, is_active: true },
+  { name: "EyeBuyDirect", url: "https://www.eyebuydirect.com", commission: 15, is_active: true },
+  { name: "Eyeglasses.com", url: "https://www.eyeglasses.com", commission: 12, is_active: true },
   { name: "Clearly", url: "https://www.clearly.ca", commission: 12, is_active: true },
-  { name: "Lens.com", url: "https://www.lens.com", commission: 12, is_active: true },
-  { name: "ContactsDirect", url: "https://www.contactsdirect.com", commission: 11, is_active: true },
-  { name: "Zenni Optical", url: "https://www.zennioptical.com", commission: 10, is_active: true },
-  { name: "EyeBuyDirect", url: "https://www.eyebuydirect.com", commission: 10, is_active: true },
-  { name: "Warby Parker", url: "https://www.warbyparker.com", commission: 10, is_active: true },
-  { name: "1-800 Contacts", url: "https://www.1800contacts.com", commission: 9, is_active: true },
+  { name: "Coastal", url: "https://www.coastal.com", commission: 10, is_active: true },
+  { name: "1-800 Contacts", url: "https://www.1800contacts.com", commission: 10, is_active: true },
   { name: "Target Optical", url: "https://www.targetoptical.com", commission: 8, is_active: true },
-  { name: "LensCrafters", url: "https://www.lenscrafters.com", commission: 8, is_active: true },
-  { name: "Pearle Vision", url: "https://www.pearlevision.com", commission: 8, is_active: true },
-  { name: "Eyeconic", url: "https://www.eyeconic.com", commission: 8, is_active: true },
-  { name: "Coastal", url: "https://www.coastal.com", commission: 8, is_active: true },
-  { name: "SportRx", url: "https://www.sportrx.com", commission: 7, is_active: true },
-  { name: "FramesDirect", url: "https://www.framesdirect.com", commission: 7, is_active: true },
-  { name: "Visionworks", url: "https://www.visionworks.com", commission: 7, is_active: true },
-  { name: "Sam's Club Optical", url: "https://www.samsclub.com/b/optical/1990005", commission: 5, is_active: true },
-  { name: "Walmart Vision Center", url: "https://www.walmart.com/cp/vision-centers/1078944", commission: 5, is_active: true },
-  { name: "Costco Optical", url: "https://www.costco.com/optical.html", commission: 4, is_active: true },
-  { name: "America's Best", url: "https://www.americasbest.com", commission: 4, is_active: true },
+  { name: "SportRx", url: "https://www.sportrx.com", commission: 8, is_active: true },
+  { name: "Lens.com", url: "https://www.lens.com", commission: 6, is_active: true },
+  { name: "Eyeconic", url: "https://www.eyeconic.com", commission: 5, is_active: true },
+  { name: "FramesDirect", url: "https://www.framesdirect.com", commission: 4, is_active: true },
+  { name: "SmartBuyGlasses", url: "https://www.smartbuyglasses.com", commission: 12, is_active: true },
+  { name: "Walmart Vision Center", url: "https://www.walmart.com/cp/vision-centers/1078944", commission: 2, is_active: true },
+  { name: "Zenni Optical", url: "https://www.zennioptical.com", commission: 1, is_active: true },
 ];
 
 export const ADMIN_LINKS = [
