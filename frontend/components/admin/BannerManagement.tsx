@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
+  TouchableOpacity,
   Switch,
   Linking,
   Modal,
@@ -11,7 +12,6 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
 import { ConfirmModal } from "./ConfirmModal";
@@ -40,8 +40,6 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
   const [banEndDate, setBanEndDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: "error" | "success"; text: string } | null>(null);
-
-  // Confirmation state
   const [deleteTarget, setDeleteTarget] = useState<Banner | null>(null);
 
   const openModal = (banner?: Banner) => {
@@ -67,7 +65,6 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
 
   const saveBanner = async () => {
     setStatusMsg(null);
-
     if (!banImageUrl.trim()) {
       setStatusMsg({ type: "error", text: "Image URL is required." });
       return;
@@ -76,7 +73,6 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
       setStatusMsg({ type: "error", text: "Destination URL is required." });
       return;
     }
-
     setSaving(true);
     try {
       if (editing?.banner_id) {
@@ -103,7 +99,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
       await refreshData();
     } catch (error: any) {
       setSaving(false);
-      setStatusMsg({ type: "error", text: error.message || "Failed to save banner. Check your connection." });
+      setStatusMsg({ type: "error", text: error.message || "Failed to save. Check connection." });
     }
   };
 
@@ -112,37 +108,25 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
     try {
       await deleteBanner(deleteTarget.banner_id);
       await refreshData();
-    } catch (error: any) {
-      console.log("Delete banner error:", error.message);
-    } finally {
-      setDeleteTarget(null);
-    }
+    } catch {}
+    setDeleteTarget(null);
   };
 
   const handleToggle = async (ban: Banner) => {
     try {
       await updateBanner(ban.banner_id, { ...ban, is_active: !ban.is_active });
       await refreshData();
-    } catch (error: any) {
-      console.log("Toggle banner error:", error.message);
-    }
+    } catch {}
   };
 
   return (
     <>
-      <Section
-        title="Banner Management"
-        icon="images-outline"
-        iconColor="#FF9800"
-        expanded={expanded}
-        onToggle={onToggle}
-        badge={String(banners.length)}
-      >
+      <Section title="Banner Management" icon="images-outline" iconColor="#FF9800" expanded={expanded} onToggle={onToggle} badge={String(banners.length)}>
         <View style={styles.sectionActions}>
-          <RectButton style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()}>
+          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#FF9800" }]} onPress={() => openModal()} activeOpacity={0.7}>
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Add Banner</Text>
-          </RectButton>
+          </TouchableOpacity>
         </View>
 
         {banners.length === 0 ? (
@@ -158,113 +142,63 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemName}>{ban.title || "Untitled Banner"}</Text>
                   <Text style={styles.itemSubtext} numberOfLines={1}>{ban.image_url}</Text>
-                  <Text style={styles.itemMeta}>
-                    Views: {ban.view_count || 0} | Clicks: {ban.click_count || 0}
-                  </Text>
-                  {(ban.start_date || ban.end_date) && (
-                    <Text style={styles.itemMeta}>
-                      {ban.start_date ? `From: ${ban.start_date.split("T")[0]}` : ""}{" "}
-                      {ban.end_date ? `To: ${ban.end_date.split("T")[0]}` : ""}
-                    </Text>
-                  )}
+                  <Text style={styles.itemMeta}>Views: {ban.view_count || 0} | Clicks: {ban.click_count || 0}</Text>
                 </View>
-                <Switch
-                  value={ban.is_active}
-                  onValueChange={() => handleToggle(ban)}
-                  trackColor={{ false: "#3a4d63", true: "#FF9800" }}
-                  thumbColor={ban.is_active ? "#fff" : "#8899a6"}
-                />
+                <Switch value={ban.is_active} onValueChange={() => handleToggle(ban)} trackColor={{ false: "#3a4d63", true: "#FF9800" }} thumbColor={ban.is_active ? "#fff" : "#8899a6"} />
               </View>
               <View style={styles.itemActions}>
-                <RectButton style={styles.iconBtn} onPress={() => openModal(ban)}>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => openModal(ban)} activeOpacity={0.7}>
                   <Ionicons name="create-outline" size={18} color="#FF9800" />
-                </RectButton>
-                <RectButton style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)} activeOpacity={0.7}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
-                </RectButton>
-                <RectButton style={styles.iconBtn} onPress={() => setDeleteTarget(ban)}>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => setDeleteTarget(ban)} activeOpacity={0.7}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
-                </RectButton>
+                </TouchableOpacity>
               </View>
             </View>
           ))
         )}
       </Section>
 
-      {/* Delete Confirmation */}
-      <ConfirmModal
-        visible={!!deleteTarget}
-        title="Delete Banner"
-        message={`Remove "${deleteTarget?.title || "Untitled"}"? This cannot be undone.`}
-        confirmText="Delete"
-        confirmColor="#ff5c5c"
-        icon="trash"
-        iconColor="#ff5c5c"
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-      />
+      <ConfirmModal visible={!!deleteTarget} title="Delete Banner" message={`Remove "${deleteTarget?.title || "Untitled"}"?`} confirmText="Delete" confirmColor="#ff5c5c" icon="trash" iconColor="#ff5c5c" onCancel={() => setDeleteTarget(null)} onConfirm={confirmDelete} />
 
-      {/* Banner Edit/Add Modal */}
+      {/* Banner Modal — onStartShouldSetResponder fixes Android touch bug (RN 0.76+) */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Ionicons name="images" size={28} color="#FF9800" />
-                <Text style={styles.modalTitle}>{editing?.banner_id ? "Edit" : "Add"} Banner</Text>
-              </View>
-
-              {/* Inline status message - replaces Alert.alert */}
-              {statusMsg && (
-                <View style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  backgroundColor: statusMsg.type === "error" ? "rgba(255,92,92,0.15)" : "rgba(76,175,80,0.15)",
-                  borderWidth: 1,
-                  borderColor: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 12,
-                }}>
-                  <Ionicons
-                    name={statusMsg.type === "error" ? "alert-circle" : "checkmark-circle"}
-                    size={20}
-                    color={statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50"}
-                  />
-                  <Text style={{
-                    flex: 1,
-                    fontSize: 14,
-                    color: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
-                    fontWeight: "600",
-                  }}>{statusMsg.text}</Text>
+        <View style={{ flex: 1 }} onStartShouldSetResponder={() => true}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
+            <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Ionicons name="images" size={28} color="#FF9800" />
+                  <Text style={styles.modalTitle}>{editing?.banner_id ? "Edit" : "Add"} Banner</Text>
                 </View>
-              )}
 
-              <TextInput style={styles.modalInput} placeholder="Banner Title (optional)" placeholderTextColor="#6b7c8f" value={banTitle} onChangeText={(t) => { setStatusMsg(null); setBanTitle(t); }} />
-              <TextInput style={styles.modalInput} placeholder="Image URL (required)" placeholderTextColor="#6b7c8f" value={banImageUrl} onChangeText={(t) => { setStatusMsg(null); setBanImageUrl(t); }} keyboardType="url" autoCapitalize="none" />
-              <TextInput style={styles.modalInput} placeholder="Destination URL (required)" placeholderTextColor="#6b7c8f" value={banDestUrl} onChangeText={(t) => { setStatusMsg(null); setBanDestUrl(t); }} keyboardType="url" autoCapitalize="none" />
-              <TextInput style={styles.modalInput} placeholder="Start Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banStartDate} onChangeText={setBanStartDate} />
-              <TextInput style={styles.modalInput} placeholder="End Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banEndDate} onChangeText={setBanEndDate} />
-              <View style={styles.modalButtons}>
-                <RectButton style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
-                  <Text style={styles.modalCancelText}>Cancel</Text>
-                </RectButton>
-                <RectButton
-                  style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#FF9800" }]}
-                  onPress={saveBanner}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <Text style={styles.modalSaveText}>Save</Text>
-                  )}
-                </RectButton>
+                {statusMsg && (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: statusMsg.type === "error" ? "rgba(255,92,92,0.15)" : "rgba(76,175,80,0.15)", borderWidth: 1, borderColor: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50", borderRadius: 10, padding: 12, marginBottom: 12 }}>
+                    <Ionicons name={statusMsg.type === "error" ? "alert-circle" : "checkmark-circle"} size={20} color={statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50"} />
+                    <Text style={{ flex: 1, fontSize: 14, color: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50", fontWeight: "600" }}>{statusMsg.text}</Text>
+                  </View>
+                )}
+
+                <TextInput style={styles.modalInput} placeholder="Banner Title (optional)" placeholderTextColor="#6b7c8f" value={banTitle} onChangeText={(t) => { setStatusMsg(null); setBanTitle(t); }} />
+                <TextInput style={styles.modalInput} placeholder="Image URL (required)" placeholderTextColor="#6b7c8f" value={banImageUrl} onChangeText={(t) => { setStatusMsg(null); setBanImageUrl(t); }} keyboardType="url" autoCapitalize="none" />
+                <TextInput style={styles.modalInput} placeholder="Destination URL (required)" placeholderTextColor="#6b7c8f" value={banDestUrl} onChangeText={(t) => { setStatusMsg(null); setBanDestUrl(t); }} keyboardType="url" autoCapitalize="none" />
+                <TextInput style={styles.modalInput} placeholder="Start Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banStartDate} onChangeText={setBanStartDate} />
+                <TextInput style={styles.modalInput} placeholder="End Date (YYYY-MM-DD)" placeholderTextColor="#6b7c8f" value={banEndDate} onChangeText={setBanEndDate} />
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity style={styles.modalCancelButton} onPress={() => setModalVisible(false)} activeOpacity={0.7}>
+                    <Text style={styles.modalCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#FF9800" }]} onPress={saveBanner} activeOpacity={0.7} disabled={saving}>
+                    {saving ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.modalSaveText}>Save</Text>}
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
       </Modal>
     </>
   );

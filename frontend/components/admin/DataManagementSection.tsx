@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Text, Alert } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import { TouchableOpacity, Text, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Section } from "./Section";
@@ -19,56 +18,26 @@ export const DataManagementSection: React.FC<Props> = ({ expanded, onToggle }) =
 
   const confirmClearAllData = async () => {
     setShowClearConfirm(false);
-    try {
-      await clearAllData();
-      await setAgeVerified(false);
-      Alert.alert("Success", "All data has been cleared. Please restart the app.");
-      router.replace("/");
-    } catch (error) {
-      Alert.alert("Error", "Could not clear data");
-    }
+    try { await clearAllData(); await setAgeVerified(false); router.replace("/"); } catch {}
   };
 
   const handleResetAgeVerification = async () => {
-    try {
-      await setAgeVerified(false);
-      Alert.alert("Success", "Age verification has been reset.");
-    } catch {
-      Alert.alert("Error", "Could not reset age verification");
-    }
+    try { await setAgeVerified(false); } catch {}
   };
 
   return (
     <>
-      <Section
-        title="Data Management"
-        icon="server-outline"
-        iconColor="#ff5c5c"
-        expanded={expanded}
-        onToggle={onToggle}
-      >
-        <RectButton style={styles.actionButton} onPress={handleResetAgeVerification}>
+      <Section title="Data Management" icon="server-outline" iconColor="#ff5c5c" expanded={expanded} onToggle={onToggle}>
+        <TouchableOpacity style={styles.actionButton} onPress={handleResetAgeVerification} activeOpacity={0.7}>
           <Ionicons name="refresh" size={20} color="#4a9eff" />
           <Text style={styles.actionButtonText}>Reset Age Verification</Text>
-        </RectButton>
-        <RectButton style={[styles.actionButton, styles.dangerButton]} onPress={() => setShowClearConfirm(true)}>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.dangerButton]} onPress={() => setShowClearConfirm(true)} activeOpacity={0.7}>
           <Ionicons name="trash" size={20} color="#ff5c5c" />
           <Text style={[styles.actionButtonText, styles.dangerText]}>Clear All App Data</Text>
-        </RectButton>
+        </TouchableOpacity>
       </Section>
-
-      {/* Clear All Data Confirmation */}
-      <ConfirmModal
-        visible={showClearConfirm}
-        title="Clear All Data"
-        message="This will delete ALL optical documents, family members, and app settings. This action cannot be undone!"
-        confirmText="Clear Everything"
-        confirmColor="#ff5c5c"
-        icon="warning"
-        iconColor="#ff5c5c"
-        onCancel={() => setShowClearConfirm(false)}
-        onConfirm={confirmClearAllData}
-      />
+      <ConfirmModal visible={showClearConfirm} title="Clear All Data" message="Delete ALL optical documents, family members, and settings? This cannot be undone!" confirmText="Clear Everything" confirmColor="#ff5c5c" icon="warning" iconColor="#ff5c5c" onCancel={() => setShowClearConfirm(false)} onConfirm={confirmClearAllData} />
     </>
   );
 };

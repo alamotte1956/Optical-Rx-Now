@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, Modal, StyleSheet } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import { View, Text, Modal, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface ConfirmModalProps {
@@ -29,7 +28,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
 }) => (
   <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-    <View style={modalStyles.overlay}>
+    <View style={modalStyles.overlay} onStartShouldSetResponder={() => true}>
       <View style={modalStyles.content}>
         <View style={modalStyles.header}>
           <Ionicons name={icon as any} size={32} color={iconColor} />
@@ -37,12 +36,12 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </View>
         <Text style={modalStyles.message}>{message}</Text>
         <View style={modalStyles.buttons}>
-          <RectButton style={modalStyles.cancelBtn} onPress={onCancel}>
+          <TouchableOpacity style={modalStyles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
             <Text style={modalStyles.cancelText}>{cancelText}</Text>
-          </RectButton>
-          <RectButton style={[modalStyles.confirmBtn, { backgroundColor: confirmColor }]} onPress={onConfirm}>
+          </TouchableOpacity>
+          <TouchableOpacity style={[modalStyles.confirmBtn, { backgroundColor: confirmColor }]} onPress={onConfirm} activeOpacity={0.7}>
             <Text style={modalStyles.confirmText}>{confirmText}</Text>
-          </RectButton>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
