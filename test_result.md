@@ -122,6 +122,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ REGRESSION TEST PASSED: GET /api/health returns {'status': 'healthy', 'service': 'my-optical-wallet', 'version': '2.0.1'}. Endpoint working correctly after bug fixes."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED: GET /api/health returns {'status': 'healthy', 'service': 'my-optical-wallet', 'version': '2.0.1'}. Endpoint working correctly."
 
   - task: "Affiliate CRUD endpoints"
     implemented: true
@@ -137,6 +140,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ TESTED: Full CRUD operations working. POST creates affiliate with UUID, GET lists all active affiliates, PUT updates affiliate (fixed ID exclusion issue), DELETE removes affiliate. All 4 operations passing. Fixed bug: POST endpoints were not serializing MongoDB ObjectId, and PUT was overwriting affiliate_id."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (6/6 tests): Full CRUD + ?all=true parameter tested. POST creates affiliate, GET lists active only, PUT updates and disables affiliate, GET ?all=true includes disabled affiliates, verified disabled affiliates excluded from default GET, DELETE removes affiliate. All operations working correctly."
 
   - task: "Banner CRUD endpoints"
     implemented: true
@@ -152,6 +158,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ TESTED: Full CRUD operations working. POST creates banner with UUID, GET lists active banners with date filtering, PUT updates banner (fixed ID exclusion issue), DELETE removes banner. All 4 operations passing."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (6/6 tests): Full CRUD + ?all=true parameter tested. POST creates banner, GET lists active only, PUT updates and disables banner, GET ?all=true includes disabled banners, verified disabled banners excluded from default GET, DELETE removes banner. All operations working correctly."
 
   - task: "Invoice CRUD endpoints"
     implemented: true
@@ -167,6 +176,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ TESTED: Full CRUD operations working. POST creates invoice with line items, GET lists all invoices sorted by date, PUT updates invoice status (pending to paid), DELETE removes invoice. All 4 operations passing."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (4/4 tests): Full CRUD tested. POST creates invoice with line items, GET lists invoices, PUT updates status to paid, DELETE removes invoice. All operations working correctly."
 
   - task: "Analytics dashboard endpoint"
     implemented: true
@@ -185,6 +197,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ REGRESSION TEST PASSED (3/3 tests): GET /api/analytics/dashboard returns all required keys (events, platform_breakdown, platform_events, affiliate_stats, banner_stats, summary). Platform breakdown shows platforms: ios, android, web, unknown. Total events: 657. Endpoint working correctly after bug fixes."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (3/3 tests): POST /api/analytics/event accepts platform field (ios, android, web) and logs events correctly. GET /api/analytics/dashboard returns platform_breakdown {'unknown': 26, 'android': 98, 'ios': 28, 'web': 508} and platform_events with all platforms. All required keys present. Platform tracking feature working correctly."
 
   - task: "Financial dashboard endpoint"
     implemented: true
@@ -203,6 +218,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ REGRESSION TEST PASSED (3/3 tests): GET /api/finance/dashboard returns all required keys (commission, invoices, total_revenue). Commission data: potential $0.15, 1 affiliate click. Invoice data: 8 total invoices (0 paid, 8 pending). Endpoint working correctly after bug fixes."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED: GET /api/finance/dashboard returns all required keys. Commission potential: $0.15, Total invoices: 11, Revenue: $0. Endpoint working correctly."
 
   - task: "Affiliate redirect with click tracking"
     implemented: true
@@ -218,6 +236,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ TESTED: GET /api/redirect/{affiliate_id} returns correct redirect_url and increments click_count in database. Analytics event logged for affiliate_click. Click tracking verified working."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (2/2 tests): GET /api/redirect/{affiliate_id} returns correct redirect_url (https://testredirect.com/promo). Click count incremented to 1 in database. Click tracking working correctly."
 
   - task: "Weekly PDF report generation"
     implemented: true
@@ -236,6 +257,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ REGRESSION TEST PASSED (4/4 tests): Bug fix verified. GET /api/reports/weekly generates valid PDF (3941 bytes) with correct Content-Type (application/pdf), %PDF magic bytes, and proper filename (MOW_Weekly_Report_20260510.pdf). Created test analytics events and confirmed PDF generation works correctly with 'created_at' field filtering. Previous bug where 'timestamp' field was used has been fixed."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (2/2 tests): Bug fix verified. GET /api/reports/weekly generates valid PDF (3939 bytes) with correct Content-Type, %PDF magic bytes, and proper filename (MOW_Weekly_Report_20260510.pdf). PDF generation working correctly with 'created_at' field filtering. Bug fix confirmed working."
 
   - task: "Auto-generate invoices from affiliate data"
     implemented: true
@@ -251,6 +275,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ REGRESSION TEST PASSED (2/2 tests): POST /api/invoices/auto-generate working correctly. Created 3 test affiliates (2 with clicks, 1 without). Auto-generate created invoices for affiliates with clicks > 0. Verified 2 test invoices in database: Test Affiliate 1 ($2.5 for 25 clicks at 10% commission) and Test Affiliate 2 ($6.0 for 40 clicks at 15% commission). Calculations and line items correct."
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE REGRESSION TEST PASSED (2/2 tests): POST /api/invoices/auto-generate working correctly. Created 3 test affiliates (25 clicks at 10%, 40 clicks at 15%, 0 clicks at 20%). Auto-generate created 3 invoices (expected >= 2). Verified 2 test invoices in database with correct calculations. Endpoint working correctly."
 
 
   - task: "Platform tracking in analytics"
@@ -315,3 +342,5 @@ agent_communication:
       message: "Completed full code review. Fixed 6 bugs: (1) CRITICAL: importData() never saved imported prescriptions to AsyncStorage - now properly saves. (2) clearAllData() now includes insurance cards in cleanup. (3) deleteFamilyMember() now also deletes associated insurance cards. (4) Pull-to-refresh on prescriptions tab now also refreshes expiring items banner. (5) Weekly report was filtering on wrong field 'timestamp' instead of 'created_at' - weekly event counts were always 0. (6) Replaced deprecated datetime.utcnow() with datetime.now(timezone.utc). Please re-test the weekly report endpoint to confirm the timestamp fix."
     - agent: "testing"
       message: "✅ REGRESSION TESTS COMPLETE (13/13 tests passing). Verified bug fixes for weekly report and datetime deprecation. Tested 5 critical endpoints: (1) GET /api/health - Working correctly. (2) GET /api/reports/weekly - Bug fix verified, PDF generates correctly with 'created_at' field filtering (3941 bytes, valid PDF format). (3) POST /api/invoices/auto-generate - Working correctly, creates invoices for affiliates with clicks > 0. (4) GET /api/analytics/dashboard - All required keys present, platform breakdown working. (5) GET /api/finance/dashboard - Commission and invoice data correct. All backend APIs fully functional after bug fixes."
+    - agent: "testing"
+      message: "✅ COMPREHENSIVE REGRESSION TEST COMPLETE (27/27 tests passing). Tested ALL backend endpoints as requested: (1) Health check - Working. (2) Affiliate CRUD + ?all=true parameter - All 6 tests passing, disabled affiliate filtering working correctly. (3) Banner CRUD + ?all=true parameter - All 6 tests passing, disabled banner filtering working correctly. (4) Invoice CRUD - All 4 tests passing. (5) Auto-generate invoices - Working correctly, creates invoices for affiliates with clicks > 0. (6) Analytics with platform tracking - POST accepts platform field (ios, android, web), GET returns platform_breakdown and platform_events. (7) Financial dashboard - All required keys present. (8) Weekly PDF report - Bug fix verified, generates valid PDF with 'created_at' field filtering. (9) Affiliate redirect with click tracking - Returns correct redirect_url and increments click_count. ALL BACKEND APIs FULLY FUNCTIONAL. No issues found."
