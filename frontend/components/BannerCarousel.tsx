@@ -223,9 +223,10 @@ const styles = StyleSheet.create({
   sampleText: {
     fontSize: 32,
     fontWeight: "900",
-    color: "rgba(255, 0, 0, 0.50)",
+    color: "rgba(255, 0, 0, 0.65)",
     letterSpacing: 6,
     textAlign: "center",
+    transform: [{ rotate: "-25deg" }],
   },
   bannerPlaceholder: {
     width: "100%",
