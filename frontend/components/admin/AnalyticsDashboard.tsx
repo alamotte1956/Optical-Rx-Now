@@ -1,6 +1,5 @@
-import React from "react";
-import { View, Text, Alert, Platform } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+import React, { useState } from "react";
+import { View, Text, Platform, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Section } from "./Section";
@@ -16,7 +15,10 @@ interface Props {
 }
 
 export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onToggle, onRefresh }) => {
+  const [reportStatus, setReportStatus] = useState<{ type: "error" | "success" | "loading"; text: string } | null>(null);
+
   const handleGenerateReport = async () => {
+    setReportStatus({ type: "loading", text: "Generating report..." });
     try {
       const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
         || process.env.EXPO_PUBLIC_BACKEND_URL
@@ -26,6 +28,7 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
       if (Platform.OS === "web") {
         const { default: Linking } = await import("react-native");
         await Linking.openURL(reportUrl);
+        setReportStatus({ type: "success", text: "Report opened in browser." });
       } else {
         const FileSystem = await import("expo-file-system");
         const Sharing = await import("expo-sharing");
@@ -37,13 +40,15 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
             mimeType: "application/pdf",
             dialogTitle: "Weekly PDF Report",
           });
+          setReportStatus({ type: "success", text: "Report downloaded successfully." });
         } else {
-          Alert.alert("Error", "Failed to download report. Status: " + download.status);
+          setReportStatus({ type: "error", text: "Download failed. Status: " + download.status });
         }
       }
     } catch (error: any) {
-      Alert.alert("Error", "Could not generate report: " + (error.message || "Unknown error"));
+      setReportStatus({ type: "error", text: "Could not generate report: " + (error.message || "Unknown error") });
     }
+    setTimeout(() => setReportStatus(null), 5000);
   };
 
   return (
@@ -179,10 +184,10 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
             <MetricCard value={analytics.banner_stats.active_banners} label="Active Banners" icon="images-outline" color="#FF9800" />
             <MetricCard value={analytics.affiliate_stats.total_affiliates} label="Affiliates" icon="people-outline" color="#E040FB" />
           </View>
-          <RectButton style={styles.refreshRow} onPress={onRefresh}>
+          <TouchableOpacity style={styles.refreshRow} onPress={onRefresh} activeOpacity={0.7}>
             <Ionicons name="refresh" size={16} color="#4a9eff" />
             <Text style={styles.refreshText}>Refresh Data</Text>
-          </RectButton>
+          </TouchableOpacity>
 
           {/* Platform Breakdown */}
           {analytics.platform_breakdown && Object.keys(analytics.platform_breakdown).length > 0 && (
@@ -270,10 +275,21 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
             </>
           )}
 
-          <RectButton style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport}>
+          {reportStatus && (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: reportStatus.type === "error" ? "rgba(255,92,92,0.15)" : reportStatus.type === "loading" ? "rgba(74,158,255,0.15)" : "rgba(76,175,80,0.15)", borderWidth: 1, borderColor: reportStatus.type === "error" ? "#ff5c5c" : reportStatus.type === "loading" ? "#4a9eff" : "#4CAF50", borderRadius: 10, padding: 12, marginTop: 8 }}>
+              {reportStatus.type === "loading" ? (
+                <ActivityIndicator size="small" color="#4a9eff" />
+              ) : (
+                <Ionicons name={reportStatus.type === "error" ? "alert-circle" : "checkmark-circle"} size={20} color={reportStatus.type === "error" ? "#ff5c5c" : "#4CAF50"} />
+              )}
+              <Text style={{ flex: 1, fontSize: 14, color: reportStatus.type === "error" ? "#ff5c5c" : reportStatus.type === "loading" ? "#4a9eff" : "#4CAF50", fontWeight: "600" }}>{reportStatus.text}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity style={[styles.addButton, { backgroundColor: "#4a9eff", alignSelf: "center", marginTop: 8 }]} onPress={handleGenerateReport} activeOpacity={0.7}>
             <Ionicons name="document-text" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Download Weekly PDF Report</Text>
-          </RectButton>
+          </TouchableOpacity>
         </>
       ) : (
         <Text style={styles.emptyText}>No analytics data available yet.</Text>

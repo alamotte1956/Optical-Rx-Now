@@ -79,12 +79,12 @@ export function useAdminData(): AdminData {
     loadAllData();
   }, [loadAllData]);
 
-  // Auto-refresh every 10 seconds
+  // Auto-refresh every 45 seconds (battery-friendly interval)
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     refreshIntervalRef.current = setInterval(() => {
       loadAllData();
-    }, 10000);
+    }, 45000);
     return () => {
       if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
     };

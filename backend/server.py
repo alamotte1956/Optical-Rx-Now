@@ -137,9 +137,10 @@ async def readyz():
 
 @app.get("/api/affiliates")
 @limiter.limit("60/minute")
-async def get_affiliates(request: Request):
-    """Public endpoint - app fetches current affiliate data"""
-    affiliates = await db.affiliates.find({"is_active": True}).sort("commission", -1).to_list(100)
+async def get_affiliates(request: Request, all: bool = False):
+    """Fetch affiliates. Pass ?all=true from admin to include inactive."""
+    query = {} if all else {"is_active": True}
+    affiliates = await db.affiliates.find(query).sort("commission", -1).to_list(100)
     for a in affiliates:
         a["_id"] = str(a["_id"])
     return {"affiliates": affiliates}
@@ -199,8 +200,14 @@ async def redirect_affiliate(affiliate_id: str):
 # ==================== BANNER ENDPOINTS ====================
 
 @app.get("/api/banners")
-async def get_banners():
-    """Public endpoint - app fetches active banners"""
+async def get_banners(all: bool = False):
+    """Fetch banners. Pass ?all=true from admin to include inactive/expired."""
+    if all:
+        banners = await db.banners.find({}).to_list(50)
+        for b in banners:
+            b["_id"] = str(b["_id"])
+        return {"banners": banners}
+    
     now = datetime.now(timezone.utc).isoformat()
     banners = await db.banners.find({"is_active": True}).to_list(50)
     active_banners = []

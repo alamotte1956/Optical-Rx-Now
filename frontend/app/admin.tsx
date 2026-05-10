@@ -4,8 +4,9 @@ import {
   Text,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
-import { ScrollView, RectButton } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,15 +57,16 @@ export default function AdminScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-          <RectButton onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
             <Ionicons name="close" size={24} color="#fff" />
-          </RectButton>
-          <RectButton
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => router.replace("/welcome")}
             style={{ width: 36, height: 36, justifyContent: "center", alignItems: "center" }}
+            activeOpacity={0.7}
           >
             <Ionicons name="home-outline" size={20} color="#4a9eff" />
-          </RectButton>
+          </TouchableOpacity>
         </View>
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={styles.headerRight}>

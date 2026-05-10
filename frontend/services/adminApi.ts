@@ -91,7 +91,7 @@ export interface Affiliate {
 }
 
 export const getAffiliates = async (): Promise<Affiliate[]> => {
-  const data = await apiCall("/api/affiliates");
+  const data = await apiCall("/api/affiliates?all=true");
   return data.affiliates || [];
 };
 
@@ -131,7 +131,7 @@ export interface Banner {
 }
 
 export const getBanners = async (): Promise<Banner[]> => {
-  const data = await apiCall("/api/banners");
+  const data = await apiCall("/api/banners?all=true");
   return data.banners || [];
 };
 
