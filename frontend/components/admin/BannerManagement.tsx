@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
+import { ConfirmModal } from "./ConfirmModal";
 import { adminStyles as styles } from "../../styles/adminStyles";
 import {
   createBanner,
@@ -37,6 +38,9 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
   const [banDestUrl, setBanDestUrl] = useState("");
   const [banStartDate, setBanStartDate] = useState("");
   const [banEndDate, setBanEndDate] = useState("");
+
+  // Confirmation state
+  const [deleteTarget, setDeleteTarget] = useState<Banner | null>(null);
 
   const openModal = (banner?: Banner) => {
     if (banner) {
@@ -90,22 +94,16 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
     }
   };
 
-  const handleDelete = (ban: Banner) => {
-    Alert.alert("Delete Banner", `Remove "${ban.title || "Untitled"}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteBanner(ban.banner_id);
-            await refreshData();
-          } catch (error: any) {
-            Alert.alert("Error", error.message);
-          }
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteBanner(deleteTarget.banner_id);
+      await refreshData();
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   const handleToggle = async (ban: Banner) => {
@@ -171,7 +169,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
                 <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(ban.destination_url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
                 </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => handleDelete(ban)}>
+                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(ban)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
                 </Pressable>
               </View>
@@ -180,7 +178,20 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
         )}
       </Section>
 
-      {/* Banner Modal */}
+      {/* Delete Confirmation */}
+      <ConfirmModal
+        visible={!!deleteTarget}
+        title="Delete Banner"
+        message={`Remove "${deleteTarget?.title || "Untitled"}"? This cannot be undone.`}
+        confirmText="Delete"
+        confirmColor="#ff5c5c"
+        icon="trash"
+        iconColor="#ff5c5c"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Banner Edit/Add Modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
           <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">

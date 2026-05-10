@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
+import { ConfirmModal } from "./ConfirmModal";
 import { adminStyles as styles } from "../../styles/adminStyles";
 import { DEFAULT_AFFILIATES_SEED } from "../../constants/adminConstants";
 import {
@@ -35,6 +36,10 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
   const [affName, setAffName] = useState("");
   const [affUrl, setAffUrl] = useState("");
   const [affCommission, setAffCommission] = useState("");
+
+  // Confirmation states
+  const [deleteTarget, setDeleteTarget] = useState<Affiliate | null>(null);
+  const [showSeedConfirm, setShowSeedConfirm] = useState(false);
 
   const openModal = (affiliate?: Affiliate) => {
     if (affiliate) {
@@ -80,22 +85,29 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
     }
   };
 
-  const handleDelete = (aff: Affiliate) => {
-    Alert.alert("Delete Affiliate", `Remove "${aff.name}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteAffiliate(aff.affiliate_id);
-            await refreshData();
-          } catch (error: any) {
-            Alert.alert("Error", error.message);
-          }
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteAffiliate(deleteTarget.affiliate_id);
+      await refreshData();
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
+
+  const confirmSeed = async () => {
+    setShowSeedConfirm(false);
+    try {
+      for (const aff of DEFAULT_AFFILIATES_SEED) {
+        await createAffiliate(aff);
+      }
+      await refreshData();
+      Alert.alert("Success", "22 affiliates seeded successfully!");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const handleToggle = async (aff: Affiliate) => {
@@ -105,30 +117,6 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
     } catch (error: any) {
       Alert.alert("Error", error.message);
     }
-  };
-
-  const seedAffiliates = async () => {
-    Alert.alert(
-      "Seed Affiliates",
-      "This will add 22 default optical affiliate partners to the database, sorted by commission rate (highest first).",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Seed",
-          onPress: async () => {
-            try {
-              for (const aff of DEFAULT_AFFILIATES_SEED) {
-                await createAffiliate(aff);
-              }
-              await refreshData();
-              Alert.alert("Success", "22 affiliates seeded successfully!");
-            } catch (error: any) {
-              Alert.alert("Error", error.message);
-            }
-          },
-        },
-      ]
-    );
   };
 
   return (
@@ -147,7 +135,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
             <Text style={styles.addButtonText}>Add Affiliate</Text>
           </Pressable>
           {affiliates.length === 0 && (
-            <Pressable style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={seedAffiliates}>
+            <Pressable style={[styles.addButton, { backgroundColor: "#E040FB" }]} onPress={() => setShowSeedConfirm(true)}>
               <Ionicons name="download-outline" size={18} color="#fff" />
               <Text style={styles.addButtonText}>Seed Defaults</Text>
             </Pressable>
@@ -188,7 +176,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
                 <Pressable style={styles.iconBtn} onPress={() => Linking.openURL(aff.url)}>
                   <Ionicons name="open-outline" size={18} color="#8899a6" />
                 </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => handleDelete(aff)}>
+                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(aff)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
                 </Pressable>
               </View>
@@ -197,7 +185,33 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
         )}
       </Section>
 
-      {/* Affiliate Modal */}
+      {/* Delete Confirmation */}
+      <ConfirmModal
+        visible={!!deleteTarget}
+        title="Delete Affiliate"
+        message={`Remove "${deleteTarget?.name}"? This cannot be undone.`}
+        confirmText="Delete"
+        confirmColor="#ff5c5c"
+        icon="trash"
+        iconColor="#ff5c5c"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Seed Confirmation */}
+      <ConfirmModal
+        visible={showSeedConfirm}
+        title="Seed Affiliates"
+        message="This will add 22 default optical affiliate partners to the database, sorted by commission rate (highest first)."
+        confirmText="Seed"
+        confirmColor="#E040FB"
+        icon="download"
+        iconColor="#E040FB"
+        onCancel={() => setShowSeedConfirm(false)}
+        onConfirm={confirmSeed}
+      />
+
+      {/* Affiliate Edit/Add Modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
           <View style={styles.modalContent}>

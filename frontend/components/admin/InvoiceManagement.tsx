@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
+import { ConfirmModal } from "./ConfirmModal";
 import { adminStyles as styles } from "../../styles/adminStyles";
 import { statusColor } from "../../constants/adminConstants";
 import {
@@ -39,6 +40,10 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
   const [invAmount, setInvAmount] = useState("");
   const [invDueDate, setInvDueDate] = useState("");
   const [invDescription, setInvDescription] = useState("");
+
+  // Confirmation states
+  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
+  const [showAutoGenConfirm, setShowAutoGenConfirm] = useState(false);
 
   const openModal = (invoice?: Invoice) => {
     if (invoice) {
@@ -100,44 +105,27 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
     }
   };
 
-  const handleDelete = (inv: Invoice) => {
-    Alert.alert("Delete Invoice", `Remove invoice for "${inv.recipient_name}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteInvoice(inv.invoice_id);
-            await refreshData();
-          } catch (error: any) {
-            Alert.alert("Error", error.message);
-          }
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteInvoice(deleteTarget.invoice_id);
+      await refreshData();
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
-  const handleAutoGenerate = async () => {
-    Alert.alert(
-      "Auto-Generate Invoices",
-      "This will create invoices based on current affiliate click data and commission rates.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Generate",
-          onPress: async () => {
-            try {
-              const result = await autoGenerateInvoices();
-              await refreshData();
-              Alert.alert("Success", `${result.invoices_created} invoice(s) generated from affiliate data.`);
-            } catch (error: any) {
-              Alert.alert("Error", error.message);
-            }
-          },
-        },
-      ]
-    );
+  const confirmAutoGenerate = async () => {
+    setShowAutoGenConfirm(false);
+    try {
+      const result = await autoGenerateInvoices();
+      await refreshData();
+      Alert.alert("Success", `${result.invoices_created} invoice(s) generated from affiliate data.`);
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const cycleStatus = async (inv: Invoice) => {
@@ -167,7 +155,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Create Invoice</Text>
           </Pressable>
-          <Pressable style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={handleAutoGenerate}>
+          <Pressable style={[styles.addButton, { backgroundColor: "#4CAF50" }]} onPress={() => setShowAutoGenConfirm(true)}>
             <Ionicons name="flash" size={18} color="#fff" />
             <Text style={styles.addButtonText}>Auto-Generate</Text>
           </Pressable>
@@ -212,7 +200,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 <Pressable style={styles.iconBtn} onPress={() => openModal(inv)}>
                   <Ionicons name="create-outline" size={18} color="#00BCD4" />
                 </Pressable>
-                <Pressable style={styles.iconBtn} onPress={() => handleDelete(inv)}>
+                <Pressable style={styles.iconBtn} onPress={() => setDeleteTarget(inv)}>
                   <Ionicons name="trash-outline" size={18} color="#ff5c5c" />
                 </Pressable>
               </View>
@@ -221,7 +209,33 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
         )}
       </Section>
 
-      {/* Invoice Modal */}
+      {/* Delete Confirmation */}
+      <ConfirmModal
+        visible={!!deleteTarget}
+        title="Delete Invoice"
+        message={`Remove invoice for "${deleteTarget?.recipient_name}"? This cannot be undone.`}
+        confirmText="Delete"
+        confirmColor="#ff5c5c"
+        icon="trash"
+        iconColor="#ff5c5c"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Auto-Generate Confirmation */}
+      <ConfirmModal
+        visible={showAutoGenConfirm}
+        title="Auto-Generate Invoices"
+        message="This will create invoices based on current affiliate click data and commission rates."
+        confirmText="Generate"
+        confirmColor="#4CAF50"
+        icon="flash"
+        iconColor="#4CAF50"
+        onCancel={() => setShowAutoGenConfirm(false)}
+        onConfirm={confirmAutoGenerate}
+      />
+
+      {/* Invoice Edit/Add Modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
           <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">

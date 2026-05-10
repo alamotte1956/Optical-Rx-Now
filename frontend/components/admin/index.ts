@@ -1,5 +1,6 @@
 export { Section } from "./Section";
 export { MetricCard } from "./MetricCard";
+export { ConfirmModal } from "./ConfirmModal";
 export { AnalyticsDashboard } from "./AnalyticsDashboard";
 export { FinancialOverview } from "./FinancialOverview";
 export { AffiliateManagement } from "./AffiliateManagement";
