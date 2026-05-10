@@ -3,12 +3,12 @@ import {
   View,
   Text,
   Pressable,
-  Alert,
   Modal,
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
@@ -40,12 +40,16 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
   const [invAmount, setInvAmount] = useState("");
   const [invDueDate, setInvDueDate] = useState("");
   const [invDescription, setInvDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
   // Confirmation states
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
   const [showAutoGenConfirm, setShowAutoGenConfirm] = useState(false);
 
   const openModal = (invoice?: Invoice) => {
+    setStatusMsg(null);
+    setSaving(false);
     if (invoice) {
       setEditing(invoice);
       setInvRecipient(invoice.recipient_name);
@@ -67,8 +71,9 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
   };
 
   const saveInvoice = async () => {
+    setStatusMsg(null);
     if (!invRecipient.trim()) {
-      Alert.alert("Error", "Recipient name is required.");
+      setStatusMsg({ type: "error", text: "Recipient name is required." });
       return;
     }
     const amount = parseFloat(invAmount) || 0;
@@ -76,6 +81,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
       ? [{ description: invDescription.trim(), quantity: 1, unit_price: amount, total: amount }]
       : [];
 
+    setSaving(true);
     try {
       if (editing?.invoice_id) {
         await updateInvoice(editing.invoice_id, {
@@ -97,11 +103,12 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
           status: "pending",
         });
       }
+      setSaving(false);
       setModalVisible(false);
       await refreshData();
-      Alert.alert("Success", editing?.invoice_id ? "Invoice updated!" : "Invoice created!");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      setSaving(false);
+      setStatusMsg({ type: "error", text: error.message || "Failed to save invoice. Check your connection." });
     }
   };
 
@@ -111,7 +118,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
       await deleteInvoice(deleteTarget.invoice_id);
       await refreshData();
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Delete invoice error:", error.message);
     } finally {
       setDeleteTarget(null);
     }
@@ -120,11 +127,10 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
   const confirmAutoGenerate = async () => {
     setShowAutoGenConfirm(false);
     try {
-      const result = await autoGenerateInvoices();
+      await autoGenerateInvoices();
       await refreshData();
-      Alert.alert("Success", `${result.invoices_created} invoice(s) generated from affiliate data.`);
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Auto-generate error:", error.message);
     }
   };
 
@@ -136,7 +142,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
       await updateInvoice(inv.invoice_id, { status: nextStatus });
       await refreshData();
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Cycle status error:", error.message);
     }
   };
 
@@ -244,7 +250,35 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 <Ionicons name="receipt" size={28} color="#00BCD4" />
                 <Text style={styles.modalTitle}>{editing?.invoice_id ? "Edit" : "Create"} Invoice</Text>
               </View>
-              <TextInput style={styles.modalInput} placeholder="Recipient Name" placeholderTextColor="#6b7c8f" value={invRecipient} onChangeText={setInvRecipient} />
+
+              {/* Inline status message */}
+              {statusMsg && (
+                <View style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                  backgroundColor: statusMsg.type === "error" ? "rgba(255,92,92,0.15)" : "rgba(76,175,80,0.15)",
+                  borderWidth: 1,
+                  borderColor: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 12,
+                }}>
+                  <Ionicons
+                    name={statusMsg.type === "error" ? "alert-circle" : "checkmark-circle"}
+                    size={20}
+                    color={statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50"}
+                  />
+                  <Text style={{
+                    flex: 1,
+                    fontSize: 14,
+                    color: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
+                    fontWeight: "600",
+                  }}>{statusMsg.text}</Text>
+                </View>
+              )}
+
+              <TextInput style={styles.modalInput} placeholder="Recipient Name (required)" placeholderTextColor="#6b7c8f" value={invRecipient} onChangeText={(t) => { setStatusMsg(null); setInvRecipient(t); }} />
               <TextInput style={styles.modalInput} placeholder="Email (optional)" placeholderTextColor="#6b7c8f" value={invEmail} onChangeText={setInvEmail} keyboardType="email-address" autoCapitalize="none" />
               <View style={styles.typeToggle}>
                 <Pressable
@@ -267,8 +301,16 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
                 <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                   <Text style={styles.modalCancelText}>Cancel</Text>
                 </Pressable>
-                <Pressable style={[styles.modalSaveButton, { backgroundColor: "#00BCD4" }]} onPress={saveInvoice}>
-                  <Text style={styles.modalSaveText}>Save</Text>
+                <Pressable
+                  style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#00BCD4" }]}
+                  onPress={saveInvoice}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.modalSaveText}>Save</Text>
+                  )}
                 </Pressable>
               </View>
             </View>

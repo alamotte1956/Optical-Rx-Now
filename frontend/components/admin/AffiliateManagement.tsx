@@ -5,11 +5,11 @@ import {
   Pressable,
   Switch,
   Linking,
-  Alert,
   Modal,
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Section } from "./Section";
@@ -36,12 +36,16 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
   const [affName, setAffName] = useState("");
   const [affUrl, setAffUrl] = useState("");
   const [affCommission, setAffCommission] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
   // Confirmation states
   const [deleteTarget, setDeleteTarget] = useState<Affiliate | null>(null);
   const [showSeedConfirm, setShowSeedConfirm] = useState(false);
 
   const openModal = (affiliate?: Affiliate) => {
+    setStatusMsg(null);
+    setSaving(false);
     if (affiliate) {
       setEditing(affiliate);
       setAffName(affiliate.name);
@@ -57,10 +61,16 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
   };
 
   const saveAffiliate = async () => {
-    if (!affName.trim() || !affUrl.trim()) {
-      Alert.alert("Error", "Name and URL are required.");
+    setStatusMsg(null);
+    if (!affName.trim()) {
+      setStatusMsg({ type: "error", text: "Partner name is required." });
       return;
     }
+    if (!affUrl.trim()) {
+      setStatusMsg({ type: "error", text: "Website URL is required." });
+      return;
+    }
+    setSaving(true);
     try {
       if (editing?.affiliate_id) {
         await updateAffiliate(editing.affiliate_id, {
@@ -77,11 +87,12 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
           is_active: true,
         });
       }
+      setSaving(false);
       setModalVisible(false);
       await refreshData();
-      Alert.alert("Success", editing?.affiliate_id ? "Affiliate updated!" : "Affiliate created!");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      setSaving(false);
+      setStatusMsg({ type: "error", text: error.message || "Failed to save affiliate. Check your connection." });
     }
   };
 
@@ -91,7 +102,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
       await deleteAffiliate(deleteTarget.affiliate_id);
       await refreshData();
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Delete affiliate error:", error.message);
     } finally {
       setDeleteTarget(null);
     }
@@ -104,9 +115,8 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
         await createAffiliate(aff);
       }
       await refreshData();
-      Alert.alert("Success", "22 affiliates seeded successfully!");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Seed error:", error.message);
     }
   };
 
@@ -115,7 +125,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
       await updateAffiliate(aff.affiliate_id, { ...aff, is_active: !aff.is_active });
       await refreshData();
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("Toggle affiliate error:", error.message);
     }
   };
 
@@ -146,7 +156,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
           <View style={styles.emptyCard}>
             <Ionicons name="link-outline" size={40} color="#3a4d63" />
             <Text style={styles.emptyCardText}>No affiliates yet</Text>
-            <Text style={styles.emptyCardSub}>Tap "Seed Defaults" to add 22 optical affiliate partners sorted by commission</Text>
+            <Text style={styles.emptyCardSub}>Tap "Seed Defaults" to add default optical affiliate partners sorted by commission</Text>
           </View>
         ) : (
           affiliates.map((aff) => (
@@ -202,7 +212,7 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
       <ConfirmModal
         visible={showSeedConfirm}
         title="Seed Affiliates"
-        message="This will add 22 default optical affiliate partners to the database, sorted by commission rate (highest first)."
+        message="This will add default optical affiliate partners to the database, sorted by commission rate (highest first)."
         confirmText="Seed"
         confirmColor="#E040FB"
         icon="download"
@@ -219,15 +229,51 @@ export const AffiliateManagement: React.FC<Props> = ({ affiliates, expanded, onT
               <Ionicons name="link" size={28} color="#E040FB" />
               <Text style={styles.modalTitle}>{editing?.affiliate_id ? "Edit" : "Add"} Affiliate</Text>
             </View>
-            <TextInput style={styles.modalInput} placeholder="Partner Name" placeholderTextColor="#6b7c8f" value={affName} onChangeText={setAffName} />
-            <TextInput style={styles.modalInput} placeholder="Website URL" placeholderTextColor="#6b7c8f" value={affUrl} onChangeText={setAffUrl} keyboardType="url" autoCapitalize="none" />
+
+            {/* Inline status message */}
+            {statusMsg && (
+              <View style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                backgroundColor: statusMsg.type === "error" ? "rgba(255,92,92,0.15)" : "rgba(76,175,80,0.15)",
+                borderWidth: 1,
+                borderColor: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
+                borderRadius: 10,
+                padding: 12,
+                marginBottom: 12,
+              }}>
+                <Ionicons
+                  name={statusMsg.type === "error" ? "alert-circle" : "checkmark-circle"}
+                  size={20}
+                  color={statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50"}
+                />
+                <Text style={{
+                  flex: 1,
+                  fontSize: 14,
+                  color: statusMsg.type === "error" ? "#ff5c5c" : "#4CAF50",
+                  fontWeight: "600",
+                }}>{statusMsg.text}</Text>
+              </View>
+            )}
+
+            <TextInput style={styles.modalInput} placeholder="Partner Name (required)" placeholderTextColor="#6b7c8f" value={affName} onChangeText={(t) => { setStatusMsg(null); setAffName(t); }} />
+            <TextInput style={styles.modalInput} placeholder="Website URL (required)" placeholderTextColor="#6b7c8f" value={affUrl} onChangeText={(t) => { setStatusMsg(null); setAffUrl(t); }} keyboardType="url" autoCapitalize="none" />
             <TextInput style={styles.modalInput} placeholder="Commission %" placeholderTextColor="#6b7c8f" value={affCommission} onChangeText={setAffCommission} keyboardType="decimal-pad" />
             <View style={styles.modalButtons}>
               <Pressable style={styles.modalCancelButton} onPress={() => setModalVisible(false)}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.modalSaveButton, { backgroundColor: "#E040FB" }]} onPress={saveAffiliate}>
-                <Text style={styles.modalSaveText}>Save</Text>
+              <Pressable
+                style={[styles.modalSaveButton, { backgroundColor: saving ? "#6b7c8f" : "#E040FB" }]}
+                onPress={saveAffiliate}
+                disabled={saving}
+              >
+                {saving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.modalSaveText}>Save</Text>
+                )}
               </Pressable>
             </View>
           </View>
