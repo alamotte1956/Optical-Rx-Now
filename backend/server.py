@@ -434,7 +434,7 @@ async def auto_generate_invoices():
         }]
         
         # Set due date to 30 days from now
-        due_date = (datetime.utcnow() + timedelta(days=30)).isoformat()
+        due_date = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
         
         invoice = {
             "invoice_id": invoice_id,
@@ -445,7 +445,7 @@ async def auto_generate_invoices():
             "total_amount": potential_revenue,
             "status": "pending",
             "due_date": due_date,
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         await db.invoices.insert_one(invoice)
@@ -461,7 +461,7 @@ async def generate_weekly_report():
     """Generate a weekly PDF report for advertisers with analytics summary"""
     from fpdf import FPDF
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     week_ago = now - timedelta(days=7)
     
     # Fetch data
@@ -471,7 +471,7 @@ async def generate_weekly_report():
     invoices = await db.invoices.find().to_list(100)
     
     # Aggregate events from last 7 days
-    weekly_events = [e for e in events if e.get("timestamp", "") >= week_ago.isoformat()]
+    weekly_events = [e for e in events if e.get("created_at", "") >= week_ago.isoformat()]
     event_counts = {}
     for e in weekly_events:
         etype = e.get("event_type", "unknown")

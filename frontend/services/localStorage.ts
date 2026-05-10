@@ -197,6 +197,11 @@ export const deleteFamilyMember = async (id: string): Promise<boolean> => {
     for (const rx of prescriptions) {
       await deletePrescription(rx.id);
     }
+    // Also delete insurance cards for this member
+    const insuranceCards = await getInsuranceCardsByMember(id);
+    for (const card of insuranceCards) {
+      await deleteInsuranceCard(card.id);
+    }
     const members = await getFamilyMembers();
     const filtered = members.filter((m) => m.id !== id);
     await AsyncStorage.setItem(KEYS.FAMILY_MEMBERS, JSON.stringify(filtered));
@@ -637,7 +642,7 @@ export const clearAllData = async (): Promise<void> => {
       await FileSystem.deleteAsync(IMAGE_DIR, { idempotent: true });
     }
   } catch {}
-  await AsyncStorage.multiRemove([KEYS.FAMILY_MEMBERS, KEYS.PRESCRIPTIONS, KEYS.SETTINGS, KEYS.SCHEDULED_NOTIFICATIONS]);
+  await AsyncStorage.multiRemove([KEYS.FAMILY_MEMBERS, KEYS.PRESCRIPTIONS, KEYS.SETTINGS, KEYS.SCHEDULED_NOTIFICATIONS, KEYS.INSURANCE_CARDS]);
   await Notifications.cancelAllScheduledNotificationsAsync();
 };
 
@@ -700,10 +705,31 @@ export const importData = async (jsonString: string): Promise<{ members: number;
   }
 
   if (data.opticalDocuments && Array.isArray(data.opticalDocuments)) {
-    const existing = await getPrescriptions();
-    const existingIds = new Set(existing.map((p) => p.id));
-    const newDocs = data.opticalDocuments.filter((p: Prescription) => !existingIds.has(p.id) && p.imageBase64 !== "[IMAGE DATA]");
-    // Note: imports without images will skip, full backup includes images
+    const existingData = await AsyncStorage.getItem(KEYS.PRESCRIPTIONS);
+    const existingStored: PrescriptionStorage[] = existingData ? JSON.parse(existingData) : [];
+    const existingIds = new Set(existingStored.map((p) => p.id));
+    const newDocs = data.opticalDocuments.filter(
+      (p: Prescription) => !existingIds.has(p.id) && p.imageBase64 !== "[IMAGE DATA]"
+    );
+    if (newDocs.length > 0) {
+      const newStored: PrescriptionStorage[] = newDocs.map((p: Prescription) => ({
+        id: p.id,
+        familyMemberId: p.familyMemberId,
+        rxType: p.rxType,
+        imagePath: p.imageBase64 || "",
+        notes: p.notes,
+        dateTaken: p.dateTaken,
+        expiryDate: p.expiryDate,
+        createdAt: p.createdAt,
+        doctorName: p.doctorName,
+        doctorPhone: p.doctorPhone,
+        clinicName: p.clinicName,
+      }));
+      await AsyncStorage.setItem(
+        KEYS.PRESCRIPTIONS,
+        JSON.stringify([...existingStored, ...newStored])
+      );
+    }
   }
 
   return {

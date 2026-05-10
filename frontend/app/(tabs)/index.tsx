@@ -77,6 +77,7 @@ export default function PrescriptionsScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     loadData();
+    loadExpiring();
   };
 
   const handleDeletePrescription = (rx: Prescription) => {
