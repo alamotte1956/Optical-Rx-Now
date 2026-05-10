@@ -142,7 +142,7 @@ export default function AdminScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>My Optical Wallet v2.0.1</Text>
+          <Text style={styles.footerText}>My Optical Wallet v2.1.0</Text>
           <Text style={styles.footerSubtext}>Admin Panel • Backend {backendOnline ? "Connected" : "Disconnected"}</Text>
         </View>
       </ScrollView>

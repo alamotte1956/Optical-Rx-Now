@@ -224,7 +224,7 @@ export const InvoiceManagement: React.FC<Props> = ({ invoices, expanded, onToggl
       {/* Invoice Modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalScrollContent}>
+          <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Ionicons name="receipt" size={28} color="#00BCD4" />

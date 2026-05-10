@@ -183,7 +183,7 @@ export const BannerManagement: React.FC<Props> = ({ banners, expanded, onToggle,
       {/* Banner Modal */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalScrollContent}>
+          <ScrollView contentContainerStyle={styles.modalScrollContent} keyboardShouldPersistTaps="handled">
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Ionicons name="images" size={28} color="#FF9800" />
