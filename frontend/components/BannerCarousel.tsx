@@ -131,7 +131,7 @@ export default function BannerCarousel({
           <Image
             source={{ uri: currentBanner.image_url }}
             style={styles.bannerImage}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : (
           <View style={styles.bannerPlaceholder}>
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#1a2d45",
+    backgroundColor: "#ffffff",
   },
   bannerImage: {
     width: "100%",
