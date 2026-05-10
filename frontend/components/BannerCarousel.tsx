@@ -123,7 +123,7 @@ export default function BannerCarousel({
   return (
     <View style={styles.carouselWrapper}>
       <TouchableOpacity
-        style={styles.bannerContainer}
+        style={[styles.bannerContainer, currentBanner.background_color ? { backgroundColor: currentBanner.background_color } : null]}
         onPress={() => handleBannerPress(currentBanner)}
         activeOpacity={0.8}
       >
@@ -131,7 +131,7 @@ export default function BannerCarousel({
           <Image
             source={{ uri: currentBanner.image_url }}
             style={styles.bannerImage}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : (
           <View style={styles.bannerPlaceholder}>
