@@ -147,7 +147,7 @@ export default function BannerCarousel({
         )}
         {/* SAMPLE watermark stamp */}
         <View style={styles.sampleOverlay} pointerEvents="none">
-          <Text style={styles.sampleText}>SAMPLE</Text>
+          <Text style={styles.sampleText}>Sample Ad</Text>
         </View>
       </TouchableOpacity>
 
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   sampleText: {
     fontSize: 36,
     fontWeight: "900",
-    color: "rgba(0, 0, 0, 0.30)",
+    color: "rgba(255, 0, 0, 0.30)",
     letterSpacing: 12,
     transform: [{ rotate: "-20deg" }],
   },
