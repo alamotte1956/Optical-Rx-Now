@@ -145,6 +145,10 @@ export default function BannerCarousel({
             </Text>
           </View>
         )}
+        {/* SAMPLE watermark stamp */}
+        <View style={styles.sampleOverlay} pointerEvents="none">
+          <Text style={styles.sampleText}>SAMPLE</Text>
+        </View>
       </TouchableOpacity>
 
       {/* Dots indicator */}
@@ -206,6 +210,22 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: "100%",
     height: "100%",
+  },
+  sampleOverlay: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sampleText: {
+    fontSize: 36,
+    fontWeight: "900",
+    color: "rgba(0, 0, 0, 0.15)",
+    letterSpacing: 12,
+    transform: [{ rotate: "-20deg" }],
   },
   bannerPlaceholder: {
     width: "100%",
