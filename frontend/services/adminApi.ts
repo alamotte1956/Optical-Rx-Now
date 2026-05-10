@@ -12,15 +12,10 @@ const PRODUCTION_BACKEND_URL = "https://optical-rx-now-production.up.railway.app
 
 // Resolve the backend URL dynamically from environment config
 const getBaseUrl = (): string => {
-  // For web preview, use relative URLs (same origin)
-  if (Platform.OS === "web") {
-    return "";
-  }
-
   // Try all possible sources for the backend URL
   try {
     const fromExtra = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL;
-    if (fromExtra && fromExtra.length > 0) {
+    if (fromExtra && fromExtra.length > 0 && !fromExtra.includes("preview.emergentagent.com")) {
       console.log("[AdminAPI] Using URL from extra:", fromExtra);
       return fromExtra;
     }
@@ -30,7 +25,7 @@ const getBaseUrl = (): string => {
 
   try {
     const fromEnv = process.env.EXPO_PUBLIC_BACKEND_URL;
-    if (fromEnv && fromEnv.length > 0) {
+    if (fromEnv && fromEnv.length > 0 && !fromEnv.includes("preview.emergentagent.com")) {
       console.log("[AdminAPI] Using URL from env:", fromEnv);
       return fromEnv;
     }
@@ -38,7 +33,7 @@ const getBaseUrl = (): string => {
     console.log("[AdminAPI] process.env not available");
   }
 
-  // Always fallback to production URL for native builds
+  // Always use production Railway URL (ensures web preview and native share same database)
   console.log("[AdminAPI] Using production URL:", PRODUCTION_BACKEND_URL);
   return PRODUCTION_BACKEND_URL;
 };
