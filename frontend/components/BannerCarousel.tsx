@@ -221,11 +221,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sampleText: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "900",
     color: "rgba(255, 0, 0, 0.50)",
-    letterSpacing: 12,
-    transform: [{ rotate: "-20deg" }],
+    letterSpacing: 6,
+    textAlign: "center",
   },
   bannerPlaceholder: {
     width: "100%",
