@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     height: 130,
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#D6EAF8",
   },
   bannerImage: {
     width: "100%",
