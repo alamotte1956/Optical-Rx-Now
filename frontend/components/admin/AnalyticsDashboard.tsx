@@ -30,19 +30,18 @@ export const AnalyticsDashboard: React.FC<Props> = ({ analytics, expanded, onTog
         await Linking.openURL(reportUrl);
         setReportStatus({ type: "success", text: "Report opened in browser." });
       } else {
-        const FileSystem = await import("expo-file-system");
+        const { File, Directory, Paths } = await import("expo-file-system");
         const Sharing = await import("expo-sharing");
-        const filename = `MOW_Weekly_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
-        const fileUri = FileSystem.documentDirectory + filename;
-        const download = await FileSystem.downloadAsync(reportUrl, fileUri);
-        if (download.status === 200) {
-          await Sharing.shareAsync(download.uri, {
+        const cacheDir = new Directory(Paths.cache);
+        const downloadedFile = await File.downloadFileAsync(reportUrl, cacheDir);
+        if (downloadedFile && downloadedFile.exists) {
+          await Sharing.shareAsync(downloadedFile.uri, {
             mimeType: "application/pdf",
             dialogTitle: "Weekly PDF Report",
           });
           setReportStatus({ type: "success", text: "Report downloaded successfully." });
         } else {
-          setReportStatus({ type: "error", text: "Download failed. Status: " + download.status });
+          setReportStatus({ type: "error", text: "Download failed." });
         }
       }
     } catch (error: any) {
