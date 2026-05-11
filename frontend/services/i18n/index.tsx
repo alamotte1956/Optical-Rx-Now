@@ -5,6 +5,7 @@ import { getLocales } from "expo-localization";
 import * as Updates from "expo-updates";
 import { en } from "./en";
 import { es } from "./es";
+import { es_419 } from "./es_419";
 import { fr } from "./fr";
 import { zh } from "./zh";
 import { pt } from "./pt";
@@ -25,14 +26,22 @@ import { sv } from "./sv";
 import { uk } from "./uk";
 import { bn } from "./bn";
 import { tl } from "./tl";
+import { cs } from "./cs";
+import { da } from "./da";
+import { fi } from "./fi";
+import { hu } from "./hu";
+import { he } from "./he";
+import { nb } from "./nb";
+import { ro } from "./ro";
+import { sk } from "./sk";
 
-export type LanguageCode = "en" | "es" | "fr" | "zh" | "pt" | "hi" | "ar" | "ja" | "ko" | "de" | "it" | "ru" | "tr" | "vi" | "th" | "id" | "pl" | "nl" | "sv" | "uk" | "bn" | "tl" | "auto";
+export type LanguageCode = "en" | "es" | "es_419" | "fr" | "zh" | "pt" | "hi" | "ar" | "ja" | "ko" | "de" | "it" | "ru" | "tr" | "vi" | "th" | "id" | "pl" | "nl" | "sv" | "uk" | "bn" | "tl" | "cs" | "da" | "fi" | "hu" | "he" | "nb" | "ro" | "sk" | "auto";
 
 const LANGUAGE_STORAGE_KEY = "@optical_rx_language";
 
-const RTL_LANGUAGES = ["ar"];
+const RTL_LANGUAGES = ["ar", "he"];
 
-const translations: Record<string, typeof en> = { en, es, fr, zh, pt, hi, ar, ja, ko, de, it, ru, tr, vi, th, id, pl, nl, sv, uk, bn, tl };
+const translations: Record<string, typeof en> = { en, es, es_419, fr, zh, pt, hi, ar, ja, ko, de, it, ru, tr, vi, th, id, pl, nl, sv, uk, bn, tl, cs, da, fi, hu, he, nb, ro, sk };
 
 export type TranslationKey = keyof typeof en;
 
@@ -40,6 +49,8 @@ function getDeviceLanguage(): string {
   const locales = getLocales();
   if (locales && locales.length > 0) {
     const code = locales[0].languageCode || "en";
+    const region = locales[0].regionCode || "";
+    if (code.startsWith("es") && (region === "419" || region === "MX" || region === "AR" || region === "CO" || region === "CL" || region === "PE")) return "es_419";
     if (code.startsWith("es")) return "es";
     if (code.startsWith("fr")) return "fr";
     if (code.startsWith("zh")) return "zh";
@@ -61,6 +72,14 @@ function getDeviceLanguage(): string {
     if (code.startsWith("uk")) return "uk";
     if (code.startsWith("bn")) return "bn";
     if (code.startsWith("tl") || code.startsWith("fil")) return "tl";
+    if (code.startsWith("cs")) return "cs";
+    if (code.startsWith("da")) return "da";
+    if (code.startsWith("fi")) return "fi";
+    if (code.startsWith("hu")) return "hu";
+    if (code.startsWith("he") || code.startsWith("iw")) return "he";
+    if (code.startsWith("nb") || code.startsWith("no") || code.startsWith("nn")) return "nb";
+    if (code.startsWith("ro")) return "ro";
+    if (code.startsWith("sk")) return "sk";
   }
   return "en";
 }
@@ -168,25 +187,34 @@ export function useTranslation() {
 export const LANGUAGE_OPTIONS = [
   { code: "auto" as LanguageCode, label: "Auto-detect" },
   { code: "en" as LanguageCode, label: "English" },
-  { code: "es" as LanguageCode, label: "Español" },
-  { code: "fr" as LanguageCode, label: "Français" },
-  { code: "zh" as LanguageCode, label: "中文" },
-  { code: "pt" as LanguageCode, label: "Português" },
-  { code: "hi" as LanguageCode, label: "हिन्दी" },
   { code: "ar" as LanguageCode, label: "العربية" },
+  { code: "cs" as LanguageCode, label: "Čeština" },
+  { code: "da" as LanguageCode, label: "Dansk" },
+  { code: "de" as LanguageCode, label: "Deutsch" },
+  { code: "es" as LanguageCode, label: "Español (España)" },
+  { code: "es_419" as LanguageCode, label: "Español (Latinoamérica)" },
+  { code: "fi" as LanguageCode, label: "Suomi" },
+  { code: "fr" as LanguageCode, label: "Français" },
+  { code: "he" as LanguageCode, label: "עברית" },
+  { code: "hi" as LanguageCode, label: "हिन्दी" },
+  { code: "hu" as LanguageCode, label: "Magyar" },
+  { code: "id" as LanguageCode, label: "Bahasa Indonesia" },
+  { code: "it" as LanguageCode, label: "Italiano" },
   { code: "ja" as LanguageCode, label: "日本語" },
   { code: "ko" as LanguageCode, label: "한국어" },
-  { code: "de" as LanguageCode, label: "Deutsch" },
-  { code: "it" as LanguageCode, label: "Italiano" },
-  { code: "ru" as LanguageCode, label: "Русский" },
-  { code: "tr" as LanguageCode, label: "Türkçe" },
-  { code: "vi" as LanguageCode, label: "Tiếng Việt" },
-  { code: "th" as LanguageCode, label: "ภาษาไทย" },
-  { code: "id" as LanguageCode, label: "Bahasa Indonesia" },
-  { code: "pl" as LanguageCode, label: "Polski" },
+  { code: "nb" as LanguageCode, label: "Norsk" },
   { code: "nl" as LanguageCode, label: "Nederlands" },
+  { code: "pl" as LanguageCode, label: "Polski" },
+  { code: "pt" as LanguageCode, label: "Português (Brasil)" },
+  { code: "ro" as LanguageCode, label: "Română" },
+  { code: "ru" as LanguageCode, label: "Русский" },
+  { code: "sk" as LanguageCode, label: "Slovenčina" },
   { code: "sv" as LanguageCode, label: "Svenska" },
+  { code: "th" as LanguageCode, label: "ภาษาไทย" },
+  { code: "tr" as LanguageCode, label: "Türkçe" },
   { code: "uk" as LanguageCode, label: "Українська" },
+  { code: "vi" as LanguageCode, label: "Tiếng Việt" },
+  { code: "zh" as LanguageCode, label: "中文" },
   { code: "bn" as LanguageCode, label: "বাংলা" },
   { code: "tl" as LanguageCode, label: "Tagalog" },
 ];
