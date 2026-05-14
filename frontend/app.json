@@ -2,7 +2,7 @@
   "expo": {
     "name": "My Optical Wallet",
     "slug": "optical-rx-now",
-    "version": "2.1.1",
+    "version": "2.2.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": ["opticalrxnow", "snssdk1233"],
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.opticalrxnow.mobile.v1",
-      "buildNumber": "35",
+      "buildNumber": "36",
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
