@@ -5,7 +5,7 @@
     "version": "2.1.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
-    "scheme": "opticalrxnow",
+    "scheme": ["opticalrxnow", "snssdk1233"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -50,6 +50,9 @@
           "mailto",
           "maps",
           "tel"
+        ],
+        "SKAdNetworkItems": [
+          { "SKAdNetworkIdentifier": "22mmun2rn5.skadnetwork" }
         ]
       },
       "config": {
@@ -136,15 +139,7 @@
       "expo-web-browser",
       "expo-font",
       "expo-mail-composer",
-      "expo-localization",
-      [
-        "@layers/expo-tiktok-business/app.plugin.cjs",
-        {
-          "ios": {
-            "urlSchemes": ["snssdk1233"]
-          }
-        }
-      ]
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
