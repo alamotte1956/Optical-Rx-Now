@@ -27,7 +27,7 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.lastUpdated}>Last Updated: April 17, 2026</Text>
+        <Text style={styles.lastUpdated}>Last Updated: May 14, 2026</Text>
 
         {/* Section 1 */}
         <Text style={styles.sectionTitle}>1. Introduction</Text>
@@ -41,17 +41,28 @@ export default function PrivacyPolicyScreen() {
         {/* Section 2 */}
         <Text style={styles.sectionTitle}>2. Information We Collect</Text>
         <Text style={styles.paragraph}>
-          My Optical Wallet is a local-only utility. We do not require account creation or registration. The only information processed by the app consists of the optical document photos and family names you choose to save locally on your device.
+          My Optical Wallet is primarily a local-only utility. We do not require account creation or registration. The optical document photos and family names you save are stored locally on your device and are never uploaded to our servers.
+        </Text>
+        <Text style={styles.subSectionTitle}>Data stored locally on your device:</Text>
+        <Text style={styles.bulletPoint}>• Optical document photos you choose to capture or import</Text>
+        <Text style={styles.bulletPoint}>• Family member names you enter</Text>
+        <Text style={styles.subSectionTitle}>Limited analytics data collected by third-party SDKs:</Text>
+        <Text style={styles.paragraph}>
+          To measure the effectiveness of our advertising campaigns and improve the App, we use the TikTok Business SDK (&quot;TikTok Pixel&quot;). This SDK may automatically collect certain limited data, including:
+        </Text>
+        <Text style={styles.bulletPoint}>• App event data (e.g., app open, app install)</Text>
+        <Text style={styles.bulletPoint}>• Device type and operating system version</Text>
+        <Text style={styles.bulletPoint}>• Advertising identifiers (IDFA on iOS, Advertising ID on Android), subject to your device&apos;s privacy settings and consent</Text>
+        <Text style={styles.paragraph}>
+          This analytics data is sent to TikTok and is governed by TikTok&apos;s privacy policy. It does not include any of your optical document photos, family member names, or other personal content stored in the App.
         </Text>
         <Text style={styles.subSectionTitle}>Data we do NOT collect:</Text>
         <Text style={styles.bulletPoint}>• Personal identifiers (name, email address, phone number, mailing address)</Text>
         <Text style={styles.bulletPoint}>• Financial or payment information</Text>
         <Text style={styles.bulletPoint}>• Location data (GPS or IP-based)</Text>
-        <Text style={styles.bulletPoint}>• Device identifiers or advertising IDs</Text>
         <Text style={styles.bulletPoint}>• Browsing or search history</Text>
         <Text style={styles.bulletPoint}>• Contacts or address book data</Text>
         <Text style={styles.bulletPoint}>• Health data beyond what you voluntarily store as optical document photos</Text>
-        <Text style={styles.bulletPoint}>• Usage analytics or behavioral tracking data</Text>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>Device permissions:</Text> The App may request access to your device&apos;s camera and photo library solely for the purpose of allowing you to photograph or select optical document images to store locally. These permissions are optional and can be managed through your device&apos;s settings at any time. No images are transmitted from your device.
         </Text>
@@ -59,13 +70,18 @@ export default function PrivacyPolicyScreen() {
         {/* Section 3 */}
         <Text style={styles.sectionTitle}>3. How We Use Your Information</Text>
         <Text style={styles.paragraph}>
-          Since all data remains on your device, we do not access, process, or use your personal information on any server or cloud service. The App processes your optical document photos and family member names exclusively on your device to:
+          Your optical document photos and family member names remain on your device. We do not access, process, or use this personal content on any server or cloud service. The App processes this data exclusively on your device to:
         </Text>
         <Text style={styles.bulletPoint}>• Display and organize your saved optical document photos within the App</Text>
         <Text style={styles.bulletPoint}>• Associate optical document photos with family member names you provide</Text>
         <Text style={styles.bulletPoint}>• Enable you to view your optical documents at any time on your device</Text>
         <Text style={styles.paragraph}>
-          We do not use your data for advertising, analytics, profiling, or any purpose beyond the core functionality described above.
+          The limited analytics data collected by the TikTok Business SDK (described in Section 2) is used solely to:
+        </Text>
+        <Text style={styles.bulletPoint}>• Measure the performance of advertising campaigns that promote the App</Text>
+        <Text style={styles.bulletPoint}>• Understand aggregate app usage patterns (e.g., how many users install or open the App)</Text>
+        <Text style={styles.paragraph}>
+          We do not use your locally stored optical documents, photos, or family member names for advertising, profiling, or any purpose beyond the core functionality described above.
         </Text>
 
         {/* Section 4 */}
@@ -83,10 +99,14 @@ export default function PrivacyPolicyScreen() {
         {/* Section 5 */}
         <Text style={styles.sectionTitle}>5. Data Sharing and Third Parties</Text>
         <Text style={styles.paragraph}>
-          We do not sell, trade, rent, share, or transfer your personal information to any third party. Since the App operates entirely on your device with no server communication, there is no data available for us to share.
+          We do not sell, trade, rent, or share your locally stored personal information (optical document photos, family member names) with any third party. This data remains exclusively on your device.
+        </Text>
+        <Text style={styles.subSectionTitle}>TikTok Business SDK</Text>
+        <Text style={styles.paragraph}>
+          The App integrates the TikTok Business SDK (&quot;TikTok Pixel&quot;) provided by TikTok Inc. (ByteDance Ltd.). This SDK collects limited analytics data (app events, device type, and advertising identifiers) and transmits it to TikTok&apos;s servers for the purpose of measuring advertising campaign performance. This data is processed by TikTok in accordance with TikTok&apos;s own privacy policy, available at:{"\n"}https://www.tiktok.com/legal/privacy-policy
         </Text>
         <Text style={styles.paragraph}>
-          <Text style={styles.bold}>Third-party SDKs and services:</Text> The App does not integrate any third-party analytics, advertising, or tracking SDKs. No third-party service receives data from the App.
+          No optical document photos, family member names, or other personal content you store in the App are shared with TikTok or any other third party.
         </Text>
         <Text style={styles.paragraph}>
           <Text style={styles.bold}>App Store platforms:</Text> Please note that the Apple App Store and Google Play Store may independently collect certain data related to your download and use of apps, such as app installation data and crash reports. This data collection is governed by Apple&apos;s and Google&apos;s respective privacy policies, not by this Privacy Policy.
@@ -120,12 +140,23 @@ export default function PrivacyPolicyScreen() {
         <Text style={styles.bulletPoint}>• We do not sell your personal information</Text>
         <Text style={styles.bulletPoint}>• We do not share your personal information for cross-context behavioral advertising</Text>
         <Text style={styles.bulletPoint}>• We do not collect or use sensitive personal information beyond what is necessary for the App&apos;s core functionality</Text>
+        <Text style={styles.bulletPoint}>• The TikTok Business SDK collects limited analytics data as described in Sections 2 and 8. You may opt out of this by adjusting your device&apos;s advertising settings</Text>
         <Text style={styles.bulletPoint}>• We do not use or disclose your personal information for purposes other than those disclosed in this Privacy Policy</Text>
 
         {/* Section 8 */}
         <Text style={styles.sectionTitle}>8. Tracking and Advertising</Text>
         <Text style={styles.paragraph}>
-          My Optical Wallet does not track you across other apps or websites. We do not use advertising identifiers (IDFA on iOS or Advertising ID on Android). We do not display advertisements within the App. We do not engage in cross-app or cross-site tracking of any kind.
+          My Optical Wallet uses the TikTok Business SDK (&quot;TikTok Pixel&quot;) to measure the effectiveness of our advertising campaigns on the TikTok platform. This integration tracks limited app events such as app installs and app opens. It does not track or access your optical documents, family member names, or any other personal content stored in the App.
+        </Text>
+        <Text style={styles.subSectionTitle}>What the TikTok SDK may collect:</Text>
+        <Text style={styles.bulletPoint}>• App event data (app install, app open)</Text>
+        <Text style={styles.bulletPoint}>• Device type and operating system version</Text>
+        <Text style={styles.bulletPoint}>• Advertising identifiers (IDFA on iOS, Advertising ID on Android), subject to your consent</Text>
+        <Text style={styles.subSectionTitle}>Your choices:</Text>
+        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>iOS:</Text> You can decline app tracking when prompted via Apple&apos;s App Tracking Transparency (ATT) dialog. You can also manage this in Settings &gt; Privacy &amp; Security &gt; Tracking.</Text>
+        <Text style={styles.bulletPoint}>• <Text style={styles.bold}>Android:</Text> You can opt out of personalized ads in Settings &gt; Google &gt; Ads &gt; Opt out of Ads Personalization, or delete your advertising ID.</Text>
+        <Text style={styles.paragraph}>
+          We do not display advertisements within the App. We do not engage in cross-app or cross-site behavioral tracking beyond the TikTok campaign measurement described above. We do not sell your data to advertisers.
         </Text>
 
         {/* Section 9 */}
@@ -137,7 +168,7 @@ export default function PrivacyPolicyScreen() {
         {/* Section 10 */}
         <Text style={styles.sectionTitle}>10. International Data Transfers</Text>
         <Text style={styles.paragraph}>
-          Since all data is stored exclusively on your device and is never transmitted to our servers or any third party, there are no international data transfers associated with the use of this App.
+          Your locally stored optical documents and family member names are never transmitted from your device. However, the limited analytics data collected by the TikTok Business SDK (app events, device information, and advertising identifiers) may be transferred to and processed on servers located outside your country of residence, including in the United States and Singapore, in accordance with TikTok&apos;s privacy policy and applicable data transfer mechanisms.
         </Text>
 
         {/* Section 11 */}
