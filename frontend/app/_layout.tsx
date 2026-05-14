@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -7,6 +7,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { I18nProvider } from "../services/i18n";
 import { ThemeProvider, useTheme } from "../services/theme";
 import { logAnalyticsEvent } from "../services/adminApi";
+import { initTikTokTracking, trackAppOpen, trackAppInstall } from "../services/tiktokTracking";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Recommendation 5: Error Boundary
 class ErrorBoundary extends React.Component<
@@ -144,6 +146,27 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    // Initialize TikTok Pixel / Business SDK on app launch
+    initTikTokTracking()
+      .then(async () => {
+        trackAppOpen();
+        // Track install event only once (first launch)
+        try {
+          const hasTrackedInstall = await AsyncStorage.getItem("@tiktok_install_tracked");
+          if (!hasTrackedInstall) {
+            await trackAppInstall();
+            await AsyncStorage.setItem("@tiktok_install_tracked", "true");
+          }
+        } catch (e) {
+          console.log("[TikTok] Install tracking error:", e);
+        }
+      })
+      .catch((err) => {
+        console.log("[TikTok] Initialization skipped:", err);
+      });
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ErrorBoundary>

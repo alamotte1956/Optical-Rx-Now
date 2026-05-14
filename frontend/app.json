@@ -136,15 +136,7 @@
       "expo-web-browser",
       "expo-font",
       "expo-mail-composer",
-      "expo-localization",
-      [
-        "@layers/expo-tiktok-business/app.plugin.cjs",
-        {
-          "ios": {
-            "urlSchemes": ["snssdk1233"]
-          }
-        }
-      ]
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
