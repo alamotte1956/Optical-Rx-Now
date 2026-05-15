@@ -1467,11 +1467,6 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@layers/expo-tiktok-business@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.npmjs.org/@layers/expo-tiktok-business/-/expo-tiktok-business-3.0.3.tgz"
-  integrity sha512-pn3bF9XjTvcRKqGDNULDkRdViHvVvZTI/L/sh1Q67+KpXG3DVDDb0BSZtBNEkcs07bFR3Uf1hQc7M/eWoH8jQg==
-
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz#3e78a8b96e6c33a6c517e1894efbd5385a7cb6f2"
