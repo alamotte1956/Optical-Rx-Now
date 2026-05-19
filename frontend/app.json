@@ -2,7 +2,7 @@
   "expo": {
     "name": "My Optical Wallet",
     "slug": "optical-rx-now",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": ["opticalrxnow", "snssdk1233"],
