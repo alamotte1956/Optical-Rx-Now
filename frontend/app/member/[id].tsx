@@ -21,6 +21,7 @@ import {
   Prescription,
 } from "../../services/localStorage";
 import { useTranslation } from "../../services/i18n";
+import { VersionFooter } from "../../components/VersionFooter";
 
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "No date";
@@ -267,6 +268,7 @@ export default function MemberDetailScreen() {
             );
           })
         )}
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

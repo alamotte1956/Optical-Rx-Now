@@ -25,6 +25,7 @@ import {
 } from "../services/localStorage";
 import { isSmallDevice, moderateScale } from "../services/responsive";
 import { useTranslation } from "../services/i18n";
+import { VersionFooter } from "../components/VersionFooter";
 const formatDateSafe = (dateString: string | null | undefined): string => {
   if (!dateString) return "No date";
   try {
@@ -441,6 +442,7 @@ export default function RxDetailScreen() {
             )}
           </TouchableOpacity>
         </View>
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

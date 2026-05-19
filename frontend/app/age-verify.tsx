@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "../services/i18n";
+import { VersionFooter } from "../components/VersionFooter";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
@@ -94,6 +95,7 @@ export default function AgeVerificationScreen() {
           By continuing, you confirm that you are at least 18 years old and agree to our Terms of Service and Privacy Policy.
         </Text>
       </View>
+      <VersionFooter />
     </SafeAreaView>
   );
 }

@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
 import * as Location from "expo-location";
+import { VersionFooter } from "../components/VersionFooter";
 
 // Helper function to get state abbreviation
 const getStateAbbreviation = (stateName: string): string => {
@@ -337,6 +338,7 @@ export default function FindOptometristsScreen() {
           <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
           <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
         </TouchableOpacity>
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

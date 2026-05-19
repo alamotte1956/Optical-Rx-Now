@@ -25,6 +25,7 @@ import {
   ScheduledNotification,
 } from "../services/localStorage";
 import { useTranslation } from "../services/i18n";
+import { VersionFooter } from "../components/VersionFooter";
 
 const REMINDER_OPTIONS = [
   { days: 30, label: "30 days before", enabled: true },
@@ -408,6 +409,7 @@ export default function NotificationSettingsScreen() {
             </Text>
           </View>
         </View>
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

@@ -24,6 +24,7 @@ import {
 } from "../../services/localStorage";
 import { isSmallDevice, moderateScale } from "../../services/responsive";
 import { useTranslation } from "../../services/i18n";
+import { VersionFooter } from "../../components/VersionFooter";
 
 export default function PrescriptionsScreen() {
   const router = useRouter();
@@ -410,6 +411,7 @@ export default function PrescriptionsScreen() {
             </TouchableOpacity>
           ))
         )}
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

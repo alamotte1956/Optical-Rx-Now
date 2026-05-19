@@ -11,11 +11,12 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAdminData } from "../hooks/useAdminData";
+import Constants from "expo-constants";
+const APP_VERSION = Constants.expoConfig?.version || "2.2.1";
 import { adminStyles as styles } from "../styles/adminStyles";
 import {
   AnalyticsDashboard,
   FinancialOverview,
-  AffiliateManagement,
   BannerManagement,
   InvoiceManagement,
   AppManagementSection,
@@ -103,14 +104,6 @@ export default function AdminScreen() {
           onToggle={() => toggleSection("financial")}
         />
 
-        {/* Affiliate Management */}
-        <AffiliateManagement
-          affiliates={affiliates}
-          expanded={expandedSection === "affiliates"}
-          onToggle={() => toggleSection("affiliates")}
-          refreshData={refreshData}
-        />
-
         {/* Banner Management */}
         <BannerManagement
           banners={banners}
@@ -141,7 +134,7 @@ export default function AdminScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>My Optical Wallet v2.1.0</Text>
+          <Text style={styles.footerText}>My Optical Wallet v{APP_VERSION}</Text>
           <Text style={styles.footerSubtext}>Admin Panel • Backend {backendOnline ? "Connected" : "Disconnected"}</Text>
         </View>
       </ScrollView>

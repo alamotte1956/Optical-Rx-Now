@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation, LANGUAGE_OPTIONS, LanguageCode } from "../services/i18n";
+import { VersionFooter } from "../components/VersionFooter";
 
 export default function LanguageSettingsScreen() {
   const router = useRouter();
@@ -72,6 +73,7 @@ export default function LanguageSettingsScreen() {
             )}
           </TouchableOpacity>
         ))}
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

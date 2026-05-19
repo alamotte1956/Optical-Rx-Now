@@ -26,6 +26,7 @@ import {
   InsuranceCard,
   FamilyMember,
 } from "../services/localStorage";
+import { VersionFooter } from "../components/VersionFooter";
 
 export default function InsuranceCardsScreen() {
   const router = useRouter();
@@ -331,6 +332,7 @@ export default function InsuranceCardsScreen() {
               </View>
             ))
           )}
+          <VersionFooter />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -20,6 +20,7 @@ import {
 } from "../../services/localStorage";
 import { isSmallDevice, moderateScale } from "../../services/responsive";
 import { useTranslation } from "../../services/i18n";
+import { VersionFooter } from "../../components/VersionFooter";
 
 export default function FamilyScreen() {
   const router = useRouter();
@@ -176,6 +177,7 @@ export default function FamilyScreen() {
             ))}
           </View>
         )}
+        <VersionFooter />
       </ScrollView>
 
       {/* Delete Confirmation Modal */}

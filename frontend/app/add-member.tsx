@@ -19,6 +19,7 @@ import { saveFamilyMember } from "../services/localStorage";
 import { trackMemberForASO } from "../services/asoService";
 import { isSmallDevice, moderateScale } from "../services/responsive";
 import { useTranslation } from "../services/i18n";
+import { VersionFooter } from "../components/VersionFooter";
 
 const RELATIONSHIP_OPTIONS = [
   "Self",
@@ -177,6 +178,7 @@ export default function AddMemberScreen() {
               Add family members to organize optical documents. You can add optical documents for each member separately.
             </Text>
           </View>
+          <VersionFooter />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

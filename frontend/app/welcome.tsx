@@ -11,8 +11,11 @@ import { isSmallDevice, isLargeDevice, moderateScale } from "../services/respons
 import { useTranslation } from "../services/i18n";
 import { useTheme } from "../services/theme";
 import { exportAllToPDF } from "../services/pdfExport";
+import Constants from "expo-constants";
 import BannerCarousel from "../components/BannerCarousel";
 import { logAnalyticsEvent } from "../services/adminApi";
+
+const APP_VERSION = Constants.expoConfig?.version || "2.2.1";
 
 const AGE_VERIFIED_KEY = "@optical_rx_age_verified";
 
@@ -307,7 +310,7 @@ export default function WelcomeScreen() {
           </View>
 
           {/* Version Number */}
-          <Text style={styles.versionText}>{t("version")} 2.0.1</Text>
+          <Text style={styles.versionText}>{t("version")} {APP_VERSION}</Text>
         </View>
       </ScrollView>
 

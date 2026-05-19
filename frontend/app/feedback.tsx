@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as MailComposer from "expo-mail-composer";
+import { VersionFooter } from "../components/VersionFooter";
 
 const FEEDBACK_TYPES = [
   { id: "bug", label: "Bug Report", icon: "bug", color: "#ff5c5c" },
@@ -162,6 +163,7 @@ export default function FeedbackScreen() {
               We read every message and appreciate your feedback. It helps us make My Optical Wallet better for everyone!
             </Text>
           </View>
+          <VersionFooter />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

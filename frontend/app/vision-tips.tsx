@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VersionFooter } from "../components/VersionFooter";
 
 const FAQ_ITEMS = [
   {
@@ -205,6 +206,7 @@ export default function VisionTipsScreen() {
         </TouchableOpacity>
 
         <View style={styles.bottomSpacer} />
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

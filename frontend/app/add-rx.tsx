@@ -26,6 +26,7 @@ import { trackPrescriptionForASO } from "../services/asoService";
 import { isSmallDevice, moderateScale } from "../services/responsive";
 import { useTranslation } from "../services/i18n";
 import SmartInvitePrompt, { shouldShowInvitePrompt, incrementSaveCount } from "../components/SmartInvitePrompt";
+import { VersionFooter } from "../components/VersionFooter";
 
 const RX_TYPES = [
   { value: "eyeglass", labelKey: "eyeglasses", icon: "glasses-outline" },
@@ -429,6 +430,7 @@ export default function AddRxScreen() {
               </Pressable>
             </View>
           </View>
+          <VersionFooter />
         </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { saveSettings } from "../services/localStorage";
+import { VersionFooter } from "../components/VersionFooter";
 
 const { width } = Dimensions.get("window");
 
@@ -214,6 +215,7 @@ export default function OnboardingScreen() {
           />
         </TouchableOpacity>
       </View>
+      <VersionFooter />
     </SafeAreaView>
   );
 }

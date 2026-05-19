@@ -2,6 +2,7 @@ import { ScrollView, Text, StyleSheet, TouchableOpacity, View, Linking } from "r
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VersionFooter } from "../components/VersionFooter";
 
 export default function TermsOfServiceScreen() {
   const router = useRouter();
@@ -200,6 +201,7 @@ export default function TermsOfServiceScreen() {
         </View>
 
         <View style={styles.bottomSpacer} />
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );

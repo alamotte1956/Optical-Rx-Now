@@ -16,12 +16,9 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { trackAffiliateClick } from "../services/analytics";
-import { getAffiliates, logAnalyticsEvent, type Affiliate as BackendAffiliate } from "../services/adminApi";
+import { logAnalyticsEvent } from "../services/adminApi";
 import Constants from "expo-constants";
-
-const AFFILIATES_STORAGE_KEY = "@optical_rx_affiliates";
+import { VersionFooter } from "../components/VersionFooter";
 
 // Default affiliate data - complete list with categories, descriptions, and store locators
 const DEFAULT_AFFILIATES = [
@@ -33,10 +30,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.eyeglasses.com",
     category: "online",
     isPreferred: false,
-    commission: 15,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "designer-optics",
     name: "Designer Optics",
@@ -44,10 +38,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.designeroptics.com",
     category: "online",
     isPreferred: false,
-    commission: 15,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "glasses-usa",
     name: "GlassesUSA",
@@ -55,10 +46,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.glassesusa.com",
     category: "online",
     isPreferred: false,
-    commission: 12,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "zenni",
     name: "Zenni Optical",
@@ -66,10 +54,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.zennioptical.com",
     category: "online",
     isPreferred: false,
-    commission: 10,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "warby-parker",
     name: "Warby Parker",
@@ -77,10 +62,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.warbyparker.com",
     category: "online",
     isPreferred: false,
-    commission: 10,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "eyebuydirect",
     name: "EyeBuyDirect",
@@ -88,10 +70,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.eyebuydirect.com",
     category: "online",
     isPreferred: false,
-    commission: 10,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "eyeconic",
     name: "Eyeconic",
@@ -99,10 +78,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.eyeconic.com",
     category: "online",
     isPreferred: false,
-    commission: 8,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "coastal",
     name: "Coastal",
@@ -110,10 +86,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.coastal.com",
     category: "online",
     isPreferred: false,
-    commission: 8,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "sportrx",
     name: "SportRx",
@@ -121,10 +94,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.sportrx.com",
     category: "online",
     isPreferred: false,
-    commission: 7,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "framesdirect",
     name: "FramesDirect",
@@ -132,10 +102,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.framesdirect.com",
     category: "online",
     isPreferred: false,
-    commission: 7,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   // ===== CONTACT LENSES =====
   {
     id: "clearly",
@@ -144,10 +111,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.clearly.ca/en-ca",
     category: "contacts",
     isPreferred: false,
-    commission: 12,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "lens-com",
     name: "Lens.com",
@@ -155,10 +119,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.lens.com",
     category: "contacts",
     isPreferred: false,
-    commission: 12,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "contactsdirect",
     name: "ContactsDirect",
@@ -166,10 +127,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.contactsdirect.com",
     category: "contacts",
     isPreferred: false,
-    commission: 11,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "1800contacts",
     name: "1-800 Contacts",
@@ -177,10 +135,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.1800contacts.com",
     category: "contacts",
     isPreferred: false,
-    commission: 9,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   // ===== RETAIL STORES (GPS-enabled) =====
   {
     id: "lenscrafters",
@@ -189,10 +144,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.lenscrafters.com",
     category: "retail",
     isPreferred: false,
-    commission: 8,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "pearle-vision",
     name: "Pearle Vision",
@@ -200,10 +152,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.pearlevision.com",
     category: "retail",
     isPreferred: false,
-    commission: 8,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "target-optical",
     name: "Target Optical",
@@ -211,10 +160,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.targetoptical.com",
     category: "retail",
     isPreferred: false,
-    commission: 8,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "visionworks",
     name: "Visionworks",
@@ -222,10 +168,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.visionworks.com",
     category: "retail",
     isPreferred: false,
-    commission: 7,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "walmart-vision",
     name: "Walmart Vision Center",
@@ -233,10 +176,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.walmart.com/cp/vision-centers/1078944",
     category: "retail",
     isPreferred: false,
-    commission: 5,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "sams-club",
     name: "Sam's Club Optical",
@@ -244,10 +184,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.samsclub.com/b/optical/1990005",
     category: "retail",
     isPreferred: false,
-    commission: 5,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "costco-optical",
     name: "Costco Optical",
@@ -255,10 +192,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.costco.com/optical.html",
     category: "retail",
     isPreferred: false,
-    commission: 4,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
   {
     id: "americas-best",
     name: "America's Best",
@@ -266,10 +200,7 @@ const DEFAULT_AFFILIATES = [
     baseUrl: "https://www.americasbest.com",
     category: "retail",
     isPreferred: false,
-    commission: 4,
-    enabled: true,
-    affiliateId: "",
-  },
+    enabled: true,  },
 ];
 
 interface Affiliate {
@@ -279,9 +210,7 @@ interface Affiliate {
   baseUrl: string;
   category: string;
   isPreferred?: boolean;
-  commission: number;
   enabled: boolean;
-  affiliateId: string;
 }
 
 export default function ShopScreen() {
@@ -307,80 +236,10 @@ export default function ShopScreen() {
   }, []);
 
   const loadAffiliates = async () => {
-    // ALWAYS start with the full local defaults (which have categories, descriptions, store locator data)
-    let finalAffiliates = [...DEFAULT_AFFILIATES];
-
-    // Try to merge any ADDITIONAL affiliates from the backend (admin-added partners)
-    try {
-      const backendAffiliates = await getAffiliates();
-      if (backendAffiliates && backendAffiliates.length > 0) {
-        const localIds = new Set(finalAffiliates.map((a) => a.name.toLowerCase()));
-        const extraFromBackend = backendAffiliates
-          .filter((a: BackendAffiliate) => a.is_active && !localIds.has(a.name.toLowerCase()))
-          .map((a: BackendAffiliate) => ({
-            id: a.affiliate_id,
-            name: a.name,
-            description: `${a.name} - Partner store`,
-            baseUrl: a.url,
-            category: "online",
-            isPreferred: false,
-            commission: a.commission,
-            enabled: a.is_active,
-            affiliateId: a.affiliate_id,
-          }));
-        finalAffiliates = [...finalAffiliates, ...extraFromBackend];
-      }
-    } catch (error) {
-      console.log("Backend affiliates unavailable, using defaults only:", error);
-    }
-
-    // Also check local storage for any admin-added custom affiliates
-    try {
-      const stored = await AsyncStorage.getItem(AFFILIATES_STORAGE_KEY);
-      if (stored) {
-        const adminAffiliates = JSON.parse(stored);
-        const existingIds = new Set(finalAffiliates.map((a) => a.id));
-        const extraLocal = adminAffiliates
-          .filter((a: any) => a.enabled && !existingIds.has(a.id))
-          .map((a: any) => ({
-            id: a.id,
-            name: a.name,
-            description: a.description || `${a.name} - Partner store`,
-            baseUrl: a.baseUrl || a.url,
-            category: a.category || "online",
-            isPreferred: a.isPreferred || false,
-            commission: a.commission,
-            enabled: a.enabled,
-            affiliateId: a.affiliateId || "",
-          }));
-        finalAffiliates = [...finalAffiliates, ...extraLocal];
-      }
-    } catch (error) {
-      console.log("Error loading local affiliates:", error);
-    }
-
-    setAffiliates(finalAffiliates);
+    setAffiliates([...DEFAULT_AFFILIATES]);
   };
 
-  // Build affiliate URL - route through backend redirect for obfuscation & tracking
-  const buildAffiliateUrl = (affiliate: Affiliate): string => {
-    // If this affiliate came from backend (has a UUID-style affiliateId), use redirect endpoint
-    if (affiliate.affiliateId && affiliate.affiliateId.includes("-")) {
-      const baseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL
-        || process.env.EXPO_PUBLIC_BACKEND_URL
-        || "";
-      if (baseUrl) {
-        return `${baseUrl}/api/redirect/${affiliate.affiliateId}`;
-      }
-    }
-    
-    // Fallback: direct URL with optional ref parameter
-    let url = affiliate.baseUrl;
-    if (affiliate.affiliateId) {
-      url += url.includes("?") ? `&ref=${affiliate.affiliateId}` : `?ref=${affiliate.affiliateId}`;
-    }
-    return url;
-  };
+
 
   const requestLocationPermission = async () => {
     setLoading(true);
@@ -445,14 +304,7 @@ export default function ShopScreen() {
   };
 
   const handleOpenLink = async (affiliate: Affiliate) => {
-    let finalUrl = buildAffiliateUrl(affiliate);
-    
-    // Track the click (both local analytics and backend)
-    await trackAffiliateClick(affiliate.id, affiliate.name);
-    logAnalyticsEvent("affiliate_click", { 
-      affiliate_id: affiliate.id, 
-      affiliate_name: affiliate.name 
-    }).catch(() => {});
+    let finalUrl = affiliate.baseUrl;
     
     // For RETAIL category stores, use location-based search
     if (affiliate.category === "retail") {
@@ -505,11 +357,11 @@ export default function ShopScreen() {
     ? affiliates.filter((a) => a.category === selectedCategory)
     : affiliates;
 
-  // Sort: preferred first, then by commission (highest to lowest)
+  // Sort: preferred first, then alphabetical
   const sortedAffiliates = [...filteredAffiliates].sort((a, b) => {
     if (a.isPreferred && !b.isPreferred) return -1;
     if (!a.isPreferred && b.isPreferred) return 1;
-    return b.commission - a.commission;
+    return a.name.localeCompare(b.name);
   });
 
   const categories = [
@@ -737,6 +589,7 @@ export default function ShopScreen() {
           <Ionicons name="megaphone-outline" size={24} color="#4a9eff" />
           <Text style={styles.adPlaceholderText}>Advertise with us Here</Text>
         </TouchableOpacity>
+        <VersionFooter />
       </ScrollView>
     </SafeAreaView>
   );
